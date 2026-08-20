@@ -28,22 +28,32 @@ async function clearAuthStorage(page) {
   }, AUTH_KEYS);
 }
 
-/** Seed a verified email user directly in localStorage (skips OTP). */
+/** SHA-256 hex of `aakashik-demo|` + password (same as Auth/Landing). */
+async function hashPassword(page, password) {
+  return page.evaluate(async (pw) => {
+    const data = new TextEncoder().encode('aakashik-demo|' + String(pw || ''));
+    const buf = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  }, password);
+}
+
+/** Seed a verified email user directly in localStorage (skips OTP). Stores pwHash only. */
 async function seedEmailUser(page, { email, password, name = 'Test User' }) {
-  await page.evaluate(({ email, password, name }) => {
+  const pwHash = await hashPassword(page, password);
+  await page.evaluate(({ email, pwHash, name }) => {
     const users = {};
     users[email] = {
       name,
       email,
       phone: '',
-      password,
+      pwHash,
       verified: true,
     };
     localStorage.setItem('ak_users', JSON.stringify(users));
     localStorage.setItem('ak_profile', JSON.stringify({ name, email, phone: '', verified: true }));
     localStorage.setItem('ak_logged', '1');
     localStorage.setItem('ak_persist', '1');
-  }, { email, password, name });
+  }, { email, pwHash, name });
 }
 
 /** Read OTP or reset code from localStorage. */
@@ -89,6 +99,7 @@ module.exports = {
   AUTH_KEYS,
   STRONG_PASSWORD,
   clearAuthStorage,
+  hashPassword,
   seedEmailUser,
   readStoredCode,
   isLoggedIn,

@@ -179,8 +179,40 @@ View runs under the repo **Actions** tab → **E2E Tests**.
 
 ---
 
+## Remaining UX audit (`tests/ux-remaining.spec.js`)
+
+| ID | Focus | Type |
+|----|--------|------|
+| TC-R01 | Signup stores `pwHash` only (no plaintext; user written after OTP) | + |
+| TC-R02 | Wrong password vs hashed user | − |
+| TC-R03 | Legacy plaintext migrates to `pwHash` on sign-in | + |
+| TC-R04 | Auth demo banner (OTP/reset simulated) | + |
+| TC-R05 | Phone sign-in requires existing account | − |
+| TC-R06 | Phone signup via OTP still works | + |
+| TC-R07 | Reviews = sample stories (no 1,240+ / Verified buyer) | + |
+| TC-R08 | Medical overclaims removed from sample reviews | − |
+| TC-R09 | Kit prices match Save ₹ vs singles (599 / 349) | + |
+| TC-R10 | “Sugar Balance Support” replaces “Diabetic Care” | + |
+| TC-R11 | Order confirm = saved on device (demo) | + |
+| TC-R12 | Track modal discloses simulated timeline | + |
+| TC-R13 | Reminder + newsletter device-only demo copy | + |
+| TC-R14 | Checkout “Keep me signed in” persists session | + |
+| TC-R15 | Checkout invalid phone rejected | − |
+| TC-R16 | Delivery fields have visible labels | + |
+| TC-R17 | Member + Subscribe do not stack beyond 10% | + |
+| TC-R18 | Guest without subscribe pays full list price | − |
+| TC-R19 | Cart/Search dialog roles | + |
+| TC-R20 | i18n disclosure: cart/checkout stay English | + |
+| TC-R21 | Weather geolocation is opt-in | + |
+| TC-R22 | Placeholders use `you@example.com` | + |
+| TC-R23 | Dead `image-slot` import removed | + |
+| TC-R24 | Track result shows Simulated timeline badge | + |
+
+---
+
 ## Notes
 
 - OTP and reset codes are read from `localStorage` (`ak_pending_otp`, `ak_reset`) — same as the demo UI toasts.
 - Each test clears auth storage first to avoid cross-test pollution.
 - Default test password: `Test@1234` (meets all strength rules).
+- Passwords are stored as SHA-256 hex of `aakashik-demo|` + password (`pwHash`). Legacy plaintext entries migrate on successful sign-in.

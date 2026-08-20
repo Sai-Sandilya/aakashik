@@ -74,8 +74,6 @@
   </style>
 </helmet>
 
-<x-import component-from-global-scope="image-slot" from="./image-slot.js" id="ak-slot-loader" hint-size="1px,1px" style="display:none;position:absolute;"></x-import>
-
 <div id="top" style="font-family: 'Jost', sans-serif; color: #33432F; width: 100%; overflow-x: hidden; -webkit-font-smoothing: antialiased; position: relative;">
 
   <!-- brand watermark (parallax) -->
@@ -117,13 +115,13 @@
       <!-- Actions -->
       <div style="display: flex; align-items: center; gap: 6px;">
         <div style="position: relative;">
-          <button aria-label="Language" aria-expanded="{{ langOpen }}" aria-haspopup="true" data-lang-menu="true" onClick="{{ toggleLang }}" title="Partial translation — hero & nav" style="display: inline-flex; align-items: center; gap: 5px; background: transparent; border: 1px solid #D7CDB4; padding: 7px 12px; border-radius: 30px; color: #45543E; font-size: 13px; cursor: pointer;">
+          <button aria-label="Language" aria-expanded="{{ langOpen }}" aria-haspopup="true" data-lang-menu="true" onClick="{{ toggleLang }}" title="Partial translation — hero, nav, story & some sections; cart/checkout stay English" style="display: inline-flex; align-items: center; gap: 5px; background: transparent; border: 1px solid #D7CDB4; padding: 7px 12px; border-radius: 30px; color: #45543E; font-size: 13px; cursor: pointer;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             {{ langLabel }}
           </button>
           <sc-if value="{{ langOpen }}">
             <div role="menu" data-lang-menu="true" style="position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; background: #FBF7EE; border: 1px solid #E4DBC8; border-radius: 14px; padding: 6px; box-shadow: 0 18px 40px -20px rgba(46,61,44,0.5); min-width: 160px;">
-              <p style="font-size: 11px; color: #8A9678; margin: 4px 10px 8px; line-height: 1.4;">Partial — hero &amp; nav only</p>
+              <p style="font-size: 11px; color: #8A9678; margin: 4px 10px 8px; line-height: 1.4;">Partial — cart &amp; checkout stay English</p>
               <sc-for list="{{ langOptions }}" as="lo" hint-placeholder-count="4">
                 <button onClick="{{ lo.onClick }}" style="display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 10px; background: transparent; border: none; padding: 9px 12px; border-radius: 9px; font-size: 14px; color: #2E3D2C; cursor: pointer; text-align: left;">
                   {{ lo.label }}
@@ -204,6 +202,9 @@
             <span style="font-size: 16px;">{{ weather.emoji }}</span>
             <span>{{ weather.label }} · <strong style="font-weight: 500;">{{ weather.temp }}°</strong> — try <strong style="font-weight: 500; color: #5E7A4C;">{{ weather.blend }}</strong></span>
           </button>
+        </sc-if>
+        <sc-if value="{{ noWeather }}">
+          <button type="button" onClick="{{ enableWeather }}" style="display: inline-flex; align-items: center; gap: 10px; margin-top: 20px; background: transparent; border: 1px dashed #D7CDB4; padding: 10px 16px; border-radius: 30px; font-size: 13px; color: #5E6A54; cursor: pointer;">Use my location for a seasonal tip (optional)</button>
         </sc-if>
         <div style="display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px;">
           <a href="#shop" data-magnetic="true" style="display: inline-flex; align-items: center; gap: 10px; background: #BE6A45; color: #FBF7EE; text-decoration: none; padding: 15px 28px; border-radius: 40px; font-size: 15px; font-weight: 500; letter-spacing: 0.01em; box-shadow: 0 10px clamp(24px, 5vw, 90px) -10px rgba(190,106,69,0.7);">
@@ -773,7 +774,7 @@
       </div>
 
       <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 42px; flex-wrap: wrap;">
-        <span style="font-family: 'Marcellus', serif; font-size: 34px; color: #E8CE86;">4.8</span>
+        <span style="font-family: 'Marcellus', serif; font-size: 34px; color: #E8CE86;">★</span>
         <span style="display: inline-flex; gap: 3px;">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="#C0A55E" stroke="none"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
           <svg width="17" height="17" viewBox="0 0 24 24" fill="#C0A55E" stroke="none"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
@@ -1039,7 +1040,7 @@
           Never miss a dose
         </span>
         <h2 style="font-family: 'Marcellus', serif; font-weight: 400; font-size: clamp(28px, 3.6vw, 40px); line-height: 1.12; color: #2E3D2C; margin: 14px 0 12px;">Ritual Reminders, Gently Delivered</h2>
-        <p style="font-size: 15px; line-height: 1.7; color: #5E6A54; margin: 0; max-width: 440px;">Consistency is where Ayurveda works. We'll send a calm nudge when it's time for your morning or evening kashayam — on the channel you prefer.</p>
+        <p style="font-size: 15px; line-height: 1.7; color: #5E6A54; margin: 0; max-width: 440px;">Demo only — preference is saved on this device. No real WhatsApp/SMS/email is sent yet.</p>
       </div>
 
       <div style="flex: 1 1 320px; min-width: 300px;">
@@ -1075,7 +1076,7 @@
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C8D4B9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
             </span>
             <h3 style="font-family: 'Marcellus', serif; font-weight: 400; font-size: 22px; color: #2E3D2C; margin: 0 0 6px;">You're all set</h3>
-            <p style="font-size: 13.5px; color: #5E6A54; margin: 0;">We'll send your gentle ritual nudge right on time. Namaste.</p>
+            <p style="font-size: 13.5px; color: #5E6A54; margin: 0;">Reminder saved on this device (demo — nothing is sent yet). Namaste.</p>
           </div>
         </sc-if>
       </div>
@@ -1096,7 +1097,7 @@
             </span>
           </div>
           <p style="font-size: 13.5px; line-height: 1.7; color: #C5CBB4; margin: 0 0 20px; max-width: 300px;">Traditional Ayurvedic care for the modern home — chemical-free bath powders, kashayams and sacred blends.</p>
-          <p style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #B2B79E; margin: 0 0 10px;">Join our newsletter</p>
+          <p style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #B2B79E; margin: 0 0 10px;">Join our newsletter (demo — this device)</p>
           <sc-if value="{{ notSubscribed }}">
             <form onSubmit="{{ subscribe }}" style="display: flex; gap: 8px; max-width: 320px;">
               <input type="email" value="{{ newsletterEmail }}" onInput="{{ onNewsletterEmail }}" required="" placeholder="Your email" style="flex: 1; min-width: 0; background: #303E27; border: 1px solid #435138; color: #E8E4D2; padding: 11px 14px; border-radius: 30px; font-size: 13.5px; outline: none;">
@@ -1106,7 +1107,7 @@
           <sc-if value="{{ subscribed }}">
             <div style="display: inline-flex; align-items: center; gap: 8px; background: #303E27; border: 1px solid #435138; padding: 11px 16px; border-radius: 30px; font-size: 13.5px; color: #B7C7A6;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9DB08E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
-              Thank you for subscribing!
+              Saved on this device (demo)
             </div>
           </sc-if>
         </div>
@@ -1167,8 +1168,8 @@
   <!-- ===== CART DRAWER ===== -->
   <sc-if value="{{ cartOpen }}">
     <div onClick="{{ closeCart }}" style="position: fixed; inset: 0; background: rgba(35,45,25,0.42); z-index: 200; animation: sceneFade .25s ease;"></div>
-    <div style="position: fixed; top: 0; right: 0; bottom: 0; width: min(430px, 94vw); background: #F6F1E4; z-index: 201; box-shadow: -22px 0 54px -20px rgba(35,45,25,0.55); display: flex; flex-direction: column; animation: drawerIn .3s cubic-bezier(.4,0,.2,1);">
-      <div style="position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; padding: 22px clamp(24px, 5vw, 90px); border-bottom: 1px solid #E4DBC8;">
+    <div role="dialog" aria-modal="true" aria-label="Your Cart" style="position: fixed; top: 0; right: 0; bottom: 0; width: min(430px, 94vw); background: #F6F1E4; z-index: 201; box-shadow: -22px 0 54px -20px rgba(35,45,25,0.55); display: flex; flex-direction: column; animation: drawerIn .3s cubic-bezier(.4,0,.2,1);">
+      <div style="position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; padding: 22px 20px; border-bottom: 1px solid #E4DBC8;">
         <sc-if value="{{ hasBumped }}">
           <div key="{{ bump }}" style="position: absolute; inset: 0; pointer-events: none; z-index: 0;">
             <span style="position: absolute; left: 16%; bottom: -8px; width: 16px; height: 16px; border-radius: 50%; background: rgba(157,176,142,0.5); animation: bubbleFloat 1.2s ease-out;"></span>
@@ -1191,7 +1192,7 @@
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#C8D4B9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
           </span>
           <h3 style="font-family: 'Marcellus', serif; font-size: 26px; color: #2E3D2C; margin: 0 0 8px;">Order Placed!</h3>
-          <p style="font-size: 14px; color: #5E6A54; margin: 0 0 8px; line-height: 1.6;">Thank you — a confirmation is on its way. Your ritual is being packed with care.</p>
+          <p style="font-size: 14px; color: #5E6A54; margin: 0 0 8px; line-height: 1.6;">Thank you — order saved on this device (demo). No email/SMS is sent yet.</p>
           <p style="font-size: 12.5px; color: #8A3E2A; margin: 0 0 8px; line-height: 1.5;">All sales are final. We do not accept returns on placed orders.</p>
           <sc-if value="{{ hasLastOrderId }}">
             <p style="font-size: 13px; color: #8A9678; margin: 0 0 16px;">Order ID: <strong style="color: #2E3D2C; letter-spacing: 0.04em;">{{ lastOrderId }}</strong></p>
@@ -1214,22 +1215,22 @@
             </span>
             <h3 style="font-family: 'Marcellus', serif; font-size: 22px; color: #2E3D2C; margin: 0 0 6px;">Your cart is empty</h3>
             <p style="font-size: 13.5px; color: #7A8570; margin: 0 0 20px;">Add a blend to begin your ritual.</p>
-            <button onClick="{{ closeCart }}" style="background: transparent; color: #2E3D2C; border: 1px solid #C2B591; padding: 12px clamp(24px, 5vw, 90px); border-radius: 30px; font-size: 14px; font-weight: 500;">Browse the Shelf</button>
+            <button onClick="{{ closeCart }}" style="background: transparent; color: #2E3D2C; border: 1px solid #C2B591; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 500;">Browse the Shelf</button>
           </div>
         </sc-if>
 
         <sc-if value="{{ showCartSteps }}" hint-placeholder-val="{{ false }}">
           <sc-if value="{{ stepCart }}">
-          <div style="padding: 12px clamp(24px, 5vw, 90px); border-bottom: 1px solid #E4DBC8;">
+          <div style="padding: 12px 20px; border-bottom: 1px solid #E4DBC8;">
             <sc-if value="{{ memberPricing }}">
-              <p style="font-size: 12.5px; color: #4E6B3C; margin: 0;">Member pricing applied — 10% off</p>
+              <p style="font-size: 12.5px; color: #4E6B3C; margin: 0;">10% off applies once (subscribe preferred over member — not stacked)</p>
             </sc-if>
             <sc-if value="{{ notMemberPricing }}">
               <p style="font-size: 12.5px; color: #5E6A54; margin: 0;">Sign in for member pricing (10% off)</p>
             </sc-if>
           </div>
           <!-- items -->
-          <div style="flex: 1; overflow-y: auto; padding: 8px clamp(24px, 5vw, 90px);">
+          <div style="flex: 1; overflow-y: auto; padding: 8px 20px;">
             <sc-for list="{{ cartList }}" as="it" hint-placeholder-count="2">
               <div style="display: flex; gap: 14px; padding: 16px 0; border-bottom: 1px solid #EDE5D2;">
                 <span style="width: 48px; height: 60px; border-radius: 6px 6px 10px 10px; background: {{ it.jar }}; border-top: 5px solid {{ it.cap }}; flex-shrink: 0;"></span>
@@ -1260,14 +1261,14 @@
             </sc-for>
           </div>
           <!-- footer -->
-          <div style="padding: 20px clamp(24px, 5vw, 90px); border-top: 1px solid #E4DBC8; background: #FBF7EE;">
+          <div style="padding: 20px 20px; border-top: 1px solid #E4DBC8; background: #FBF7EE;">
             <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px;">
               <span style="font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A9678;">Subtotal</span>
               <span style="font-family: 'Marcellus', serif; font-size: 22px; color: #2E3D2C;">{{ cartSubtotalStr }}</span>
             </div>
-            <sc-if value="{{ memberPricing }}">
+            <sc-if value="{{ hasCartDiscount }}">
               <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px;">
-                <span style="font-size: 12.5px; color: #4E6B3C;">Member 10% off</span>
+                <span style="font-size: 12.5px; color: #4E6B3C;">{{ discountLabel }}</span>
                 <span style="font-size: 13px; color: #4E6B3C;">−{{ memberDiscountStr }}</span>
               </div>
             </sc-if>
@@ -1306,7 +1307,7 @@
               <sc-if value="{{ notAuthOtp }}">
                 <form onSubmit="{{ doAuth }}" style="display: flex; flex-direction: column; gap: 12px;">
                   <sc-if value="{{ isAuthSignup }}"><input value="{{ authName }}" onInput="{{ onAuthName }}" required placeholder="Full name" style="background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;"></sc-if>
-                  <input value="{{ authContact }}" onInput="{{ onAuthContact }}" onBlur="{{ trimAuthContact }}" required placeholder="10-digit phone or you@gmail.com" style="background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
+                  <input value="{{ authContact }}" onInput="{{ onAuthContact }}" onBlur="{{ trimAuthContact }}" required placeholder="10-digit phone or you@example.com" style="background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
                   <sc-if value="{{ authPwShown }}">
                     <input type="password" value="{{ authPassword }}" onInput="{{ onAuthPassword }}" required placeholder="Password" style="background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
                     <sc-if value="{{ isAuthSignup }}">
@@ -1319,15 +1320,16 @@
                       <input type="password" value="{{ authConfirmPw }}" onInput="{{ onAuthConfirmPw }}" required placeholder="Confirm password" style="background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
                     </sc-if>
                   </sc-if>
-                  <sc-if value="{{ authIsPhone }}"><p style="font-size: 12px; color: #8A9678; margin: 0;">We'll text a one-time verification code to your 10-digit number</p></sc-if>
-                  <sc-if value="{{ authIsEmail }}"><sc-if value="{{ isAuthSignup }}"><p style="font-size: 12px; color: #8A9678; margin: 0;">We'll email a verification code before activating the account</p></sc-if></sc-if>
+                  <sc-if value="{{ authIsPhone }}"><p style="font-size: 12px; color: #8A9678; margin: 0;">Demo OTP shown on screen — not sent by SMS</p></sc-if>
+                  <sc-if value="{{ authIsEmail }}"><sc-if value="{{ isAuthSignup }}"><p style="font-size: 12px; color: #8A9678; margin: 0;">Demo verification code shown on screen — not emailed</p></sc-if></sc-if>
+                  <label style="display: inline-flex; align-items: center; gap: 7px; color: #5E6A54; cursor: pointer; font-size: 13px;"><input type="checkbox" checked="{{ authRemember }}" onChange="{{ onAuthRemember }}" style="accent-color: #2E3D2C;"> Keep me signed in</label>
                   <button type="submit" style="width: 100%; background: #BE6A45; color: #FBF7EE; border: none; padding: 14px; border-radius: 30px; font-size: 14.5px; font-weight: 500; margin-top: 4px;">Continue</button>
                   <a href="Aakashik%20Auth.dc.html" style="text-align:center; font-size:12.5px; color:#B65E38; text-decoration:none;">Forgot password? / Full account page</a>
                 </form>
               </sc-if>
               <sc-if value="{{ authOtp }}">
                 <form onSubmit="{{ verifyOtp }}" style="display: flex; flex-direction: column; gap: 14px;">
-                  <p style="font-size: 13.5px; color: #5E6A54; margin: 0; line-height: 1.6;">Enter the 4-digit code sent to <strong style="color: #2E3D2C;">{{ otpContact }}</strong>. <button type="button" onClick="{{ editContact }}" style="background: transparent; border: none; color: #B65E38; cursor: pointer; font-size: 13px; padding: 0;">Edit</button></p>
+                  <p style="font-size: 13.5px; color: #5E6A54; margin: 0; line-height: 1.6;">Enter the demo 4-digit code for <strong style="color: #2E3D2C;">{{ otpContact }}</strong> (shown in the toast — not emailed/SMS). <button type="button" onClick="{{ editContact }}" style="background: transparent; border: none; color: #B65E38; cursor: pointer; font-size: 13px; padding: 0;">Edit</button></p>
                   <input value="{{ authOtpCode }}" onInput="{{ onAuthOtpCode }}" inputmode="numeric" maxlength="4" required placeholder="4-digit code" style="background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 22px; letter-spacing: 0.3em; text-align: center; color: #2E3D2C; outline: none;">
                   <button type="submit" style="width: 100%; background: #2E3D2C; color: #F1EEDF; border: none; padding: 14px; border-radius: 30px; font-size: 14.5px; font-weight: 500;">Verify &amp; Continue</button>
                   <button type="button" onClick="{{ resendOtp }}" style="background: transparent; border: none; color: #8A9678; cursor: pointer; font-size: 12.5px;">Didn't get it? Resend code</button>
@@ -1344,18 +1346,25 @@
               </button>
               <h3 style="font-family: 'Marcellus', serif; font-size: 23px; color: #2E3D2C; margin: 0 0 16px;">Delivery details</h3>
               <form onSubmit="{{ placeOrder }}" style="display: flex; flex-direction: column; gap: 12px;">
-                <input value="{{ profileName }}" onInput="{{ onProfileName }}" required placeholder="Full name" style="background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
+                <label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;">Full name</label>
+                <input value="{{ profileName }}" onInput="{{ onProfileName }}" required placeholder="Full name" aria-label="Full name" style="background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
                 <p style="font-size: 12px; color: #8A9678; margin: 0;">Provide phone or email (at least one).</p>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                  <input value="{{ profilePhone }}" onInput="{{ onProfilePhone }}" placeholder="Phone (or email below)" style="flex: 1; min-width: 120px; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
-                  <input type="email" value="{{ profileEmail }}" onInput="{{ onProfileEmail }}" placeholder="Email (or phone above)" style="flex: 1; min-width: 120px; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
+                  <div style="flex:1;min-width:120px;"><label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;margin-bottom:6px;">Phone</label>
+                  <input value="{{ profilePhone }}" onInput="{{ onProfilePhone }}" placeholder="10-digit mobile" aria-label="Phone" style="width:100%; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;"></div>
+                  <div style="flex:1;min-width:120px;"><label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;margin-bottom:6px;">Email</label>
+                  <input type="email" value="{{ profileEmail }}" onInput="{{ onProfileEmail }}" placeholder="you@example.com" aria-label="Email" style="width:100%; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;"></div>
                 </div>
-                <input value="{{ profileAddress }}" onInput="{{ onProfileAddress }}" required placeholder="Address (house, street, area)" style="background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
+                <label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;">Address</label>
+                <input value="{{ profileAddress }}" onInput="{{ onProfileAddress }}" required placeholder="House, street, area" aria-label="Address" style="background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                  <input value="{{ profileCity }}" onInput="{{ onProfileCity }}" required placeholder="City" style="flex: 1; min-width: 120px; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
-                  <input value="{{ profilePincode }}" onInput="{{ onProfilePincode }}" inputmode="numeric" maxlength="6" required placeholder="Pincode" style="flex: 1; min-width: 120px; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
+                  <div style="flex:1;min-width:120px;"><label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;margin-bottom:6px;">City</label>
+                  <input value="{{ profileCity }}" onInput="{{ onProfileCity }}" required placeholder="City" aria-label="City" style="width:100%; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;"></div>
+                  <div style="flex:1;min-width:120px;"><label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;margin-bottom:6px;">Pincode</label>
+                  <input value="{{ profilePincode }}" onInput="{{ onProfilePincode }}" inputmode="numeric" maxlength="6" required placeholder="6-digit pin" aria-label="Pincode" style="width:100%; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;"></div>
                 </div>
-                <select value="{{ profileState }}" onChange="{{ onProfileState }}" required style="width: 100%; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none; font-family: inherit;">
+                <label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;">State / UT</label>
+                <select value="{{ profileState }}" onChange="{{ onProfileState }}" required aria-label="State or UT" style="width: 100%; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none; font-family: inherit;">
                   <option value="">Select state / UT</option>
                   <optgroup label="States">
                     <sc-for list="{{ stateOptions }}" as="st" hint-placeholder-count="28">
@@ -1395,9 +1404,9 @@
                     <span style="font-size: 13px; color: #8A9678;">Subtotal</span>
                     <span style="font-size: 14px; color: #2E3D2C;">{{ cartSubtotalStr }}</span>
                   </div>
-                  <sc-if value="{{ memberPricing }}">
+                  <sc-if value="{{ hasCartDiscount }}">
                     <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                      <span style="font-size: 13px; color: #4E6B3C;">Member discount (10%)</span>
+                      <span style="font-size: 13px; color: #4E6B3C;">{{ discountLabel }}</span>
                       <span style="font-size: 14px; color: #4E6B3C;">−{{ memberDiscountStr }}</span>
                     </div>
                   </sc-if>
@@ -1512,7 +1521,7 @@
   <!-- ===== LEGAL MODAL ===== -->
   <sc-if value="{{ legalOpen }}" hint-placeholder-val="{{ false }}">
     <div onClick="{{ closeLegal }}" style="position: fixed; inset: 0; background: rgba(35,45,25,0.5); z-index: 240; display: flex; align-items: center; justify-content: center; padding: 20px; animation: panelBloom .3s ease both;">
-      <div onClick="{{ stop }}" style="position: relative; width: min(760px, 100%); max-height: 86vh; background: #F6F1E4; border-radius: 24px; overflow: hidden; box-shadow: 0 40px 80px -30px rgba(35,45,25,0.6); display: flex; flex-direction: column;">
+      <div onClick="{{ stop }}" role="dialog" aria-modal="true" aria-label="Legal" style="position: relative; width: min(760px, 100%); max-height: 86vh; background: #F6F1E4; border-radius: 24px; overflow: hidden; box-shadow: 0 40px 80px -30px rgba(35,45,25,0.6); display: flex; flex-direction: column;">
         <div style="padding: 26px 30px 18px; border-bottom: 1px solid #E4DBC8;">
           <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
             <div>
@@ -1613,7 +1622,7 @@
 
   <!-- ===== SEARCH OVERLAY ===== -->
   <sc-if value="{{ searchOpen }}">
-    <div style="position: fixed; inset: 0; background: rgba(246,241,228,0.97); z-index: 220; overflow-y: auto; animation: sceneFade .25s ease;">
+    <div role="dialog" aria-modal="true" aria-label="Search" style="position: fixed; inset: 0; background: rgba(246,241,228,0.97); z-index: 220; overflow-y: auto; animation: sceneFade .25s ease;">
       <div style="max-width: 900px; margin: 0 auto; padding: 32px clamp(24px, 5vw, 90px) 60px;">
         <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 24px;">
           <div style="flex: 1; display: flex; align-items: center; gap: 12px; background: #FBF7EE; border: 1px solid #D7CDB4; border-radius: 40px; padding: 14px 20px;">
@@ -1673,7 +1682,7 @@
   <!-- ===== WISHLIST DRAWER ===== -->
   <sc-if value="{{ wishlistOpen }}" hint-placeholder-val="{{ false }}">
     <div onClick="{{ closeWishlist }}" style="position: fixed; inset: 0; background: rgba(35,45,25,0.42); z-index: 220; display: flex; justify-content: flex-end; animation: sceneFade .25s ease;">
-      <div onClick="{{ stop }}" style="width: min(420px, 100%); height: 100%; background: #F6F1E4; display: flex; flex-direction: column; box-shadow: -20px 0 60px -30px rgba(35,45,25,0.55);">
+      <div onClick="{{ stop }}" role="dialog" aria-modal="true" aria-label="Wishlist" style="width: min(420px, 100%); height: 100%; background: #F6F1E4; display: flex; flex-direction: column; box-shadow: -20px 0 60px -30px rgba(35,45,25,0.55);">
         <div style="padding: 22px 24px; border-bottom: 1px solid #E4DBC8; display: flex; align-items: center; justify-content: space-between;">
           <h3 style="font-family: 'Marcellus', serif; font-size: 24px; color: #2E3D2C; margin: 0;">Wishlist</h3>
           <button onClick="{{ closeWishlist }}" aria-label="Close wishlist" style="background: transparent; border: none; padding: 6px; cursor: pointer; color: #5E6A54; display: inline-flex;">
@@ -1721,13 +1730,14 @@
         </div>
         <sc-if value="{{ notTrackSubmitted }}">
           <form onSubmit="{{ onTrackSubmit }}">
-            <p style="font-size: 13.5px; color: #5E6A54; margin: 0 0 14px; line-height: 1.6;">Enter your order ID (from your confirmation email or SMS).</p>
+            <p style="font-size: 13.5px; color: #5E6A54; margin: 0 0 14px; line-height: 1.6;">Enter your order ID. Tracking is a simulated demo timeline (not live shipping).</p>
             <input value="{{ trackOrderId }}" onInput="{{ onTrackOrderId }}" required placeholder="e.g. AAK-10482" style="width: 100%; background: #FBF7EE; border: 1px solid #D7CDB4; color: #2E3D2C; padding: 13px 16px; border-radius: 12px; font-size: 14px; outline: none; margin-bottom: 14px;">
             <button type="submit" style="width: 100%; background: #2E3D2C; color: #F1EEDF; border: none; padding: 14px; border-radius: 30px; font-size: 14.5px; font-weight: 500;">Track Order</button>
           </form>
         </sc-if>
         <sc-if value="{{ trackSubmitted }}">
           <sc-if value="{{ trackFound }}">
+            <p style="font-size: 12px; color: #A8894E; margin: 0 0 8px; letter-spacing: 0.06em; text-transform: uppercase;">Simulated timeline (demo)</p>
             <p style="font-size: 13px; color: #8A9678; margin: 0 0 20px;">Order <strong style="color: #2E3D2C;">{{ trackDisplayId }}</strong> · {{ trackEta }}</p>
             <div style="display: flex; flex-direction: column; gap: 0;">
               <sc-for list="{{ trackSteps }}" as="st" hint-placeholder-count="5">
@@ -1777,12 +1787,12 @@
   </button>
 
   <!-- back to top lotus -->
-  <button id="ak-top" onClick="{{ scrollTop }}" aria-label="Back to top" style="position: fixed; right: 18px; bottom: 88px; z-index: 178; width: 46px; height: 46px; border-radius: 50%; background: #2E3D2C; border: none; cursor: pointer; opacity: 0; transition: opacity .3s; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 10px clamp(24px, 5vw, 90px) -12px rgba(0,0,0,0.5);">
+  <button id="ak-top" onClick="{{ scrollTop }}" aria-label="Back to top" style="position: fixed; right: 18px; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); z-index: 178; width: 46px; height: 46px; border-radius: 50%; background: #2E3D2C; border: none; cursor: pointer; opacity: 0; transition: opacity .3s; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 10px clamp(24px, 5vw, 90px) -12px rgba(0,0,0,0.5);">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8D4B9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1.5 3 1.5 6 0 9-1.5-3-1.5-6 0-9Z"/><path d="M12 12c3-1.5 6-1.5 9 0-3 1.5-6 1.5-9 0Z"/><path d="M12 12c-3-1.5-6-1.5-9 0 3 1.5 6 1.5 9 0Z"/><path d="m9 15 3-3 3 3"/></svg>
   </button>
 
   <!-- breathing ambient widget -->
-  <div style="position: fixed; left: 18px; bottom: 18px; z-index: 178;">
+  <div style="position: fixed; left: 18px; bottom: calc(78px + env(safe-area-inset-bottom, 0px)); z-index: 178;">
     <sc-if value="{{ breatheClosed }}">
       <button onClick="{{ toggleBreathe }}" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(46,61,44,0.92); color: #F1EEDF; border: none; padding: 10px 16px; border-radius: 30px; font-size: 12.5px; cursor: pointer; box-shadow: 0 10px clamp(24px, 5vw, 90px) -12px rgba(0,0,0,0.5);">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B7C7A6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M12 8c0-2 2-4 5-4 0 6-3 8-5 8M12 8c0-2-2-4-5-4 0 6 3 8 5 8"/></svg>
@@ -1803,7 +1813,7 @@
 
   <!-- toast -->
   <sc-if value="{{ hasToast }}">
-    <div role="status" aria-live="polite" style="position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 230; background: #2E3D2C; color: #F1EEDF; padding: 12px 22px; border-radius: 30px; font-size: 13.5px; box-shadow: 0 16px 34px -16px rgba(0,0,0,0.5); animation: toastIn .3s ease; display: flex; align-items: center; gap: 8px;">
+    <div role="status" aria-live="polite" style="position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 230; background: #2E3D2C; color: #F1EEDF; padding: 12px 22px; border-radius: 30px; font-size: 13.5px; box-shadow: 0 16px 34px -16px rgba(0,0,0,0.5); animation: toastIn .3s ease; display: flex; align-items: center; gap: 8px;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9DB08E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
       {{ toast }}
     </div>
@@ -1887,7 +1897,7 @@ class Component extends DCLogic {
     checkoutStep: 'cart', loggedIn: false, authMode: 'signin', payMethod: 'cod',
     payUpiId: '', payCardNumber: '', payCardExpiry: '', payCardCvv: '', payError: '',
     authContact: '', authName: '', authPassword: '', authConfirmPw: '', authOtpCode: '', authError: '', authOtp: false,
-    authFailCount: 0, authLockUntil: 0,
+    authRemember: true, authFailCount: 0, authLockUntil: 0,
     profileName: '', profilePhone: '', profileEmail: '',
     profileAddress: '', profileCity: '', profileState: '', profilePincode: '',
     accountMenuOpen: false, profileOpen: false, ordersOpen: false,
@@ -1936,6 +1946,20 @@ class Component extends DCLogic {
       localStorage.removeItem('ak_lock_until');
       localStorage.removeItem('ak_fail_count');
     } catch (e) {}
+  }
+  _hashPassword(pw) {
+    const data = new TextEncoder().encode('aakashik-demo|' + String(pw || ''));
+    return crypto.subtle.digest('SHA-256', data).then((buf) =>
+      Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('')
+    );
+  }
+  _passwordMatches(user, plain) {
+    return this._hashPassword(plain).then((hash) => {
+      if (!user) return { ok: false, hash };
+      if (user.pwHash && user.pwHash === hash) return { ok: true, hash, migrate: false };
+      if (user.password && user.password === plain) return { ok: true, hash, migrate: true };
+      return { ok: false, hash };
+    });
   }
   _authIsLocked() {
     try {
@@ -2112,7 +2136,7 @@ class Component extends DCLogic {
     window.addEventListener('focus', this._onPageShow);
     document.addEventListener('visibilitychange', this._onVis);
     try { this._setupMagic(); } catch (e) {}
-    try { this._loadWeather(); } catch (e) {}
+    // Weather is opt-in — do not call geolocation on load
     try {
       const h = String(location.hash || '').replace(/^#/, '');
       if (h === 'legal-terms') this.setState({ legal: 'terms' });
@@ -2260,7 +2284,7 @@ class Component extends DCLogic {
         herbEye: 'Know your herbs', herbTitle: 'The Herb Web', herbSub: 'Tap a herb to see what it does and every blend it lives in.',
         doshaEye: 'Personal guidance', doshaTitle: 'Find Your Dosha', doshaSub: 'Four questions to reveal your Ayurvedic constitution — and the ritual that suits it best.',
         doshaYourType: 'Your constitution', doshaRitual: 'Your recommended ritual', doshaRetake: 'Retake the quiz',
-        revEye: 'Loved by families', revTitle: 'What Our Customers Say', revSub: 'Real words from homes that made Aakashik part of their daily ritual.', revVerified: 'Verified buyer', revCount: 'based on 1,240+ reviews',
+        revEye: 'Loved by families', revTitle: 'What Our Customers Say', revSub: 'Real words from homes that made Aakashik part of their daily ritual.', revVerified: 'Sample story', revCount: '4 sample stories (demo)',
         trustEye: 'The Aakashik promise', trustTitle: 'Why Choose Us',
         featEye: 'Handpicked for you', featTitle: 'Featured Products',
         s: { eye: 'Our Story', title: 'Healing Inspired by Purpose', sub: 'Aakashik Wellness was born from a simple belief: nature has the power to support health when combined with traditional wisdom, genuine care, and a deep commitment to helping people live healthier lives.', famEye: 'A family journey', famTitle: 'From a time of uncertainty, a mission of care', p1a: 'Founded by ', gopi: 'Mr. Gopi', p1b: " — an experienced astrologer, Vasthu expert & Pranic healer with a profound interest in holistic wellness — Aakashik Wellness began its journey during one of the most challenging periods in recent history: the COVID-19 pandemic in 2021. Witnessing the fear and uncertainty of the outbreak, he was inspired to create a natural herbal formulation that could support people's immunity and respiratory wellness.", p2a: 'This vision was brought to life with the unwavering support of his wife and co-founder, ', devi: 'Mrs. Syamala Devi', p2b: '. Together they began carefully preparing their herbal formulations with dedication — combining traditional knowledge with a sincere desire to serve the community through natural wellness.', kaphaTag: 'FIRST FORMULATION', kaphaBody: 'Developed using carefully selected herbs traditionally known to support respiratory health — created to provide natural support for cough, cold, sore throat, fever and respiratory discomfort. When families were seeking natural solutions, Kaphahara earned the trust of many, strengthening the couple\'s commitment to herbal wellness.', navoTag: 'GUT & METABOLIC BALANCE', navoBody: "Rooted in the belief that a healthy gut forms the foundation of well-being, Navojas was formulated to promote digestive wellness and metabolic balance. Alongside supporting healthy blood sugar management, it was developed to support joint comfort, mobility and the body's natural lubrication of the joints.", quote: '"At Aakashik Wellness, every product begins with a purpose — not a trend. We believe true wellness focuses on prevention, balance, and supporting the body\'s natural ability to maintain health."', missionTitle: 'Our Mission', missionBody: 'To create trusted herbal wellness formulations inspired by traditional wisdom and real-life health needs — empowering individuals to embrace preventive care and holistic well-being through nature.', visionTitle: 'Our Vision', visionBody: 'To become a trusted name in herbal wellness by preserving traditional knowledge and offering natural formulations that support healthier communities for generations to come.', valuesTitle: 'Our Values', v1t: 'Purpose Before Profit', v1b: 'Every formulation is created to address genuine wellness needs and improve quality of life.', v2t: 'Rooted in Tradition', v2b: "We honour generations of herbal knowledge while creating products for today's needs.", v3t: 'Quality & Purity', v3b: 'Prepared with carefully selected ingredients, maintaining authenticity, consistency and uncompromising quality.', v4t: 'Care That Builds Trust', v4b: 'The confidence and well-being of the people who use our products remain at the heart of all we do.', journeyTitle: 'Our Journey Continues', jp1: "What started as one family's heartfelt effort to support people during a global health crisis has grown into a mission to make traditional herbal wellness more accessible. With every formulation, Mr. Gopi and Mrs. Syamala Devi continue to uphold the values on which Aakashik Wellness was founded — care, integrity, and the timeless wisdom of nature.", jp2: 'Aakashik Wellness is more than a wellness brand. It is a family-driven commitment to helping people nurture their health naturally, one formulation at a time.', tagline: 'Rooted in Tradition, Nurtured with Care, Dedicated to your Wellness.' } },
@@ -2274,7 +2298,7 @@ class Component extends DCLogic {
         herbEye: 'உங்கள் மூலிகைகளை அறியுங்கள்', herbTitle: 'மூலிகை வலை', herbSub: 'ஒரு மூலிகையைத் தட்டி அதன் பயனையும் அது இடம்பெறும் கலவைகளையும் காணுங்கள்.',
         doshaEye: 'தனிப்பட்ட வழிகாட்டல்', doshaTitle: 'உங்கள் தோஷத்தை அறியுங்கள்', doshaSub: 'நான்கு கேள்விகள் — உங்கள் ஆயுர்வேத உடல் இயல்பையும், அதற்கேற்ற சடங்கையும் வெளிப்படுத்தும்.',
         doshaYourType: 'உங்கள் உடல் இயல்பு', doshaRitual: 'உங்களுக்கான பரிந்துரை', doshaRetake: 'மீண்டும் தொடங்கு',
-        revEye: 'குடும்பங்களால் விரும்பப்பட்டது', revTitle: 'எங்கள் வாடிக்கையாளர்கள் கூறுவது', revSub: 'ஆகாஷிக்கை தங்கள் அன்றாட வழக்கமாக்கிய வீடுகளிலிருந்து உண்மையான வார்த்தைகள்.', revVerified: 'சரிபார்க்கப்பட்ட வாங்குபவர்', revCount: '1,240+ மதிப்புரைகள் அடிப்படையில்',
+        revEye: 'குடும்பங்களால் விரும்பப்பட்டது', revTitle: 'எங்கள் வாடிக்கையாளர்கள் கூறுவது', revSub: 'ஆகாஷிக்கை தங்கள் அன்றாட வழக்கமாக்கிய வீடுகளிலிருந்து உண்மையான வார்த்தைகள்.', revVerified: 'மாதிரி கதை', revCount: '4 மாதிரி கதைகள் (டெமோ)',
         trustEye: 'ஆகாஷிக் உறுதி', trustTitle: 'எங்களை ஏன் தேர்வு செய்ய வேண்டும்',
         featEye: 'உங்களுக்காக தேர்ந்தெடுக்கப்பட்டது', featTitle: 'சிறப்பு தயாரிப்புகள்',
         s: { eye: 'எங்கள் கதை', title: 'நோக்கத்தால் ஈர்க்கப்பட்ட நலம்', sub: 'ஆகாஷிக் வெல்னஸ் ஒரு எளிய நம்பிக்கையில் பிறந்தது: பாரம்பரிய ஞானம், உண்மையான அக்கறை மற்றும் மக்கள் ஆரோக்கியமாக வாழ உதவும் ஆழ்ந்த அர்ப்பணிப்புடன் இணைந்தால் இயற்கைக்கு ஆரோக்கியத்தை ஆதரிக்கும் சக்தி உண்டு.', famEye: 'ஒரு குடும்பப் பயணம்', famTitle: 'நிச்சயமற்ற காலத்திலிருந்து, ஒரு அக்கறையின் பணி', p1a: 'நிறுவியவர் ', gopi: 'திரு. கோபி', p1b: ' — முழுமையான நலனில் ஆழ்ந்த ஆர்வம் கொண்ட அனுபவமிக்க ஜோதிடர், வாஸ்து நிபுணர் & பிராணிக் ஹீலர் — ஆகாஷிக் வெல்னஸ் சமீபகால வரலாற்றின் மிகவும் சவாலான காலகட்டமான 2021 கோவிட்-19 பெருந்தொற்றின் போது தனது பயணத்தைத் தொடங்கியது. தொற்றின் அச்சத்தையும் நிச்சயமற்ற தன்மையையும் கண்டு, மக்களின் நோய் எதிர்ப்பு சக்தி மற்றும் சுவாச நலனை ஆதரிக்கும் இயற்கை மூலிகைக் கலவையை உருவாக்க அவர் ஈர்க்கப்பட்டார்.', p2a: 'இந்த தொலைநோக்கு அவரது மனைவி மற்றும் இணை நிறுவனர் ', devi: 'திருமதி. ஷ்யாமளா தேவி', p2b: ' அவர்களின் அசைக்க முடியாத ஆதரவுடன் நனவாக்கப்பட்டது. இருவரும் அர்ப்பணிப்புடன் தங்கள் மூலிகைக் கலவைகளை கவனமாக தயாரிக்கத் தொடங்கினர் — பாரம்பரிய அறிவை சமூகத்திற்கு சேவை செய்யும் உண்மையான விருப்பத்துடன் இணைத்தனர்.', kaphaTag: 'முதல் கலவை', kaphaBody: 'சுவாச ஆரோக்கியத்தை ஆதரிப்பதாக பாரம்பரியமாக அறியப்படும் கவனமாக தேர்ந்தெடுக்கப்பட்ட மூலிகைகளைப் பயன்படுத்தி உருவாக்கப்பட்டது — இருமல், சளி, தொண்டை வலி, காய்ச்சல் மற்றும் சுவாச அசௌகரியத்திற்கு இயற்கை ஆதரவை வழங்குகிறது. குடும்பங்கள் இயற்கை தீர்வுகளைத் தேடியபோது, கஃபஹரா பலரின் நம்பிக்கையைப் பெற்றது.', navoTag: 'குடல் & வளர்சிதை சமநிலை', navoBody: 'ஆரோக்கியமான குடல் நல்வாழ்வின் அடித்தளம் என்ற நம்பிக்கையில் வேரூன்றி, நவோஜஸ் செரிமான நலனையும் வளர்சிதை சமநிலையையும் ஊக்குவிக்க உருவாக்கப்பட்டது. ஆரோக்கியமான ரத்த சர்க்கரை மேலாண்மையை ஆதரிப்பதுடன், மூட்டு சௌகரியம் மற்றும் இயக்கத்தையும் ஆதரிக்கிறது.', quote: '"ஆகாஷிக் வெல்னஸில், ஒவ்வொரு தயாரிப்பும் ஒரு நோக்கத்துடன் தொடங்குகிறது — ஒரு போக்குடன் அல்ல. உண்மையான நலம் தடுப்பு, சமநிலை மற்றும் உடலின் இயற்கை திறனை ஆதரிப்பதில் கவனம் செலுத்துகிறது என்று நாங்கள் நம்புகிறோம்."', missionTitle: 'எங்கள் நோக்கம்', missionBody: 'பாரம்பரிய ஞானம் மற்றும் நிஜ வாழ்க்கை ஆரோக்கியத் தேவைகளால் ஈர்க்கப்பட்ட நம்பகமான மூலிகை நல்வாழ்வுக் கலவைகளை உருவாக்குதல் — இயற்கையின் மூலம் தடுப்பு பராமரிப்பையும் முழுமையான நல்வாழ்வையும் தழுவ தனிநபர்களுக்கு உதவுதல்.', visionTitle: 'எங்கள் தொலைநோக்கு', visionBody: 'பாரம்பரிய அறிவைப் பாதுகாத்து, தலைமுறைகளுக்கு ஆரோக்கியமான சமூகங்களை ஆதரிக்கும் இயற்கைக் கலவைகளை வழங்குவதன் மூலம் மூலிகை நல்வாழ்வில் நம்பகமான பெயராக மாறுதல்.', valuesTitle: 'எங்கள் மதிப்புகள்', v1t: 'லாபத்தை விட நோக்கம்', v1b: 'ஒவ்வொரு கலவையும் உண்மையான நல்வாழ்வுத் தேவைகளை நிவர்த்தி செய்து வாழ்க்கைத் தரத்தை மேம்படுத்த உருவாக்கப்படுகிறது.', v2t: 'பாரம்பரியத்தில் வேரூன்றி', v2b: 'இன்றைய தேவைகளுக்கான தயாரிப்புகளை உருவாக்கும்போது தலைமுறை மூலிகை அறிவை மதிக்கிறோம்.', v3t: 'தரம் & தூய்மை', v3b: 'கவனமாக தேர்ந்தெடுக்கப்பட்ட பொருட்களுடன் தயாரிக்கப்பட்டு, நம்பகத்தன்மை, நிலைத்தன்மை மற்றும் சமரசமற்ற தரத்தை பராமரிக்கிறது.', v4t: 'நம்பிக்கையை உருவாக்கும் அக்கறை', v4b: 'எங்கள் தயாரிப்புகளைப் பயன்படுத்தும் மக்களின் நம்பிக்கையும் நல்வாழ்வும் நாங்கள் செய்யும் அனைத்திலும் மையமாக உள்ளன.', journeyTitle: 'எங்கள் பயணம் தொடர்கிறது', jp1: 'உலகளாவிய சுகாதார நெருக்கடியின் போது மக்களுக்கு உதவும் ஒரு குடும்பத்தின் இதயப்பூர்வமான முயற்சியாகத் தொடங்கியது, பாரம்பரிய மூலிகை நலனை மேலும் அணுகக்கூடியதாக்கும் பணியாக வளர்ந்துள்ளது. ஒவ்வொரு கலவையிலும், திரு. கோபி மற்றும் திருமதி. ஷ்யாமளா தேவி ஆகாஷிக் வெல்னஸ் நிறுவப்பட்ட மதிப்புகளைத் தொடர்ந்து நிலைநிறுத்துகின்றனர்.', jp2: 'ஆகாஷிக் வெல்னஸ் ஒரு நல்வாழ்வு பிராண்டை விட அதிகம். இது மக்கள் தங்கள் ஆரோக்கியத்தை இயற்கையாக வளர்க்க உதவும் குடும்பம் சார்ந்த அர்ப்பணிப்பு.', tagline: 'பாரம்பரியத்தில் வேரூன்றி, அன்புடன் வளர்க்கப்பட்டு, உங்கள் நலனுக்கு அர்ப்பணிக்கப்பட்டது.' } },
@@ -2288,7 +2312,7 @@ class Component extends DCLogic {
         herbEye: 'మీ మూలికలను తెలుసుకోండి', herbTitle: 'మూలికా వల', herbSub: 'ఒక మూలికను తాకి అది చేసేదాన్ని, అది ఉండే మిశ్రమాలను చూడండి.',
         doshaEye: 'వ్యక్తిగత మార్గదర్శకత్వం', doshaTitle: 'మీ దోషాన్ని కనుగొనండి', doshaSub: 'నాలుగు ప్రశ్నలు — మీ ఆయుర్వేద శరీర స్వభావాన్ని, దానికి సరిపోయే విధానాన్ని తెలియజేస్తాయి.',
         doshaYourType: 'మీ శరీర స్వభావం', doshaRitual: 'మీకు సిఫారసు', doshaRetake: 'మళ్లీ ప్రారంభించండి',
-        revEye: 'కుటుంబాలు ఇష్టపడేది', revTitle: 'మా కస్టమర్లు చెప్పేది', revSub: 'ఆకాశిక్‌ను తమ నిత్య అలవాటుగా చేసుకున్న ఇళ్ల నుండి నిజమైన మాటలు.', revVerified: 'ధృవీకరించిన కొనుగోలుదారు', revCount: '1,240+ సమీక్షల ఆధారంగా',
+        revEye: 'కుటుంబాలు ఇష్టపడేది', revTitle: 'మా కస్టమర్లు చెప్పేది', revSub: 'ఆకాశిక్‌ను తమ నిత్య అలవాటుగా చేసుకున్న ఇళ్ల నుండి నిజమైన మాటలు.', revVerified: 'నమూనా కథ', revCount: '4 నమూనా కథలు (డెమో)',
         trustEye: 'ఆకాశిక్ వాగ్దానం', trustTitle: 'మమ్మల్ని ఎందుకు ఎంచుకోవాలి',
         featEye: 'మీ కోసం ఎంపిక చేసినవి', featTitle: 'ప్రత్యేక ఉత్పత్తులు',
         s: { eye: 'మా కథ', title: 'లక్ష్యంతో ప్రేరేపించబడిన స్వస్థత', sub: 'ఆకాశిక్ వెల్‌నెస్ ఒక సాధారణ నమ్మకంతో పుట్టింది: సంప్రదాయ జ్ఞానం, నిజమైన శ్రద్ధ మరియు ప్రజలు ఆరోగ్యంగా జీవించడంలో సహాయపడే లోతైన నిబద్ధతతో కలిస్తే ప్రకృతికి ఆరోగ్యాన్ని ఆదుకునే శక్తి ఉంది.', famEye: 'ఒక కుటుంబ ప్రయాణం', famTitle: 'అనిశ్చిత సమయం నుండి, ఒక శ్రద్ధ మిషన్', p1a: 'స్థాపించినవారు ', gopi: 'శ్రీ. గోపి', p1b: ' — సంపూర్ణ ఆరోగ్యంపై లోతైన ఆసక్తి గల అనుభవజ్ఞుడైన జ్యోతిష్కుడు, వాస్తు నిపుణుడు & ప్రాణిక్ హీలర్ — ఆకాశిక్ వెల్‌నెస్ ఇటీవలి చరిత్రలో అత్యంత సవాలుతో కూడిన కాలమైన 2021 కోవిడ్-19 మహమ్మారి సమయంలో తన ప్రయాణాన్ని ప్రారంభించింది. వ్యాప్తి భయాన్ని, అనిశ్చితిని చూసి, ప్రజల రోగనిరోధక శక్తి, శ్వాసకోశ ఆరోగ్యాన్ని ఆదుకునే సహజ మూలికా మిశ్రమాన్ని రూపొందించడానికి ప్రేరణ పొందారు.', p2a: 'ఈ దృష్టి ఆయన భార్య మరియు సహ-వ్యవస్థాపకురాలు ', devi: 'శ్రీమతి. శ్యామళా దేవి', p2b: ' యొక్క అచంచల మద్దతుతో సాకారమైంది. వారిద్దరూ అంకితభావంతో తమ మూలికా మిశ్రమాలను జాగ్రత్తగా తయారు చేయడం ప్రారంభించారు — సంప్రదాయ జ్ఞానాన్ని సమాజానికి సేవ చేసే నిజాయితీ కోరికతో కలిపారు.', kaphaTag: 'మొదటి మిశ్రమం', kaphaBody: 'శ్వాసకోశ ఆరోగ్యాన్ని ఆదుకునేందుకు సంప్రదాయంగా తెలిసిన జాగ్రత్తగా ఎంచుకున్న మూలికలతో రూపొందించబడింది — దగ్గు, జలుబు, గొంతు నొప్పి, జ్వరం మరియు శ్వాసకోశ అసౌకర్యానికి సహజ మద్దతును అందిస్తుంది. కుటుంబాలు సహజ పరిష్కారాలను వెతికినప్పుడు, కఫహర చాలామంది నమ్మకాన్ని పొందింది.', navoTag: 'పేగు & జీవక్రియ సమతుల్యం', navoBody: 'ఆరోగ్యకరమైన పేగు శ్రేయస్సుకు పునాది అనే నమ్మకంలో వేళ్లూనుకుని, నవోజస్ జీర్ణ ఆరోగ్యాన్ని, జీవక్రియ సమతుల్యతను ప్రోత్సహించేందుకు రూపొందించబడింది. ఆరోగ్యకరమైన రక్తంలో చక్కెర నిర్వహణకు మద్దతునిస్తూ, కీళ్ల సౌకర్యం, కదలికకు కూడా మద్దతునిస్తుంది.', quote: '"ఆకాశిక్ వెల్‌నెస్‌లో, ప్రతి ఉత్పత్తి ఒక లక్ష్యంతో మొదలవుతుంది — ఒక ధోరణితో కాదు. నిజమైన స్వస్థత నివారణ, సమతుల్యత మరియు శరీర సహజ సామర్థ్యానికి మద్దతునివ్వడంపై దృష్టి పెడుతుందని మేము నమ్ముతాము."', missionTitle: 'మా లక్ష్యం', missionBody: 'సంప్రదాయ జ్ఞానం, నిజ జీవిత ఆరోగ్య అవసరాలతో ప్రేరేపించబడిన నమ్మకమైన మూలికా ఆరోగ్య మిశ్రమాలను సృష్టించడం — ప్రకృతి ద్వారా నివారణ సంరక్షణ, సంపూర్ణ శ్రేయస్సును స్వీకరించడానికి వ్యక్తులకు శక్తినివ్వడం.', visionTitle: 'మా దృష్టి', visionBody: 'సంప్రదాయ జ్ఞానాన్ని కాపాడుతూ, తరతరాలకు ఆరోగ్యకరమైన సమాజాలను ఆదుకునే సహజ మిశ్రమాలను అందించడం ద్వారా మూలికా ఆరోగ్యంలో నమ్మకమైన పేరుగా మారడం.', valuesTitle: 'మా విలువలు', v1t: 'లాభం కంటే లక్ష్యం', v1b: 'ప్రతి మిశ్రమం నిజమైన ఆరోగ్య అవసరాలను తీర్చడానికి, జీవన నాణ్యతను మెరుగుపరచడానికి సృష్టించబడుతుంది.', v2t: 'సంప్రదాయంలో వేళ్లూనుకుని', v2b: 'నేటి అవసరాలకు ఉత్పత్తులను సృష్టిస్తూ తరతరాల మూలికా జ్ఞానాన్ని గౌరవిస్తాము.', v3t: 'నాణ్యత & స్వచ్ఛత', v3b: 'జాగ్రత్తగా ఎంచుకున్న పదార్థాలతో తయారు చేయబడి, ప్రామాణికత, స్థిరత్వం, రాజీలేని నాణ్యతను కాపాడుతుంది.', v4t: 'నమ్మకాన్ని పెంచే శ్రద్ధ', v4b: 'మా ఉత్పత్తులను ఉపయోగించే ప్రజల విశ్వాసం, శ్రేయస్సు మేము చేసే అన్నింటిలో కేంద్రంగా ఉంటాయి.', journeyTitle: 'మా ప్రయాణం కొనసాగుతోంది', jp1: 'ప్రపంచ ఆరోగ్య సంక్షోభ సమయంలో ప్రజలకు సహాయం చేయాలనే ఒక కుటుంబ హృదయపూర్వక ప్రయత్నంగా మొదలైనది, సంప్రదాయ మూలికా ఆరోగ్యాన్ని మరింత అందుబాటులోకి తెచ్చే మిషన్‌గా ఎదిగింది. ప్రతి మిశ్రమంతో, శ్రీ. గోపి, శ్రీమతి. శ్యామళా దేవి ఆకాశిక్ వెల్‌నెస్ స్థాపించబడిన విలువలను కొనసాగిస్తున్నారు.', jp2: 'ఆకాశిక్ వెల్‌నెస్ ఒక ఆరోగ్య బ్రాండ్ కంటే ఎక్కువ. ఇది ప్రజలు తమ ఆరోగ్యాన్ని సహజంగా పెంపొందించుకోవడంలో సహాయపడే కుటుంబ ఆధారిత నిబద్ధత.', tagline: 'సంప్రదాయంలో వేళ్లూనుకుని, ప్రేమతో పెంచబడి, మీ ఆరోగ్యానికి అంకితం.' } },
@@ -2302,7 +2326,7 @@ class Component extends DCLogic {
         herbEye: 'अपनी जड़ी-बूटियाँ जानें', herbTitle: 'हर्ब वेब', herbSub: 'किसी जड़ी-बूटी पर टैप करें और देखें वह क्या करती है और किन मिश्रणों में है.',
         doshaEye: 'व्यक्तिगत मार्गदर्शन', doshaTitle: 'अपना दोष जानें', doshaSub: 'चार प्रश्न — जो आपकी आयुर्वेदिक प्रकृति और उसके लिए उपयुक्त विधि बताएँगे।',
         doshaYourType: 'आपकी प्रकृति', doshaRitual: 'आपके लिए सुझाव', doshaRetake: 'फिर से शुरू करें',
-        revEye: 'परिवारों का पसंदीदा', revTitle: 'हमारे ग्राहक क्या कहते हैं', revSub: 'उन घरों के सच्चे शब्द जिन्होंने आकाशिक को अपनी दिनचर्या का हिस्सा बनाया।', revVerified: 'सत्यापित खरीदार', revCount: '1,240+ समीक्षाओं पर आधारित',
+        revEye: 'परिवारों का पसंदीदा', revTitle: 'हमारे ग्राहक क्या कहते हैं', revSub: 'उन घरों के सच्चे शब्द जिन्होंने आकाशिक को अपनी दिनचर्या का हिस्सा बनाया।', revVerified: 'नमूना कहानी', revCount: '4 नमूना कहानियाँ (डेमो)',
         trustEye: 'आकाशिक का वादा', trustTitle: 'हमें क्यों चुनें',
         featEye: 'आपके लिए चुना गया', featTitle: 'विशेष उत्पाद',
         s: { eye: 'हमारी कहानी', title: 'उद्देश्य से प्रेरित उपचार', sub: 'आकाशिक वेलनेस एक सरल विश्वास से जन्मा: पारंपरिक ज्ञान, सच्ची देखभाल और लोगों को स्वस्थ जीवन जीने में मदद करने की गहरी प्रतिबद्धता के साथ मिलकर प्रकृति में स्वास्थ्य को सहारा देने की शक्ति है।', famEye: 'एक पारिवारिक यात्रा', famTitle: 'अनिश्चितता के समय से, देखभाल का एक मिशन', p1a: 'संस्थापक ', gopi: 'श्री गोपी', p1b: ' — समग्र स्वास्थ्य में गहरी रुचि रखने वाले अनुभवी ज्योतिषी, वास्तु विशेषज्ञ और प्राणिक हीलर — आकाशिक वेलनेस ने हाल के इतिहास के सबसे चुनौतीपूर्ण दौर, 2021 की कोविड-19 महामारी के दौरान अपनी यात्रा शुरू की। प्रकोप के डर और अनिश्चितता को देखकर, वे लोगों की रोग प्रतिरोधक क्षमता और श्वसन स्वास्थ्य को सहारा देने वाला प्राकृतिक हर्बल मिश्रण बनाने के लिए प्रेरित हुए।', p2a: 'यह दृष्टि उनकी पत्नी और सह-संस्थापक ', devi: 'श्रीमती श्यामला देवी', p2b: ' के अटूट समर्थन से साकार हुई। दोनों ने समर्पण के साथ अपने हर्बल मिश्रण सावधानी से तैयार करना शुरू किया — पारंपरिक ज्ञान को समुदाय की सेवा करने की सच्ची इच्छा के साथ जोड़ा।', kaphaTag: 'पहला मिश्रण', kaphaBody: 'श्वसन स्वास्थ्य को सहारा देने के लिए पारंपरिक रूप से जानी जाने वाली सावधानी से चुनी गई जड़ी-बूटियों से विकसित — खांसी, जुकाम, गले की खराश, बुखार और श्वसन असुविधा के लिए प्राकृतिक सहारा प्रदान करने हेतु बनाया गया। जब परिवार प्राकृतिक समाधान खोज रहे थे, कफहर ने कई लोगों का विश्वास अर्जित किया।', navoTag: 'आंत और चयापचय संतुलन', navoBody: 'स्वस्थ आंत कल्याण की नींव है, इस विश्वास में निहित, नवोजस पाचन स्वास्थ्य और चयापचय संतुलन को बढ़ावा देने के लिए बनाया गया। स्वस्थ रक्त शर्करा प्रबंधन के साथ-साथ, यह जोड़ों के आराम और गतिशीलता को भी सहारा देता है।', quote: '"आकाशिक वेलनेस में, हर उत्पाद एक उद्देश्य से शुरू होता है — किसी चलन से नहीं। हम मानते हैं कि सच्चा स्वास्थ्य रोकथाम, संतुलन और शरीर की प्राकृतिक क्षमता को सहारा देने पर केंद्रित है।"', missionTitle: 'हमारा मिशन', missionBody: 'पारंपरिक ज्ञान और वास्तविक जीवन की स्वास्थ्य आवश्यकताओं से प्रेरित विश्वसनीय हर्बल कल्याण मिश्रण बनाना — प्रकृति के माध्यम से निवारक देखभाल और समग्र कल्याण को अपनाने के लिए व्यक्तियों को सशक्त बनाना।', visionTitle: 'हमारी दृष्टि', visionBody: 'पारंपरिक ज्ञान को संरक्षित करके और पीढ़ियों तक स्वस्थ समुदायों को सहारा देने वाले प्राकृतिक मिश्रण प्रदान करके हर्बल कल्याण में एक विश्वसनीय नाम बनना।', valuesTitle: 'हमारे मूल्य', v1t: 'लाभ से पहले उद्देश्य', v1b: 'हर मिश्रण सच्ची कल्याण आवश्यकताओं को पूरा करने और जीवन की गुणवत्ता सुधारने के लिए बनाया जाता है।', v2t: 'परंपरा में निहित', v2b: 'आज की जरूरतों के लिए उत्पाद बनाते हुए हम पीढ़ियों के हर्बल ज्ञान का सम्मान करते हैं।', v3t: 'गुणवत्ता और शुद्धता', v3b: 'सावधानी से चुनी गई सामग्री से तैयार, प्रामाणिकता, निरंतरता और बेजोड़ गुणवत्ता बनाए रखते हुए।', v4t: 'विश्वास बनाने वाली देखभाल', v4b: 'हमारे उत्पादों का उपयोग करने वाले लोगों का विश्वास और कल्याण हमारे हर काम के केंद्र में रहता है।', journeyTitle: 'हमारी यात्रा जारी है', jp1: 'वैश्विक स्वास्थ्य संकट के दौरान लोगों की मदद करने के एक परिवार के हार्दिक प्रयास के रूप में जो शुरू हुआ, वह पारंपरिक हर्बल कल्याण को अधिक सुलभ बनाने के मिशन में विकसित हुआ है। हर मिश्रण के साथ, श्री गोपी और श्रीमती श्यामला देवी उन मूल्यों को बनाए रखते हैं जिन पर आकाशिक वेलनेस की स्थापना हुई।', jp2: 'आकाशिक वेलनेस एक कल्याण ब्रांड से कहीं अधिक है। यह लोगों को अपने स्वास्थ्य को प्राकृतिक रूप से पोषित करने में मदद करने की पारिवारिक प्रतिबद्धता है।', tagline: 'परंपरा में निहित, प्रेम से पोषित, आपके स्वास्थ्य को समर्पित।' } },
@@ -2310,15 +2334,15 @@ class Component extends DCLogic {
     const t = I18N[this.state.lang] || I18N.en;
     const PRODUCTS = [
       { id: 'sunni', name: 'Herbal Sunni Pindi', sub: 'Bath Powder', element: 'Earth', concern: 'Skin & Body', priceN: 249, jar: '#D9BE9C', cap: '#A06437', benefit: 'Gentle herbal cleansing for soft, glowing skin.', herbs: ['Green Gram', 'Turmeric', 'Vetiver'], tag: '100% Natural' },
-      { id: 'diabetic', name: 'Diabetic Care', sub: 'Kashayam', element: 'Fire', concern: 'Sugar', priceN: 399, jar: '#CFB6A5', cap: '#9A5432', benefit: 'A targeted brew to support healthy blood-sugar balance.', herbs: ['Bitter Gourd', 'Fenugreek', 'Gymnema'], tag: 'Ayurvedic' },
+      { id: 'diabetic', name: 'Sugar Balance Support', sub: 'Kashayam', element: 'Fire', concern: 'Sugar', priceN: 399, jar: '#CFB6A5', cap: '#9A5432', benefit: 'A traditional herbal brew for everyday metabolic wellness rituals (not a medicine).', herbs: ['Bitter Gourd', 'Fenugreek', 'Gymnema'], tag: 'Ayurvedic' },
       { id: 'immunity', name: 'Daily Immunity', sub: 'Kashayam', element: 'Water', concern: 'Immunity', priceN: 349, jar: '#BCC8A2', cap: '#5E7A4C', benefit: 'Everyday defense powered by holy basil and pepper.', herbs: ['Tulsi', 'Pepper', 'Ginger'], tag: '100% Natural' },
       { id: 'kaphahara', name: 'Kaphahara', sub: 'Herbal Wellness Powder', element: 'Air', concern: 'Respiratory', priceN: 199, jar: '#D6BA8D', cap: '#A8894E', front: 'assets/kaphahara-front.png', back: 'assets/kaphahara-back.png', sizes: [{ g: '100g', p: 199 }, { g: '250g', p: 399 }, { g: '500g', p: 599 }], benefit: 'A traditional herbal blend formulated to support respiratory comfort, seasonal balance and overall well-being.', herbs: ['Tulasi', 'Shunthi', 'Maricha', 'Pippali', 'Vasa', 'Yashtimadhu', 'Haridra'], tag: 'Ayurvedic' },
       { id: 'ashta', name: 'Ashtagandham', sub: 'Sacred Powder', element: 'Space', concern: 'Spiritual', priceN: 199, jar: '#2E3D2C', cap: '#C0A55E', benefit: 'Eight fragrant herbs for ritual and clearing the space within.', herbs: ['Sandalwood', 'Saffron', 'Cardamom'], tag: '100% Natural' },
-      { id: 'navojas', name: 'Navojas', sub: 'Herbal Wellness Powder', element: 'Fire', concern: 'Digestion', priceN: 199, jar: '#C99374', cap: '#93513B', front: 'assets/navojas-front.jpeg', back: 'assets/navojas-back.jpeg', sizes: [{ g: '100g', p: 199 }, { g: '250g', p: 399 }, { g: '500g', p: 599 }], benefit: 'A traditional blend of time-tested herbs supporting gut cleanse, knee comfort and diabetes wellness.', herbs: ['Methika', 'Ajwain', 'Krishna Jeeraka', 'Kala Zeera', 'Kalmegh'], tag: 'Ayurvedic' },
+      { id: 'navojas', name: 'Navojas', sub: 'Herbal Wellness Powder', element: 'Fire', concern: 'Digestion', priceN: 199, jar: '#C99374', cap: '#93513B', front: 'assets/navojas-front.jpeg', back: 'assets/navojas-back.jpeg', sizes: [{ g: '100g', p: 199 }, { g: '250g', p: 399 }, { g: '500g', p: 599 }], benefit: 'A traditional blend of time-tested herbs for gut comfort and everyday digestive wellness (not a medicine).', herbs: ['Methika', 'Ajwain', 'Krishna Jeeraka', 'Kala Zeera', 'Kalmegh'], tag: 'Ayurvedic' },
     ];
     const BUNDLES = [
-      { id: 'kit-immunity', name: 'Immunity Ritual Kit', sub: 'Bundle · Save ₹148', element: 'Water', concern: 'Immunity', priceN: 799, jar: '#BCC8A2', cap: '#5E7A4C', benefit: 'Daily Immunity + Kaphahara + Ashtagandham — a complete daily defense ritual.', herbs: ['Daily Immunity', 'Kaphahara', 'Ashtagandham'], tag: 'Best Value', bundle: true },
-      { id: 'kit-glow', name: 'Glow & Cleanse Kit', sub: 'Bundle · Save ₹99', element: 'Earth', concern: 'Skin & Body', priceN: 549, jar: '#D9BE9C', cap: '#A06437', benefit: 'Sunni Pindi bath powder + Ashtagandham for a grounding cleanse routine.', herbs: ['Sunni Pindi', 'Ashtagandham'], tag: 'Best Value', bundle: true },
+      { id: 'kit-immunity', name: 'Immunity Ritual Kit', sub: 'Bundle · Save ₹148 vs singles', element: 'Water', concern: 'Immunity', priceN: 599, jar: '#BCC8A2', cap: '#5E7A4C', benefit: 'Daily Immunity + Kaphahara + Ashtagandham — a complete daily defense ritual.', herbs: ['Daily Immunity', 'Kaphahara', 'Ashtagandham'], tag: 'Best Value', bundle: true },
+      { id: 'kit-glow', name: 'Glow & Cleanse Kit', sub: 'Bundle · Save ₹99 vs singles', element: 'Earth', concern: 'Skin & Body', priceN: 349, jar: '#D9BE9C', cap: '#A06437', benefit: 'Sunni Pindi bath powder + Ashtagandham for a grounding cleanse routine.', herbs: ['Sunni Pindi', 'Ashtagandham'], tag: 'Best Value', bundle: true },
       { id: 'sample-trio', name: 'Sample Trio', sub: 'Try before you commit', element: 'All', concern: 'Immunity', priceN: 99, jar: '#E3D6BC', cap: '#A8894E', benefit: 'Three mini sachets of our bestsellers — a low-risk first taste.', herbs: ['Daily Immunity', 'Kaphahara', 'Navojas'], tag: 'Trial Pack', bundle: true },
     ];
     const ALL = {}; PRODUCTS.concat(BUNDLES).forEach(p => ALL[p.id] = p);
@@ -2478,24 +2502,27 @@ class Component extends DCLogic {
       const pid = it.productId || String(key).split('::')[0];
       const p = ALL[pid] || { name: pid, priceN: 0, sub: '', jar: '#E3D6BC', cap: '#A8894E' };
       const base = (it.sizePrice != null ? it.sizePrice : p.priceN);
-      let unit = base * (it.subscribe ? 0.9 : 1);
-      if (memberPricing) unit = unit * (1 - MEMBER_RATE);
+      // One 10% discount only — subscribe preferred over member (never stacked)
+      const unit = base * ((it.subscribe || memberPricing) ? (1 - MEMBER_RATE) : 1);
       return { id: key, productId: pid, name: p.name, sub: it.size ? it.size + ' · ' + p.sub : p.sub, jar: p.jar, cap: p.cap, qty: it.qty, subscribe: it.subscribe,
         lineN: unit * it.qty, priceStr: money(unit), lineStr: money(unit * it.qty),
         subLabel: it.subscribe ? 'Save 10% (demo) · on' : 'Save 10% (demo)',
         inc: () => setQty(key, 1), dec: () => setQty(key, -1), remove: () => removeItem(key), toggleSub: () => toggleLineSub(key) };
     });
     const cartCount = cartList.reduce((a, l) => a + l.qty, 0);
+    const cartListTotalN = cartList.reduce((a, l) => a + l.lineN, 0);
     const cartSubtotalN = Object.keys(this.state.cartItems).reduce((a, key) => {
       const it = this.state.cartItems[key] || {};
       const pid = it.productId || String(key).split('::')[0];
       const p = ALL[pid] || { priceN: 0 };
       const base = (it.sizePrice != null ? it.sizePrice : p.priceN);
-      const unit = base * (it.subscribe ? 0.9 : 1);
-      return a + unit * (it.qty || 0);
+      return a + base * (it.qty || 0);
     }, 0);
-    const memberDiscountN = memberPricing ? cartSubtotalN * MEMBER_RATE : 0;
-    const subtotalN = Math.round((cartSubtotalN - memberDiscountN) * 100) / 100;
+    const memberDiscountN = Math.round((cartSubtotalN - cartListTotalN) * 100) / 100;
+    const subtotalN = Math.round(cartListTotalN * 100) / 100;
+    const hasSubscribeLine = cartList.some((l) => l.subscribe);
+    const hasCartDiscount = memberDiscountN > 0;
+    const discountLabel = hasSubscribeLine ? 'Subscribe 10% off (not stacked with member)' : (memberPricing ? 'Member 10% off' : '10% off');
 
     // ---- Quick view ----
     let qv = null;
@@ -2637,8 +2664,8 @@ class Component extends DCLogic {
     // ---- Reviews ----
     const reviews = [
       { name: 'Lakshmi R.', city: 'Coimbatore', stars: 5, product: 'Herbal Sunni Pindi', text: 'I stopped using soap three months ago and my skin has never felt this soft. My mother says it smells exactly like what my grandmother used to make.', initial: 'L', tint: '#D9BE9C' },
-      { name: 'Venkat S.', city: 'Hyderabad', stars: 5, product: 'Navojas', text: 'My sugar readings have been far steadier since I started this alongside my walks. My doctor asked what changed. Genuine product, no marketing gimmicks.', initial: 'V', tint: '#C99374' },
-      { name: 'Anitha M.', city: 'Chennai', stars: 5, product: 'Kaphahara', text: 'Every monsoon my son used to miss a week of school. This year we kept Kaphahara at home and got through it without antibiotics once.', initial: 'A', tint: '#BCC8A2' },
+      { name: 'Venkat S.', city: 'Hyderabad', stars: 5, product: 'Navojas', text: 'I enjoy Navojas with my evening walk. It feels like a steady, grounding ritual — taste is strong but pleasant.', initial: 'V', tint: '#C99374' },
+      { name: 'Anitha M.', city: 'Chennai', stars: 5, product: 'Kaphahara', text: 'We keep Kaphahara at home through monsoon. The blend smells fresh and has become part of our seasonal routine.', initial: 'A', tint: '#BCC8A2' },
       { name: 'Ramesh K.', city: 'Bengaluru', stars: 4, product: 'Ashtagandham', text: 'The fragrance during morning pooja is beautiful and lasts. Delivery took a little longer than expected, but the quality made up for it.', initial: 'R', tint: '#C0A55E' },
     ].map(r => ({ ...r, starList: [1, 2, 3, 4, 5].map(n => ({ on: n <= r.stars, color: n <= r.stars ? '#C0A55E' : '#DDD3B6' })) }));
 
@@ -2718,6 +2745,8 @@ class Component extends DCLogic {
     const _pwPcts = ['12%','28%','48%','68%','86%','100%'];
 
     return {
+      noWeather: !this.state.weather,
+      enableWeather: () => { try { this._loadWeather(); this.showToast('Location optional — approving lets us suggest a blend'); } catch (e) {} },
       weather: this.state.weather ? {
         ...this.state.weather,
         blend: (ALL[this.state.weather.productId] || {}).name || this.state.weather.productId,
@@ -2769,6 +2798,7 @@ class Component extends DCLogic {
       cartOpen: this.state.cartOpen,
       cartList, cartEmpty: cartList.length === 0, notCartEmpty: cartList.length > 0,
       cartSubtotalStr: money(cartSubtotalN), memberDiscountStr: money(memberDiscountN), totalStr: money(subtotalN), subtotalStr: money(subtotalN),
+      hasCartDiscount, discountLabel,
       memberPricing, notMemberPricing: !memberPricing,
       orderPlaced: this.state.orderPlaced, notOrderPlaced: !this.state.orderPlaced,
       lastOrderId: this.state.lastOrderId, hasLastOrderId: !!this.state.lastOrderId, notLastOrderId: !this.state.lastOrderId,
@@ -2875,6 +2905,8 @@ class Component extends DCLogic {
       trimAuthContact: () => this.setState({ authContact: (this.state.authContact || '').trim() }),
       authPassword: this.state.authPassword,
       onAuthPassword: (e) => this.setState({ authPassword: e.target.value, authError: '' }),
+      authRemember: !!this.state.authRemember,
+      onAuthRemember: (e) => this.setState({ authRemember: !!(e && e.target && e.target.checked) }),
       authConfirmPw: this.state.authConfirmPw,
       onAuthConfirmPw: (e) => this.setState({ authConfirmPw: e.target.value, authError: '' }),
       authOtpCode: this.state.authOtpCode,
@@ -2912,32 +2944,55 @@ class Component extends DCLogic {
           return this.setState({ authError: 'Incorrect email or password' });
         }
         if (_authIsPhone || (this.state.authMode === 'signup' && _authIsEmail)) {
-          const code = String(1000 + Math.floor(Math.random() * 9000));
-          try { localStorage.setItem('ak_pending_otp', JSON.stringify({ contact: _authIsPhone ? _ad : contact.toLowerCase(), code, expiresAt: Date.now() + 10 * 60 * 1000 })); } catch (er) {}
-          this.showToast('OTP sent (demo: ' + code + ')');
-          this.setState({ authOtp: true, authOtpCode: '', authError: '' });
+          if (_authIsPhone && this.state.authMode === 'signin') {
+            const users0 = (() => { try { return JSON.parse(localStorage.getItem('ak_users') || '{}'); } catch (er) { return {}; } })();
+            if (!users0[_ad]) return this.setState({ authError: 'No account for this phone. Create an account first.' });
+          }
+          const finishOtp = (pwHash) => {
+            const code = String(1000 + Math.floor(Math.random() * 9000));
+            try {
+              const payload = { contact: _authIsPhone ? _ad : contact.toLowerCase(), code, expiresAt: Date.now() + 10 * 60 * 1000, mode: this.state.authMode };
+              if (this.state.authMode === 'signup') {
+                payload.name = (this.state.authName || '').trim();
+                if (_authIsEmail && pwHash) payload.pwHash = pwHash;
+              }
+              localStorage.setItem('ak_pending_otp', JSON.stringify(payload));
+            } catch (er) {}
+            this.showToast('Demo code: ' + code + ' (not emailed/SMS)');
+            this.setState({ authOtp: true, authOtpCode: '', authError: '' });
+          };
+          if (this.state.authMode === 'signup' && _authIsEmail) {
+            this._hashPassword(this.state.authPassword).then((h) => finishOtp(h));
+          } else {
+            finishOtp('');
+          }
           return;
         }
-        // email sign-in
+        // email sign-in with hashed password
         const users = (() => { try { return JSON.parse(localStorage.getItem('ak_users') || '{}'); } catch (er) { return {}; } })();
         const key = contact.toLowerCase();
         const user = users[key];
-        if (!user || user.password !== this.state.authPassword) {
-          this._authFail();
-          return;
-        }
-        const profile = {
-          name: user.name || '',
-          phone: user.phone || '',
-          email: user.email || key,
-          address: user.address || '',
-          city: user.city || '',
-          state: user.state || '',
-          pincode: user.pincode || '',
-        };
-        this._setSession(profile, false);
-        this.showToast('Signed in');
-        this.setState({ loggedIn: true, authFailCount: 0, authLockUntil: 0, checkoutStep: 'details', authOtp: false, authError: '', profileName: profile.name || '', profilePhone: profile.phone || '', profileEmail: profile.email || '', profileAddress: profile.address || '', profileCity: profile.city || '', profileState: profile.state || '', profilePincode: profile.pincode || '' });
+        this._passwordMatches(user, this.state.authPassword).then((res) => {
+          if (!res.ok) { this._authFail(); return; }
+          if (res.migrate) {
+            const next = Object.assign({}, user, { pwHash: res.hash });
+            delete next.password;
+            users[key] = next;
+            try { localStorage.setItem('ak_users', JSON.stringify(users)); } catch (er) {}
+          }
+          const profile = {
+            name: user.name || '',
+            phone: user.phone || '',
+            email: user.email || key,
+            address: user.address || '',
+            city: user.city || '',
+            state: user.state || '',
+            pincode: user.pincode || '',
+          };
+          this._setSession(profile, !!this.state.authRemember);
+          this.showToast('Signed in');
+          this.setState({ loggedIn: true, authFailCount: 0, authLockUntil: 0, checkoutStep: 'details', authOtp: false, authError: '', profileName: profile.name || '', profilePhone: profile.phone || '', profileEmail: profile.email || '', profileAddress: profile.address || '', profileCity: profile.city || '', profileState: profile.state || '', profilePincode: profile.pincode || '' });
+        });
       },
       verifyOtp: (e) => {
         if (e && e.preventDefault) e.preventDefault();
@@ -2954,7 +3009,7 @@ class Component extends DCLogic {
         const key = _authIsPhone ? _ad : _av.toLowerCase();
         const stored = users[key] || {};
         const profile = {
-          name: (this.state.authMode === 'signup' ? this.state.authName : (stored.name || '')).trim(),
+          name: (this.state.authMode === 'signup' ? (this.state.authName || pending.name || '') : (stored.name || '')).trim(),
           phone: _authIsPhone ? _ad : (stored.phone || ''),
           email: _authIsEmail ? _av.toLowerCase() : (stored.email || ''),
           address: stored.address || '',
@@ -2963,17 +3018,27 @@ class Component extends DCLogic {
           pincode: stored.pincode || '',
           verified: true,
         };
-        users[key] = Object.assign({}, stored, profile, { password: this.state.authPassword || stored.password || '' });
+        const entry = Object.assign({}, stored, profile);
+        if (pending.pwHash) { entry.pwHash = pending.pwHash; delete entry.password; }
+        else { delete entry.password; }
+        users[key] = entry;
         try { localStorage.setItem('ak_users', JSON.stringify(users)); localStorage.removeItem('ak_pending_otp'); } catch (er) {}
-        this._setSession(profile, false);
+        this._setSession(profile, !!this.state.authRemember);
         this.showToast('Verified — welcome!');
         this.setState({ loggedIn: true, checkoutStep: 'details', authOtp: false, authError: '', profileName: profile.name || '', profilePhone: profile.phone || '', profileEmail: profile.email || '', profileAddress: profile.address || '', profileCity: profile.city || '', profileState: profile.state || '', profilePincode: profile.pincode || '' });
       },
       resendOtp: () => {
         const code = String(1000 + Math.floor(Math.random() * 9000));
         const key = _authIsPhone ? _ad : _av.toLowerCase();
-        try { localStorage.setItem('ak_pending_otp', JSON.stringify({ contact: key, code, expiresAt: Date.now() + 10 * 60 * 1000 })); } catch (er) {}
-        this.showToast('OTP re-sent (demo: ' + code + ')');
+        let prev = null;
+        try { prev = JSON.parse(localStorage.getItem('ak_pending_otp') || 'null'); } catch (er) {}
+        try {
+          const payload = { contact: key, code, expiresAt: Date.now() + 10 * 60 * 1000, mode: (prev && prev.mode) || this.state.authMode };
+          if (prev && prev.pwHash) payload.pwHash = prev.pwHash;
+          if (prev && prev.name) payload.name = prev.name;
+          localStorage.setItem('ak_pending_otp', JSON.stringify(payload));
+        } catch (er) {}
+        this.showToast('Demo code: ' + code + ' (not emailed/SMS)');
       },
       editContact: () => this.setState({ authOtp: false, authError: '' }),
       payMethod: this.state.payMethod,
@@ -3004,6 +3069,12 @@ class Component extends DCLogic {
           pincode: pin,
         };
         if (!p.phone && !p.email) { this.showToast('Enter phone or email for delivery'); return; }
+        if (p.phone) {
+          const dig = p.phone.replace(/\D/g, '');
+          if (!/^\d{10}$/.test(dig) || !/^[6-9]/.test(dig)) { this.showToast('Enter a valid 10-digit phone'); return; }
+          p.phone = dig;
+        }
+        if (p.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(p.email)) { this.showToast('Enter a valid email format'); return; }
         const method = this.state.payMethod || 'cod';
         let paymentMeta = { method, mock: true, status: 'ok' };
         if (method === 'upi') {

@@ -177,7 +177,7 @@ test.describe('Auth page — forgot password', () => {
     await fillContact(page, email);
     await submitForgotForm(page);
 
-    await expect(page.getByText(/Reset code sent \(demo code:/i).first()).toBeVisible();
+    await expect(page.getByText(/Demo reset code:/i).first()).toBeVisible();
 
     const resetCode = await readStoredCode(page, 'ak_reset');
     expect(resetCode).toMatch(/^\d{4}$/);

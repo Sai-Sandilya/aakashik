@@ -111,7 +111,7 @@ test.describe('UX medium — auth OTP / forgot / social', () => {
   test('forgot password rejects phone (email-only)', async ({ page }) => {
     await gotoAuth(page);
     await openForgotPassword(page);
-    await page.getByPlaceholder('you@gmail.com').fill('9876543210');
+    await page.getByPlaceholder('you@example.com').fill('9876543210');
     await submitForgotForm(page);
     await expect(page.getByText(/email accounts only|Password reset is for email/i).first()).toBeVisible();
   });
@@ -127,6 +127,11 @@ test.describe('UX medium — auth OTP / forgot / social', () => {
   // TC-M17
   test('OTP without pending code is rejected', async ({ page }) => {
     await gotoAuth(page);
+    await page.evaluate(() => {
+      const users = JSON.parse(localStorage.getItem('ak_users') || '{}');
+      users['9876543210'] = { name: 'Phone User', phone: '9876543210', email: '', verified: true };
+      localStorage.setItem('ak_users', JSON.stringify(users));
+    });
     await fillContact(page, '9876543210');
     await submitButton(page, 'Sign In').click();
     await expect(page.getByPlaceholder('4-digit code')).toBeVisible({ timeout: 5000 });
@@ -181,10 +186,10 @@ test.describe('UX medium — landing UX', () => {
     await expect(page.getByText(/Provide phone or email/i)).toBeVisible();
     const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'Place Order' }) });
     await form.getByPlaceholder('Full name').fill('Buyer');
-    await form.getByPlaceholder(/Phone/).fill('9876543210');
-    await form.getByPlaceholder('Address (house, street, area)').fill('12 Lane');
+    await form.getByPlaceholder(/Phone|10-digit mobile/).fill('9876543210');
+    await form.getByPlaceholder('House, street, area').fill('12 Lane');
     await form.getByPlaceholder('City').fill('Hyderabad');
-    await form.getByPlaceholder('Pincode').fill('500001');
+    await form.getByPlaceholder(/Pincode|6-digit pin/).fill('500001');
     await form.locator('select').selectOption({ label: 'Telangana' });
     await page.getByRole('button', { name: 'Place Order' }).evaluate((el) => /** @type {HTMLElement} */ (el).click());
     await expect(page.getByRole('heading', { name: 'Order Placed!' })).toBeVisible({ timeout: 8000 });
@@ -236,7 +241,7 @@ test.describe('UX medium — landing UX', () => {
   test('language switcher discloses partial translation', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Language' }).click();
-    await expect(page.getByText(/Partial — hero & nav only/i)).toBeVisible();
+    await expect(page.getByText(/Partial — cart & checkout stay English/i)).toBeVisible();
   });
 
   // TC-M21
@@ -294,7 +299,8 @@ test.describe('UX medium — landing UX', () => {
     const users = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_users') || '{}'));
     expect(users[newEmail]).toBeTruthy();
     expect(users[oldEmail]).toBeFalsy();
-    expect(users[newEmail].password).toBe(STRONG_PASSWORD);
+    expect(users[newEmail].pwHash || users[newEmail].password).toBeTruthy();
+    expect(users[newEmail].password).toBeFalsy();
   });
 
   // TC-M28

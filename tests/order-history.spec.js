@@ -111,11 +111,11 @@ test.describe('Order History UX', () => {
     await expect(page.getByRole('heading', { name: 'Delivery details' })).toBeVisible({ timeout: 8000 });
     const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'Place Order' }) });
     await form.getByPlaceholder('Full name').fill('Buyer');
-    await form.getByPlaceholder('Phone (or email below)').fill('9876543210');
-    await form.getByPlaceholder('Email (or phone above)').fill(`buyer-${Date.now()}@test.com`);
-    await form.getByPlaceholder('Address (house, street, area)').fill('12 Lane');
+    await form.getByPlaceholder('10-digit mobile').fill('9876543210');
+    await form.getByPlaceholder('you@example.com').fill(`buyer-${Date.now()}@test.com`);
+    await form.getByPlaceholder('House, street, area').fill('12 Lane');
     await form.getByPlaceholder('City').fill('Hyderabad');
-    await form.getByPlaceholder('Pincode').fill('500001');
+    await form.getByPlaceholder('6-digit pin').fill('500001');
     await form.locator('select').selectOption({ label: 'Telangana' });
     await page.getByRole('button', { name: 'Place Order' }).evaluate((el) => /** @type {HTMLElement} */ (el).click());
     await expect(page.getByRole('heading', { name: 'Order Placed!' })).toBeVisible({ timeout: 8000 });
