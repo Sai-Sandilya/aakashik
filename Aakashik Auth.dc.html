@@ -500,12 +500,14 @@ class Component extends DCLogic {
       return;
     }
 
-    // Signup password rules
+    // Signup password rules (email only — phone uses OTP, no password)
     if (this.state.mode === 'signup') {
       if (!(this.state.fullName || '').trim()) return this.setState({ errorMsg: 'Please enter your full name.' });
-      const strength = this._pwScore(this.state.password);
-      if (!strength.ok) return this.setState({ errorMsg: 'Password must be 8+ characters with upper, lower, number and symbol.' });
-      if (this.state.password !== this.state.confirmPw) return this.setState({ errorMsg: 'Passwords do not match.' });
+      if (kind.kind === 'email') {
+        const strength = this._pwScore(this.state.password);
+        if (!strength.ok) return this.setState({ errorMsg: 'Password must be 8+ characters with upper, lower, number and symbol.' });
+        if (this.state.password !== this.state.confirmPw) return this.setState({ errorMsg: 'Passwords do not match.' });
+      }
     } else {
       if (!(this.state.password || '').trim() && kind.kind === 'email') return this.setState({ errorMsg: 'Incorrect email or password' });
     }
@@ -521,7 +523,7 @@ class Component extends DCLogic {
             name: (this.state.fullName || '').trim(),
             phone: kind.kind === 'phone' ? kind.value : '',
             email: kind.kind === 'email' ? kind.value : '',
-            password: this.state.password || '',
+            password: kind.kind === 'email' ? (this.state.password || '') : '',
             verified: false,
           });
           this._writeUsers(users);

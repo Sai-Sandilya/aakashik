@@ -104,17 +104,13 @@ test.describe('Auth page — create account', () => {
   });
 
   // TC-A06
-  test('phone signup sends OTP and completes account creation', async ({ page }) => {
+  test('phone signup sends OTP without password and completes account creation', async ({ page }) => {
     const phone = `9${String(Date.now()).slice(-9)}`;
     const name = 'Phone Tester';
 
     await gotoAuth(page);
     await switchToSignup(page);
     await page.getByPlaceholder('Enter full name').fill(name);
-    // Password fields hide for phone, but signup still validates password in state.
-    await fillContact(page, `setup-${Date.now()}@test.com`);
-    await fillPassword(page, STRONG_PASSWORD);
-    await fillConfirmPassword(page, STRONG_PASSWORD);
     await fillContact(page, phone);
     await submitButton(page, 'Create Account').click();
 

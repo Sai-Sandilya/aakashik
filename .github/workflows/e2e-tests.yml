@@ -2,15 +2,15 @@ name: E2E Tests
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, category1-UX-fixes]
   pull_request:
-    branches: [main, master]
+    branches: [main, master, category1-UX-fixes]
 
 jobs:
   playwright:
     name: Run Playwright tests
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout code
