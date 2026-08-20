@@ -92,6 +92,9 @@
     <span style="position: absolute; left: 40%; bottom: 22%; width: 5px; height: 5px; border-radius: 50%; background: #BE6A45; filter: blur(1px); animation: authMote 9.5s ease-in-out infinite 1.1s;"></span>
   </div>
 
+  <div role="status" style="position: absolute; top: 18px; left: 50%; transform: translateX(-50%); z-index: 4; max-width: min(520px, 92vw); background: #F3E9D8; border: 1px solid #E0D7BE; color: #5E6A54; font-size: 12px; line-height: 1.45; padding: 8px 14px; border-radius: 12px; text-align: center;">
+    Demo auth — accounts stay in this browser only. OTP/reset codes are simulated (shown on screen). Passwords are hashed locally, not sent to a server.
+  </div>
   <!-- back to store -->
   <a href="Aakashik%20Landing.dc.html" style="position: absolute; top: 22px; left: 24px; z-index: 3; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 13px; letter-spacing: 0.04em; color: #5E6A54;">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -227,7 +230,7 @@
               <label style="display: block;">
                 <span style="display: block; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A9678; margin-bottom: 7px;">Email</span>
                 <div style="display: flex; align-items: center; gap: 10px; background: #EFEBE0; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px;">
-                  <input value="{{ contact }}" onInput="{{ onContact }}" required placeholder="you@gmail.com" style="flex: 1; border: none; background: transparent; outline: none; font-size: 14.5px; color: #2E3D2C;">
+                  <input value="{{ contact }}" onInput="{{ onContact }}" required placeholder="you@example.com" style="flex: 1; border: none; background: transparent; outline: none; font-size: 14.5px; color: #2E3D2C;">
                 </div>
               </label>
             </sc-if>
@@ -274,7 +277,7 @@
             <span style="display: block; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A9678; margin-bottom: 7px;">Phone or email</span>
             <div style="display: flex; align-items: center; gap: 10px; background: #EFEBE0; border: 1px solid {{ contactBorder }}; border-radius: 12px; padding: 13px 15px;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A9678" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-              <input value="{{ contact }}" onInput="{{ onContact }}" onBlur="{{ trimContact }}" required placeholder="10-digit phone or you@gmail.com" style="flex: 1; border: none; background: transparent; outline: none; font-size: 14.5px; color: #2E3D2C;">
+              <input value="{{ contact }}" onInput="{{ onContact }}" onBlur="{{ trimContact }}" required placeholder="10-digit phone or you@example.com" style="flex: 1; border: none; background: transparent; outline: none; font-size: 14.5px; color: #2E3D2C;">
             </div>
             <sc-if value="{{ hasContactHint }}"><p style="font-size: 12px; color: #B65E38; margin: 6px 0 0;">{{ contactHint }}</p></sc-if>
           </label>
@@ -445,6 +448,20 @@ class Component extends DCLogic {
   _writeUsers(users) {
     try { localStorage.setItem('ak_users', JSON.stringify(users)); } catch (e) {}
   }
+  _hashPassword(pw) {
+    const data = new TextEncoder().encode('aakashik-demo|' + String(pw || ''));
+    return crypto.subtle.digest('SHA-256', data).then((buf) =>
+      Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('')
+    );
+  }
+  _passwordMatches(user, plain) {
+    return this._hashPassword(plain).then((hash) => {
+      if (!user) return { ok: false, hash };
+      if (user.pwHash && user.pwHash === hash) return { ok: true, hash, migrate: false };
+      if (user.password && user.password === plain) return { ok: true, hash, migrate: true };
+      return { ok: false, hash };
+    });
+  }
   _setSession(profile, remember) {
     try {
       localStorage.setItem('ak_profile', JSON.stringify(profile || {}));
@@ -504,16 +521,20 @@ class Component extends DCLogic {
       }
       this.setState({ loading: true, errorMsg: '', infoMsg: '' });
       this._t = setTimeout(() => {
+        let pending2 = null;
+        try { pending2 = JSON.parse(localStorage.getItem('ak_pending_otp') || 'null'); } catch (er) {}
         const users = this._readUsers();
         const key = kind.value;
         const existing = users[key] || {};
         const profile = {
-          name: (this.state.mode === 'signup' ? this.state.fullName : existing.name || '').trim(),
+          name: (this.state.mode === 'signup' ? (this.state.fullName || (pending2 && pending2.name) || '') : existing.name || '').trim(),
           phone: kind.kind === 'phone' ? kind.value : (existing.phone || ''),
           email: kind.kind === 'email' ? kind.value : (existing.email || ''),
           verified: true,
         };
-        users[key] = Object.assign({}, existing, profile, { password: existing.password || this.state.password });
+        const entry = Object.assign({}, existing, profile);
+        if (pending2 && pending2.pwHash) { entry.pwHash = pending2.pwHash; delete entry.password; }
+        users[key] = entry;
         this._writeUsers(users);
         try { localStorage.removeItem('ak_pending_otp'); localStorage.removeItem('ak_lock_until'); localStorage.removeItem('ak_fail_count'); } catch (er) {}
         this._setSession(profile, this.state.rememberMe);
@@ -536,39 +557,51 @@ class Component extends DCLogic {
 
     // Phone or signup email => send OTP first
     if (kind.kind === 'phone' || (this.state.mode === 'signup' && kind.kind === 'email')) {
-      const code = String(1000 + Math.floor(Math.random() * 9000));
-      try {
-        localStorage.setItem('ak_pending_otp', JSON.stringify({ contact: kind.value, code, expiresAt: Date.now() + 10 * 60 * 1000, mode: this.state.mode }));
+      if (kind.kind === 'phone' && this.state.mode === 'signin') {
         const users = this._readUsers();
-        if (this.state.mode === 'signup') {
-          users[kind.value] = Object.assign({}, users[kind.value] || {}, {
-            name: (this.state.fullName || '').trim(),
-            phone: kind.kind === 'phone' ? kind.value : '',
-            email: kind.kind === 'email' ? kind.value : '',
-            password: kind.kind === 'email' ? (this.state.password || '') : '',
-            verified: false,
-          });
-          this._writeUsers(users);
+        if (!users[kind.value]) {
+          return this.setState({ errorMsg: 'No account for this phone. Create an account first.' });
         }
-      } catch (er) {}
-      this.setState({ otp: true, otpCode: '', errorMsg: '', infoMsg: 'Verification code sent (demo code: ' + code + '). Expires in 10 minutes.' });
+      }
+      const code = String(1000 + Math.floor(Math.random() * 9000));
+      const finishOtp = (pwHash) => {
+        try {
+          const payload = { contact: kind.value, code, expiresAt: Date.now() + 10 * 60 * 1000, mode: this.state.mode };
+          if (this.state.mode === 'signup') {
+            payload.name = (this.state.fullName || '').trim();
+            if (kind.kind === 'email' && pwHash) payload.pwHash = pwHash;
+          }
+          localStorage.setItem('ak_pending_otp', JSON.stringify(payload));
+        } catch (er) {}
+        this.setState({ otp: true, otpCode: '', errorMsg: '', infoMsg: 'Demo verification code: ' + code + ' (not emailed/SMS). Expires in 10 minutes.' });
+      };
+      if (this.state.mode === 'signup' && kind.kind === 'email') {
+        this._hashPassword(this.state.password).then((h) => finishOtp(h));
+      } else {
+        finishOtp('');
+      }
       return;
     }
 
-    // Email sign-in with password
+    // Email sign-in with hashed password
     this.setState({ loading: true, errorMsg: '', infoMsg: '' });
     this._t = setTimeout(() => {
       const users = this._readUsers();
       const user = users[kind.value];
-      if (!user || !user.password || user.password !== this.state.password) {
-        this._failLogin();
-        return;
-      }
-      const profile = { name: user.name || '', phone: user.phone || '', email: user.email || kind.value, verified: true };
-      try { localStorage.removeItem('ak_lock_until'); localStorage.removeItem('ak_fail_count'); } catch (er) {}
-      this._setSession(profile, this.state.rememberMe);
-      this.setState({ loading: false, done: true, failCount: 0, lockUntil: 0 });
-    }, 900);
+      this._passwordMatches(user, this.state.password).then((res) => {
+        if (!res.ok) { this._failLogin(); return; }
+        if (res.migrate) {
+          const next = Object.assign({}, user, { pwHash: res.hash });
+          delete next.password;
+          users[kind.value] = next;
+          this._writeUsers(users);
+        }
+        const profile = { name: user.name || '', phone: user.phone || '', email: user.email || kind.value, verified: true };
+        try { localStorage.removeItem('ak_lock_until'); localStorage.removeItem('ak_fail_count'); } catch (er) {}
+        this._setSession(profile, this.state.rememberMe);
+        this.setState({ loading: false, done: true, failCount: 0, lockUntil: 0 });
+      });
+    }, 400);
   };
 
   submitForgot = (e) => {
@@ -584,7 +617,7 @@ class Component extends DCLogic {
       try {
         localStorage.setItem('ak_reset', JSON.stringify({ contact: kind.value, code, expiresAt: Date.now() + 10 * 60 * 1000 }));
       } catch (er) {}
-      this.setState({ forgotStep: 'otp', otpCode: '', errorMsg: '', infoMsg: 'Reset code sent (demo code: ' + code + '). Link/code expires in 10 minutes.' });
+      this.setState({ forgotStep: 'otp', otpCode: '', errorMsg: '', infoMsg: 'Demo reset code: ' + code + ' (not emailed). Expires in 10 minutes.' });
       return;
     }
     const code = String(this.state.otpCode || '').trim();
@@ -597,13 +630,21 @@ class Component extends DCLogic {
     if (this.state.password !== this.state.confirmPw) return this.setState({ errorMsg: 'Passwords do not match.' });
     this.setState({ loading: true, errorMsg: '' });
     this._t = setTimeout(() => {
-      const users = this._readUsers();
-      const key = reset.contact;
-      users[key] = Object.assign({}, users[key] || {}, { password: this.state.password, email: key.indexOf('@') >= 0 ? key : (users[key] && users[key].email) || '', phone: key.indexOf('@') < 0 ? key : (users[key] && users[key].phone) || '' });
-      this._writeUsers(users);
-      try { localStorage.removeItem('ak_reset'); } catch (er) {}
-      this.setState({ loading: false, forgotOpen: false, forgotStep: 'contact', mode: 'signin', password: '', confirmPw: '', otpCode: '', infoMsg: 'Password updated. A confirmation notice was sent to your contact.', errorMsg: '' });
-    }, 900);
+      this._hashPassword(this.state.password).then((pwHash) => {
+        const users = this._readUsers();
+        const key = reset.contact;
+        const next = Object.assign({}, users[key] || {}, {
+          pwHash,
+          email: key.indexOf('@') >= 0 ? key : (users[key] && users[key].email) || '',
+          phone: key.indexOf('@') < 0 ? key : (users[key] && users[key].phone) || '',
+        });
+        delete next.password;
+        users[key] = next;
+        this._writeUsers(users);
+        try { localStorage.removeItem('ak_reset'); } catch (er) {}
+        this.setState({ loading: false, forgotOpen: false, forgotStep: 'contact', mode: 'signin', password: '', confirmPw: '', otpCode: '', infoMsg: 'Password updated (demo — saved in this browser only).', errorMsg: '' });
+      });
+    }, 400);
   };
 
   componentWillUnmount() { if (this._t) clearTimeout(this._t); }
@@ -651,7 +692,14 @@ class Component extends DCLogic {
         const k = this._contactKind(this.state.contact);
         if (k.kind !== 'phone' && k.kind !== 'email') return;
         const code = String(1000 + Math.floor(Math.random() * 9000));
-        try { localStorage.setItem('ak_pending_otp', JSON.stringify({ contact: k.value, code, expiresAt: Date.now() + 10 * 60 * 1000, mode: this.state.mode })); } catch (er) {}
+        let prev = null;
+        try { prev = JSON.parse(localStorage.getItem('ak_pending_otp') || 'null'); } catch (er) {}
+        try {
+          const payload = { contact: k.value, code, expiresAt: Date.now() + 10 * 60 * 1000, mode: this.state.mode };
+          if (prev && prev.pwHash) payload.pwHash = prev.pwHash;
+          if (prev && prev.name) payload.name = prev.name;
+          localStorage.setItem('ak_pending_otp', JSON.stringify(payload));
+        } catch (er) {}
         this.setState({ infoMsg: 'New code sent (demo code: ' + code + '). Expires in 10 minutes.', errorMsg: '' });
       },
       submitText: this.state.otp ? 'Verify & Continue' : (isSignin ? 'Sign In' : 'Create Account'),

@@ -44,11 +44,11 @@ async function openDeliveryCheckout(page, opts = {}) {
 async function fillDeliveryBasics(page) {
   const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'Place Order' }) });
   await form.getByPlaceholder('Full name').fill('Test Buyer');
-  await form.getByPlaceholder('Phone (or email below)').fill('9876543210');
-  await form.getByPlaceholder('Email (or phone above)').fill(`buyer-${Date.now()}@test.com`);
-  await form.getByPlaceholder('Address (house, street, area)').fill('12 Ritual Lane');
+  await form.getByPlaceholder('10-digit mobile').fill('9876543210');
+  await form.getByPlaceholder('you@example.com').fill(`buyer-${Date.now()}@test.com`);
+  await form.getByPlaceholder('House, street, area').fill('12 Ritual Lane');
   await form.getByPlaceholder('City').fill('Hyderabad');
-  await form.getByPlaceholder('Pincode').fill('500001');
+  await form.getByPlaceholder(/Pincode|6-digit pin/).fill('500001');
   await form.locator('select').selectOption({ label: 'Telangana' });
 }
 
@@ -187,7 +187,7 @@ test.describe('UX high fixes', () => {
     });
     await page.reload();
     await cartButton(page).click({ force: true });
-    await expect(page.getByText(/Member pricing applied|Member 10% off/i).first()).toBeVisible();
+    await expect(page.getByText(/10% off applies once|Member 10% off|Member pricing applied/i).first()).toBeVisible();
     await expect(page.getByText('−₹35')).toBeVisible();
   });
 

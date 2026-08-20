@@ -65,7 +65,7 @@ test.describe('Category 1 UX fixes', () => {
     const email = `news-${Date.now()}@test.com`;
     await page.locator('footer input[type="email"]').fill(email);
     await page.locator('footer button[type="submit"]').click();
-    await expect(page.getByText('Thank you for subscribing!')).toBeVisible();
+    await expect(page.getByText(/Saved on this device \(demo\)/i)).toBeVisible();
     const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_newsletter') || '{}'));
     expect(stored.email).toBe(email);
   });
@@ -142,12 +142,12 @@ test.describe('Category 1 UX fixes', () => {
     await page.getByRole('button', { name: 'Proceed to Checkout' }).click();
 
     for (let i = 0; i < 4; i++) {
-      await page.getByPlaceholder('10-digit phone or you@gmail.com').fill(email);
+      await page.getByPlaceholder('10-digit phone or you@example.com').fill(email);
       await page.locator('input[type="password"]').fill('Wrong@9999');
       await page.getByRole('button', { name: 'Continue' }).click();
       await expect(page.getByText('Incorrect email or password')).toBeVisible({ timeout: 8000 });
     }
-    await page.getByPlaceholder('10-digit phone or you@gmail.com').fill(email);
+    await page.getByPlaceholder('10-digit phone or you@example.com').fill(email);
     await page.locator('input[type="password"]').fill('Wrong@9999');
     await page.getByRole('button', { name: 'Continue' }).click();
     await expect(page.getByText(/temporarily locked|Try again in \d+ minute/i).first()).toBeVisible({ timeout: 8000 });
