@@ -64,19 +64,19 @@
     .catCard:hover .catSheen { animation: catSheen 1.1s ease forwards; }
     .catCard:hover .catBadge { transform: translateY(-3px); box-shadow: 0 8px 16px -8px rgba(46,61,44,0.5); }
     .catCard:hover .catShop { max-height: 26px; opacity: 1; transform: translateY(0); }
-    .catImg { transition: transform .55s cubic-bezier(.22,1,.36,1); animation: catStripe 6s linear infinite; background-size: 52px 52px !important; }
+    .catImg { transition: transform .55s cubic-bezier(.22,1,.36,1); }
     .catBadge { transition: transform .34s ease, box-shadow .34s ease; }
     .catShop { max-height: 0; opacity: 0; transform: translateY(6px); overflow: hidden; transition: max-height .34s ease, opacity .34s ease, transform .34s ease; }
     @keyframes fanIn { 0% { opacity: 0; transform: translateY(10px) scale(0.7); } 100% { opacity: 1; transform: scale(1); } }
     @keyframes modalIn { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
     #ak-mobilenav { display: none; }
-    @media (max-width: 819px) { #ak-mobilenav { display: flex; } body { padding-bottom: 66px; } }
+    @media (max-width: 860px) { #ak-mobilenav { display: flex; } body { padding-bottom: 66px; } }
   </style>
 </helmet>
 
 <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="ak-slot-loader" hint-size="1px,1px" style="display:none;position:absolute;"></x-import>
 
-<div style="font-family: 'Jost', sans-serif; color: #33432F; width: 100%; overflow-x: hidden; -webkit-font-smoothing: antialiased; position: relative;">
+<div id="top" style="font-family: 'Jost', sans-serif; color: #33432F; width: 100%; overflow-x: hidden; -webkit-font-smoothing: antialiased; position: relative;">
 
   <!-- brand watermark (parallax) -->
   <div id="ak-parallax" style="position: fixed; inset: 0; z-index: 0; pointer-events: none; transition: transform .3s ease-out; background-image: url('assets/aakashik-full-logo.png'); background-repeat: no-repeat; background-position: center 42%; background-size: min(680px, 78vw) auto; opacity: 0.06; mix-blend-mode: multiply;"></div>
@@ -100,7 +100,7 @@
   <header style="position: sticky; top: 0; z-index: 50; background: rgba(248,243,232,0.86); backdrop-filter: blur(8px); border-bottom: 1px solid #E4DBC8;">
     <div style="width: 100%; max-width: none; margin: 0; padding: 14px clamp(24px, 5vw, 90px); display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px;">
       <!-- Logo -->
-      <a href="#" style="display: flex; align-items: center; gap: 12px; text-decoration: none; margin-right: auto;">
+      <a href="#top" onClick="{{ scrollTop }}" style="display: flex; align-items: center; gap: 12px; text-decoration: none; margin-right: auto;">
         <img src="assets/aakashik-logo.jpeg" alt="Aakashik Wellness" style="width: 46px; height: 46px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1px solid #E4DBC8;">
         <span style="line-height: 1;">
           <span style="display: block; font-family: 'Marcellus', serif; font-weight: 600; font-size: 25px; letter-spacing: 0.16em; color: #2E3D2C;">AAKASHIK<span style="font-size: 11px; letter-spacing: 0; vertical-align: super; margin-left: 1px;">&trade;</span></span>
@@ -108,7 +108,7 @@
         </span>
       </a>
       <!-- Nav -->
-      <nav id="store-nav" style="display: flex; align-items: center; gap: 28px; font-size: 14px; letter-spacing: 0.02em;">
+      <nav id="store-nav" style="align-items: center; gap: 28px; font-size: 14px; letter-spacing: 0.02em;">
         <a href="#categories" onClick="{{ filterConcernSkin }}" style="text-decoration: none; color: #45543E;">{{ t.nav1 }}</a>
         <a href="#shop" onClick="{{ filterConcernImmunity }}" style="text-decoration: none; color: #45543E;">{{ t.nav2 }}</a>
         <a href="#shop" onClick="{{ filterConcernSpiritual }}" style="text-decoration: none; color: #45543E;">{{ t.nav3 }}</a>
@@ -117,12 +117,12 @@
       <!-- Actions -->
       <div style="display: flex; align-items: center; gap: 6px;">
         <div style="position: relative;">
-          <button aria-label="Language" onClick="{{ toggleLang }}" title="Partial translation — hero & nav" style="display: inline-flex; align-items: center; gap: 5px; background: transparent; border: 1px solid #D7CDB4; padding: 7px 12px; border-radius: 30px; color: #45543E; font-size: 13px; cursor: pointer;">
+          <button aria-label="Language" aria-expanded="{{ langOpen }}" aria-haspopup="true" data-lang-menu="true" onClick="{{ toggleLang }}" title="Partial translation — hero & nav" style="display: inline-flex; align-items: center; gap: 5px; background: transparent; border: 1px solid #D7CDB4; padding: 7px 12px; border-radius: 30px; color: #45543E; font-size: 13px; cursor: pointer;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             {{ langLabel }}
           </button>
           <sc-if value="{{ langOpen }}">
-            <div style="position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; background: #FBF7EE; border: 1px solid #E4DBC8; border-radius: 14px; padding: 6px; box-shadow: 0 18px 40px -20px rgba(46,61,44,0.5); min-width: 160px;">
+            <div role="menu" data-lang-menu="true" style="position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; background: #FBF7EE; border: 1px solid #E4DBC8; border-radius: 14px; padding: 6px; box-shadow: 0 18px 40px -20px rgba(46,61,44,0.5); min-width: 160px;">
               <p style="font-size: 11px; color: #8A9678; margin: 4px 10px 8px; line-height: 1.4;">Partial — hero &amp; nav only</p>
               <sc-for list="{{ langOptions }}" as="lo" hint-placeholder-count="4">
                 <button onClick="{{ lo.onClick }}" style="display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 10px; background: transparent; border: none; padding: 9px 12px; border-radius: 9px; font-size: 14px; color: #2E3D2C; cursor: pointer; text-align: left;">
@@ -143,14 +143,14 @@
         </sc-if>
         <sc-if value="{{ loggedIn }}" hint-placeholder-val="{{ false }}">
           <div style="position: relative;">
-            <button onClick="{{ toggleAccountMenu }}" aria-label="Account options" title="Account options" style="background: transparent; border: none; padding: 5px; border-radius: 50%; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;">
+            <button onClick="{{ toggleAccountMenu }}" aria-label="Account options" aria-expanded="{{ accountMenuOpen }}" aria-haspopup="true" data-account-menu="true" title="Account options" style="background: transparent; border: none; padding: 5px; border-radius: 50%; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;">
               <span style="width: 32px; height: 32px; border-radius: 50%; background: #2E3D2C; color: #E8CE86; display: inline-flex; align-items: center; justify-content: center; position: relative;">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 <span style="position: absolute; right: -1px; bottom: -1px; width: 11px; height: 11px; border-radius: 50%; background: #7CC043; border: 2px solid #F8F3E8;"></span>
               </span>
             </button>
             <sc-if value="{{ accountMenuOpen }}">
-              <div style="position: absolute; right: 0; top: calc(100% + 8px); min-width: 190px; background: #FBF7EE; border: 1px solid #E4DBC8; border-radius: 14px; padding: 6px; box-shadow: 0 18px 40px -20px rgba(46,61,44,0.5); z-index: 80;">
+              <div role="menu" data-account-menu="true" style="position: absolute; right: 0; top: calc(100% + 8px); min-width: 190px; background: #FBF7EE; border: 1px solid #E4DBC8; border-radius: 14px; padding: 6px; box-shadow: 0 18px 40px -20px rgba(46,61,44,0.5); z-index: 80;">
                 <button onClick="{{ openProfile }}" style="display: flex; width: 100%; align-items: center; gap: 8px; background: transparent; border: none; padding: 10px 12px; border-radius: 10px; color: #2E3D2C; cursor: pointer; text-align: left; font-size: 14px;">Profile</button>
                 <button onClick="{{ openOrders }}" style="display: flex; width: 100%; align-items: center; gap: 8px; background: transparent; border: none; padding: 10px 12px; border-radius: 10px; color: #2E3D2C; cursor: pointer; text-align: left; font-size: 14px;">Order History</button>
                 <button onClick="{{ logout }}" style="display: flex; width: 100%; align-items: center; gap: 8px; background: transparent; border: none; padding: 10px 12px; border-radius: 10px; color: #B65E38; cursor: pointer; text-align: left; font-size: 14px;">Log out</button>
@@ -215,9 +215,9 @@
         <div style="display: flex; flex-wrap: wrap; gap: 28px; margin-top: 40px;">
           <div><span data-count="100" data-suffix="%" style="font-family: 'Marcellus', serif; font-size: 30px; font-weight: 600; color: #2E3D2C;">100%</span><span style="display: block; font-size: 12.5px; color: #7A8570; letter-spacing: 0.04em; margin-top: 2px;">{{ t.chemFree }}</span></div>
           <div style="width: 1px; background: #D9CFB9;"></div>
-          <div><span data-count="40" data-suffix="+" style="font-family: 'Marcellus', serif; font-size: 30px; font-weight: 600; color: #2E3D2C;">40+</span><span style="display: block; font-size: 12.5px; color: #7A8570; letter-spacing: 0.04em; margin-top: 2px;">{{ t.herbalBlends }}</span></div>
+          <div><span data-count="9" data-suffix="" style="font-family: 'Marcellus', serif; font-size: 30px; font-weight: 600; color: #2E3D2C;">9</span><span style="display: block; font-size: 12.5px; color: #7A8570; letter-spacing: 0.04em; margin-top: 2px;">{{ t.herbalBlends }}</span></div>
           <div style="width: 1px; background: #D9CFB9;"></div>
-          <div><span data-count="12" data-suffix="k+" style="font-family: 'Marcellus', serif; font-size: 30px; font-weight: 600; color: #2E3D2C;">12k+</span><span style="display: block; font-size: 12.5px; color: #7A8570; letter-spacing: 0.04em; margin-top: 2px;">{{ t.happyHomes }}</span></div>
+          <div><span style="font-family: 'Marcellus', serif; font-size: 30px; font-weight: 600; color: #2E3D2C;">2021</span><span style="display: block; font-size: 12.5px; color: #7A8570; letter-spacing: 0.04em; margin-top: 2px;">{{ t.happyHomes }}</span></div>
         </div>
       </div>
       <!-- Hero image -->
@@ -363,9 +363,9 @@
       <a href="#shop" onClick="{{ filterConcernSkin }}" style="text-decoration: none; display: block; cursor: pointer;">
         <div class="catCard" style="border-radius: 18px; overflow: hidden; background: #FBF7EE; border: 1px solid #E7DECB;">
           <div style="position: relative; height: 190px; overflow: hidden;">
-            <div class="catImg" style="position: absolute; inset: 0; background: repeating-linear-gradient(45deg, #E7D9BE, #E7D9BE 13px, #DECEAF 13px, #DECEAF 26px);"></div>
+            <img class="catImg" src="assets/hero-pouch.png" alt="Natural bath powders" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">
             <span class="catSheen" style="position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,251,240,0.65), transparent); transform: translateX(-140%) skewX(-18deg); pointer-events: none;"></span>
-            <span class="catBadge" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-family: monospace; font-size: 11px; color: #7A6E52; background: rgba(251,247,238,0.85); padding: 5px 11px; border-radius: 30px;">bath powders</span>
+            <span class="catBadge" style="position: absolute; top: 14px; left: 14px; transform: none; font-family: monospace; font-size: 11px; color: #7A6E52; background: rgba(251,247,238,0.9); padding: 5px 11px; border-radius: 30px;">bath powders</span>
           </div>
           <div style="padding: 18px 20px 22px;">
             <h3 style="font-family: 'Marcellus', serif; font-size: 22px; font-weight: 600; color: #2E3D2C; margin: 0;">Natural Bath Powders</h3>
@@ -378,9 +378,9 @@
       <a href="#shop" onClick="{{ filterConcernSugar }}" style="text-decoration: none; display: block; cursor: pointer;">
         <div class="catCard" style="border-radius: 18px; overflow: hidden; background: #FBF7EE; border: 1px solid #E7DECB;">
           <div style="position: relative; height: 190px; overflow: hidden;">
-            <div class="catImg" style="position: absolute; inset: 0; background: repeating-linear-gradient(45deg, #D9C3B4, #D9C3B4 13px, #CFB6A5 13px, #CFB6A5 26px);"></div>
+            <img class="catImg" src="assets/navojas-front.jpeg" alt="Targeted kashayams" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">
             <span class="catSheen" style="position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,251,240,0.65), transparent); transform: translateX(-140%) skewX(-18deg); pointer-events: none;"></span>
-            <span class="catBadge" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-family: monospace; font-size: 11px; color: #6E5849; background: rgba(251,247,238,0.85); padding: 5px 11px; border-radius: 30px;">bp &amp; sugar</span>
+            <span class="catBadge" style="position: absolute; top: 14px; left: 14px; transform: none; font-family: monospace; font-size: 11px; color: #6E5849; background: rgba(251,247,238,0.9); padding: 5px 11px; border-radius: 30px;">bp &amp; sugar</span>
           </div>
           <div style="padding: 18px 20px 22px;">
             <h3 style="font-family: 'Marcellus', serif; font-size: 22px; font-weight: 600; color: #2E3D2C; margin: 0;">Targeted Kashayams</h3>
@@ -393,9 +393,9 @@
       <a href="#shop" onClick="{{ filterConcernImmunity }}" style="text-decoration: none; display: block; cursor: pointer;">
         <div class="catCard" style="border-radius: 18px; overflow: hidden; background: #FBF7EE; border: 1px solid #E7DECB;">
           <div style="position: relative; height: 190px; overflow: hidden;">
-            <div class="catImg" style="position: absolute; inset: 0; background: repeating-linear-gradient(45deg, #C9D3B4, #C9D3B4 13px, #BCC8A2 13px, #BCC8A2 26px);"></div>
+            <img class="catImg" src="assets/kaphahara-front.png" alt="Daily wellness kashayams" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">
             <span class="catSheen" style="position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,251,240,0.65), transparent); transform: translateX(-140%) skewX(-18deg); pointer-events: none;"></span>
-            <span class="catBadge" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-family: monospace; font-size: 11px; color: #5E6A45; background: rgba(251,247,238,0.85); padding: 5px 11px; border-radius: 30px;">daily immunity</span>
+            <span class="catBadge" style="position: absolute; top: 14px; left: 14px; transform: none; font-family: monospace; font-size: 11px; color: #5E6A45; background: rgba(251,247,238,0.9); padding: 5px 11px; border-radius: 30px;">daily immunity</span>
           </div>
           <div style="padding: 18px 20px 22px;">
             <h3 style="font-family: 'Marcellus', serif; font-size: 22px; font-weight: 600; color: #2E3D2C; margin: 0;">Daily Wellness Kashayams</h3>
@@ -408,9 +408,9 @@
       <a href="#shop" onClick="{{ filterConcernSpiritual }}" style="text-decoration: none; display: block; cursor: pointer;">
         <div class="catCard" style="border-radius: 18px; overflow: hidden; background: #FBF7EE; border: 1px solid #E7DECB;">
           <div style="position: relative; height: 190px; overflow: hidden;">
-            <div class="catImg" style="position: absolute; inset: 0; background: repeating-linear-gradient(45deg, #E0C7A0, #E0C7A0 13px, #D6BA8D 13px, #D6BA8D 26px);"></div>
+            <img class="catImg" src="assets/aakashik-logo.jpeg" alt="Spiritual wellness Ashtagandham" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">
             <span class="catSheen" style="position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,251,240,0.65), transparent); transform: translateX(-140%) skewX(-18deg); pointer-events: none;"></span>
-            <span class="catBadge" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-family: monospace; font-size: 11px; color: #74603F; background: rgba(251,247,238,0.85); padding: 5px 11px; border-radius: 30px;">ashtagandham</span>
+            <span class="catBadge" style="position: absolute; top: 14px; left: 14px; transform: none; font-family: monospace; font-size: 11px; color: #74603F; background: rgba(251,247,238,0.9); padding: 5px 11px; border-radius: 30px;">ashtagandham</span>
           </div>
           <div style="padding: 18px 20px 22px;">
             <h3 style="font-family: 'Marcellus', serif; font-size: 22px; font-weight: 600; color: #2E3D2C; margin: 0;">Spiritual Wellness</h3>
@@ -534,6 +534,48 @@
     </div>
   </section>
 
+
+  <!-- FEATURED PRODUCTS -->
+  <section id="featured" style="width: 100%; max-width: none; margin: 0; padding: 70px clamp(24px, 5vw, 90px) 10px;">
+    <div style="text-align: center; margin-bottom: 34px;">
+      <span style="font-size: 12px; letter-spacing: 0.3em; text-transform: uppercase; color: #A8894E;">{{ t.featEye }}</span>
+      <h2 style="font-family: 'Marcellus', serif; font-weight: 400; font-size: clamp(30px, 4vw, 42px); color: #2E3D2C; margin: 12px 0 0;">{{ t.featTitle }}</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 20px;">
+      <sc-for list="{{ featuredProducts }}" as="p" hint-placeholder-count="4">
+        <div style="background: rgba(255,253,245,0.7); border: 1px solid #E7DECB; border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="height: 120px; border-radius: 14px; background: linear-gradient(145deg, {{ p.jar }}, {{ p.cap }}); display: flex; align-items: center; justify-content: center;">
+            <span style="font-family: 'Marcellus', serif; font-size: 13px; color: #FBF7EE; text-align: center; padding: 0 10px;">{{ p.name }}</span>
+          </div>
+          <p style="font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #A99C7E; margin: 0;">{{ p.concern }}</p>
+          <h3 style="font-family: 'Marcellus', serif; font-size: 20px; color: #2E3D2C; margin: 0;">{{ p.name }}</h3>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto;">
+            <span style="font-family: 'Marcellus', serif; font-size: 18px; color: #2E3D2C;">{{ p.priceStr }}</span>
+            <button onClick="{{ p.onQuick }}" style="background: #2E3D2C; color: #F1EEDF; border: none; padding: 9px 14px; border-radius: 30px; font-size: 12.5px; cursor: pointer;">View</button>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <sc-if value="{{ hasRecent }}">
+    <section id="recent" style="width: 100%; max-width: none; margin: 0; padding: 40px clamp(24px, 5vw, 90px) 20px;">
+      <div style="text-align: center; margin-bottom: 28px;">
+        <span style="font-size: 12px; letter-spacing: 0.3em; text-transform: uppercase; color: #A8894E;">Continue browsing</span>
+        <h2 style="font-family: 'Marcellus', serif; font-weight: 400; font-size: clamp(26px, 3.5vw, 36px); color: #2E3D2C; margin: 10px 0 0;">Recently viewed</h2>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 16px;">
+        <sc-for list="{{ recentProducts }}" as="p" hint-placeholder-count="4">
+          <button onClick="{{ p.onQuick }}" style="text-align: left; background: #FBF7EE; border: 1px solid #E7DECB; border-radius: 16px; padding: 16px; cursor: pointer;">
+            <p style="font-size: 11px; color: #A99C7E; margin: 0 0 4px;">{{ p.sub }}</p>
+            <h3 style="font-family: 'Marcellus', serif; font-size: 18px; color: #2E3D2C; margin: 0 0 6px;">{{ p.name }}</h3>
+            <span style="font-size: 14px; color: #5E6A54;">{{ p.priceStr }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+  </sc-if>
+
   <!-- MEET THE BLEND : 3D bottle spin + aroma pyramid -->
   <section style="width: 100%; max-width: none; margin: 0; padding: 70px clamp(24px, 5vw, 90px) 20px;">
     <div data-reveal="true" style="text-align: center; margin-bottom: 40px;">
@@ -603,7 +645,7 @@
   </section>
 
   <!-- HERB-TO-BENEFIT WEB -->
-  <section style="width: 100%; max-width: none; margin: 0; padding: 70px clamp(24px, 5vw, 90px) 20px;">
+  <section id="ingredients" style="width: 100%; max-width: none; margin: 0; padding: 70px clamp(24px, 5vw, 90px) 20px;">
     <div style="text-align: center; margin-bottom: 36px;">
       <span style="font-size: 12px; letter-spacing: 0.3em; text-transform: uppercase; color: #A8894E;">{{ t.herbEye }}</span>
       <h2 style="font-family: 'Marcellus', serif; font-weight: 400; font-size: clamp(30px, 4vw, 42px); color: #2E3D2C; margin: 12px 0 8px;">{{ t.herbTitle }}</h2>
@@ -787,7 +829,7 @@
       <div style="display: flex; flex-wrap: wrap; gap: 48px; align-items: center; margin-bottom: 24px;">
         <div style="flex: 1 1 340px; min-width: 300px;">
           <div style="position: relative; width: 100%; aspect-ratio: 4/5; border-radius: 200px 200px 20px 20px; overflow: hidden; box-shadow: 0 26px 54px -26px rgba(46,61,44,0.5); background: #EFE8D5;">
-            <image-slot id="story-founders" shape="rect" placeholder="Founders — Mr. Gopi &amp; Mrs. Syamala Devi"></image-slot>
+            <img src="assets/founders.webp" alt="Founders — Mr. Gopi and Mrs. Syamala Devi" style="width: 100%; height: 100%; object-fit: cover; display: block;">
           </div>
         </div>
         <div style="flex: 1 1 420px; min-width: 300px;">
@@ -965,7 +1007,7 @@
           <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#A8894E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
         </span>
         <h3 style="font-family: 'Marcellus', serif; font-size: 19px; font-weight: 400; color: #2E3D2C; margin: 0 0 5px;">Cash on Delivery</h3>
-        <p style="font-size: 13px; line-height: 1.55; color: #7A8570; margin: 0;">Pay when it arrives — plus UPI, cards &amp; net-banking at checkout.</p>
+        <p style="font-size: 13px; line-height: 1.55; color: #7A8570; margin: 0;">Pay when it arrives — or use UPI / card at checkout (mock demo).</p>
       </div>
       <div style="background: rgba(255,253,245,0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.65); border-radius: 18px; padding: 24px 22px;">
         <span style="width: 44px; height: 44px; border-radius: 12px; background: #EAF0E1; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px;">
@@ -1083,7 +1125,7 @@
           <h4 style="font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #F4EEE1; margin: 0 0 18px; font-weight: 500;">Company</h4>
           <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 13.5px;">
             <li><a href="#story" style="color: #C5CBB4; text-decoration: none;">Our Story</a></li>
-            <li><a href="#" style="color: #C5CBB4; text-decoration: none;">Ingredients</a></li>
+            <li><a href="#ingredients" style="color: #C5CBB4; text-decoration: none;">Ingredients</a></li>
             <li><a href="#reviews" style="color: #C5CBB4; text-decoration: none;">Reviews</a></li>
             <li><button onClick="{{ openRefund }}" style="background: transparent; border: none; padding: 0; cursor: pointer; font-family: inherit; font-size: 13.5px; color: #C5CBB4; text-align: left;">Return &amp; Refund Policy</button></li>
             <li><button onClick="{{ openDisclaimer }}" style="background: transparent; border: none; padding: 0; cursor: pointer; font-family: inherit; font-size: 13.5px; color: #C5CBB4; text-align: left;">Disclaimer</button></li>
@@ -1107,12 +1149,12 @@
             </li>
           </ul>
           <div style="display: flex; gap: 10px; margin-top: 20px;">
-            <a href="#" aria-label="Instagram" style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid #435138; display: inline-flex; align-items: center; justify-content: center; color: #C5CBB4;">
+            <button type="button" onClick="{{ socialSoon }}" aria-label="Instagram coming soon" title="Coming soon" style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid #435138; display: inline-flex; align-items: center; justify-content: center; color: #C5CBB4; background: transparent; cursor: pointer;">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
-            </a>
-            <a href="#" aria-label="Facebook" style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid #435138; display: inline-flex; align-items: center; justify-content: center; color: #C5CBB4;">
+            </button>
+            <button type="button" onClick="{{ socialSoon }}" aria-label="Facebook coming soon" title="Coming soon" style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid #435138; display: inline-flex; align-items: center; justify-content: center; color: #C5CBB4; background: transparent; cursor: pointer;">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-            </a>
+            </button>
           </div>
         </div>
       </div>
@@ -1376,8 +1418,8 @@
 
   <!-- ===== PROFILE MODAL ===== -->
   <sc-if value="{{ profileOpen }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ closeProfile }}" style="position: fixed; inset: 0; background: rgba(35,45,25,0.42); z-index: 240; display: flex; align-items: center; justify-content: center; padding: 20px; animation: sceneFade .25s ease;">
-      <div onClick="{{ stop }}" style="position: relative; width: min(560px, 100%); max-height: 88vh; background: #F6F1E4; border-radius: 24px; overflow: hidden; box-shadow: 0 40px 80px -30px rgba(35,45,25,0.6); display: flex; flex-direction: column; animation: modalIn .3s cubic-bezier(.34,1.4,.6,1);">
+    <div onClick="{{ closeProfile }}" role="presentation" style="position: fixed; inset: 0; background: rgba(35,45,25,0.42); z-index: 240; display: flex; align-items: center; justify-content: center; padding: 20px; animation: sceneFade .25s ease;">
+      <div onClick="{{ stop }}" role="dialog" aria-modal="true" aria-label="My Profile" style="position: relative; width: min(560px, 100%); max-height: 88vh; background: #F6F1E4; border-radius: 24px; overflow: hidden; box-shadow: 0 40px 80px -30px rgba(35,45,25,0.6); display: flex; flex-direction: column; animation: modalIn .3s cubic-bezier(.34,1.4,.6,1);">
         <div style="padding: 24px 26px 18px; border-bottom: 1px solid #E4DBC8; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-shrink: 0;">
           <div>
             <h3 style="font-family: 'Marcellus', serif; font-size: 28px; color: #2E3D2C; margin: 0;">My Profile</h3>
@@ -1428,7 +1470,7 @@
   <!-- ===== ORDER HISTORY MODAL ===== -->
   <sc-if value="{{ ordersOpen }}" hint-placeholder-val="{{ false }}">
     <div onClick="{{ closeOrders }}" style="position: fixed; inset: 0; background: rgba(35,45,25,0.42); z-index: 240; display: flex; align-items: center; justify-content: center; padding: 20px; animation: sceneFade .25s ease;">
-      <div onClick="{{ stop }}" style="position: relative; width: min(560px, 100%); max-height: 88vh; background: #F6F1E4; border-radius: 24px; overflow: hidden; box-shadow: 0 40px 80px -30px rgba(35,45,25,0.6); display: flex; flex-direction: column; animation: modalIn .3s cubic-bezier(.34,1.4,.6,1);">
+      <div onClick="{{ stop }}" role="dialog" aria-modal="true" aria-label="Order History" style="position: relative; width: min(560px, 100%); max-height: 88vh; background: #F6F1E4; border-radius: 24px; overflow: hidden; box-shadow: 0 40px 80px -30px rgba(35,45,25,0.6); display: flex; flex-direction: column; animation: modalIn .3s cubic-bezier(.34,1.4,.6,1);">
         <div style="padding: 24px 26px 18px; border-bottom: 1px solid #E4DBC8; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-shrink: 0;">
           <div>
             <h3 style="font-family: 'Marcellus', serif; font-size: 28px; color: #2E3D2C; margin: 0;">Order History</h3>
@@ -1513,7 +1555,7 @@
   <!-- ===== QUICK VIEW MODAL ===== -->
   <sc-if value="{{ quickViewOpen }}" hint-placeholder-val="{{ false }}">
     <div onClick="{{ closeQuickView }}" style="position: fixed; inset: 0; background: rgba(35,45,25,0.42); z-index: 210; display: flex; align-items: center; justify-content: center; padding: 20px; animation: sceneFade .25s ease;">
-      <div onClick="{{ stop }}" style="position: relative; width: min(720px, 100%); background: #F6F1E4; border-radius: 24px; overflow: hidden; box-shadow: 0 40px 80px -30px rgba(35,45,25,0.6); display: flex; flex-wrap: wrap; animation: modalIn .3s cubic-bezier(.34,1.4,.6,1);">
+      <div onClick="{{ stop }}" role="dialog" aria-modal="true" aria-label="Product quick view" style="position: relative; width: min(720px, 100%); background: #F6F1E4; border-radius: 24px; overflow: hidden; box-shadow: 0 40px 80px -30px rgba(35,45,25,0.6); display: flex; flex-wrap: wrap; animation: modalIn .3s cubic-bezier(.34,1.4,.6,1);">
         <button onClick="{{ closeQuickView }}" aria-label="Close" style="position: absolute; top: 14px; right: 14px; z-index: 2; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,253,245,0.9); border: none; cursor: pointer; color: #2E3D2C; display: inline-flex; align-items: center; justify-content: center;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
@@ -1670,7 +1712,7 @@
   <!-- ===== ORDER TRACKING MODAL ===== -->
   <sc-if value="{{ trackOpen }}">
     <div onClick="{{ closeTrack }}" style="position: fixed; inset: 0; background: rgba(35,45,25,0.42); z-index: 210; display: flex; align-items: center; justify-content: center; padding: 20px; animation: sceneFade .25s ease;">
-      <div onClick="{{ stop }}" style="width: min(460px, 100%); background: #F6F1E4; border-radius: 24px; padding: 32px 30px; box-shadow: 0 40px 80px -30px rgba(35,45,25,0.6); animation: modalIn .3s cubic-bezier(.34,1.4,.6,1);">
+      <div onClick="{{ stop }}" role="dialog" aria-modal="true" aria-label="Track Your Order" style="width: min(460px, 100%); background: #F6F1E4; border-radius: 24px; padding: 32px 30px; box-shadow: 0 40px 80px -30px rgba(35,45,25,0.6); animation: modalIn .3s cubic-bezier(.34,1.4,.6,1);">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
           <h3 style="font-family: 'Marcellus', serif; font-size: 24px; color: #2E3D2C; margin: 0;">Track Your Order</h3>
           <button onClick="{{ closeTrack }}" aria-label="Close" style="background: transparent; border: none; cursor: pointer; color: #5E6A54; display: inline-flex;">
@@ -1759,16 +1801,9 @@
     </sc-if>
   </div>
 
-  <!-- festival takeover -->
-  <sc-if value="{{ festiveActive }}">
-    <div style="position: fixed; left: 50%; top: 8px; transform: translateX(-50%); z-index: 185; background: #B65E38; color: #FBF7EE; padding: 8px 20px; border-radius: 30px; font-size: 12.5px; box-shadow: 0 12px 28px -12px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 8px; max-width: 92vw;">
-      <span>✦</span><strong style="font-weight: 600;">{{ festiveName }}</strong><span>{{ festiveMsg }}</span>
-    </div>
-  </sc-if>
-
   <!-- toast -->
   <sc-if value="{{ hasToast }}">
-    <div style="position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 230; background: #2E3D2C; color: #F1EEDF; padding: 12px 22px; border-radius: 30px; font-size: 13.5px; box-shadow: 0 16px 34px -16px rgba(0,0,0,0.5); animation: toastIn .3s ease; display: flex; align-items: center; gap: 8px;">
+    <div role="status" aria-live="polite" style="position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 230; background: #2E3D2C; color: #F1EEDF; padding: 12px 22px; border-radius: 30px; font-size: 13.5px; box-shadow: 0 16px 34px -16px rgba(0,0,0,0.5); animation: toastIn .3s ease; display: flex; align-items: center; gap: 8px;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9DB08E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
       {{ toast }}
     </div>
@@ -1776,7 +1811,7 @@
 
   <!-- ===== MOBILE BOTTOM NAV ===== -->
   <div id="ak-mobilenav" style="position: fixed; left: 0; right: 0; bottom: 0; z-index: 190; background: rgba(246,241,228,0.96); backdrop-filter: blur(10px); border-top: 1px solid #E0D7BE; padding: 8px 6px calc(8px + env(safe-area-inset-bottom)); justify-content: space-around; align-items: center;">
-    <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none; color: #45543E; font-size: 10px; padding: 4px 12px;">
+    <a href="#top" onClick="{{ scrollTop }}" style="display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none; color: #45543E; font-size: 10px; padding: 4px 12px;">
       <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M9 22V12h6v10"/></svg>
       Home
     </a>
@@ -1851,7 +1886,7 @@ class Component extends DCLogic {
     hoverJar: null, weather: null,
     checkoutStep: 'cart', loggedIn: false, authMode: 'signin', payMethod: 'cod',
     payUpiId: '', payCardNumber: '', payCardExpiry: '', payCardCvv: '', payError: '',
-    authContact: '', authName: '', authPassword: '', authConfirmPw: '', authOtpCode: '', authError: '', authOtp: false, pendingAdd: null,
+    authContact: '', authName: '', authPassword: '', authConfirmPw: '', authOtpCode: '', authError: '', authOtp: false,
     authFailCount: 0, authLockUntil: 0,
     profileName: '', profilePhone: '', profileEmail: '',
     profileAddress: '', profileCity: '', profileState: '', profilePincode: '',
@@ -2078,6 +2113,33 @@ class Component extends DCLogic {
     document.addEventListener('visibilitychange', this._onVis);
     try { this._setupMagic(); } catch (e) {}
     try { this._loadWeather(); } catch (e) {}
+    try {
+      const h = String(location.hash || '').replace(/^#/, '');
+      if (h === 'legal-terms') this.setState({ legal: 'terms' });
+      else if (h === 'legal-privacy') this.setState({ legal: 'privacy' });
+      else if (h === 'legal-refund') this.setState({ legal: 'refund' });
+    } catch (e) {}
+    this._onKeyDown = (e) => {
+      if (!e || e.key !== 'Escape') return;
+      if (this.state.legal) this.setState({ legal: null });
+      else if (this.state.quickView) this.setState({ quickView: null });
+      else if (this.state.trackOpen) this.setState({ trackOpen: false, trackSubmitted: false, trackOrder: null, trackNotFound: false });
+      else if (this.state.profileOpen) this.setState({ profileOpen: false });
+      else if (this.state.ordersOpen) this.setState({ ordersOpen: false });
+      else if (this.state.searchOpen) this.setState({ searchOpen: false });
+      else if (this.state.wishlistOpen) this.setState({ wishlistOpen: false });
+      else if (this.state.cartOpen) this.setState({ cartOpen: false, orderPlaced: false, checkoutStep: 'cart' });
+      else if (this.state.accountMenuOpen || this.state.langOpen) this.setState({ accountMenuOpen: false, langOpen: false });
+      else if (this.state.breatheOpen) this.setState({ breatheOpen: false });
+    };
+    document.addEventListener('keydown', this._onKeyDown);
+    this._onDocPointer = (e) => {
+      if (!this.state.accountMenuOpen && !this.state.langOpen) return;
+      const t = e && e.target;
+      if (t && t.closest && (t.closest('[data-account-menu]') || t.closest('[data-lang-menu]'))) return;
+      this.setState({ accountMenuOpen: false, langOpen: false });
+    };
+    document.addEventListener('pointerdown', this._onDocPointer, true);
   }
   componentDidUpdate(prevProps, prevState) {
     if (prevState.cartItems !== this.state.cartItems) this._writeJSON('ak_cart', this.state.cartItems);
@@ -2086,6 +2148,8 @@ class Component extends DCLogic {
   componentWillUnmount() {
     if (this._onPageShow) { window.removeEventListener('pageshow', this._onPageShow); window.removeEventListener('focus', this._onPageShow); }
     if (this._onVis) document.removeEventListener('visibilitychange', this._onVis);
+    if (this._onKeyDown) document.removeEventListener('keydown', this._onKeyDown);
+    if (this._onDocPointer) document.removeEventListener('pointerdown', this._onDocPointer, true);
     if (this._moteInt) clearInterval(this._moteInt);
     if (this._breatheTO) clearTimeout(this._breatheTO);
     if (this._toastTO) clearTimeout(this._toastTO);
@@ -2187,7 +2251,7 @@ class Component extends DCLogic {
     const LANGS = { en: 'English', ta: 'தமிழ்', te: 'తెలుగు', hi: 'हिन्दी' };
     const I18N = {
       en: { ann1: '100% Natural Ingredients', ann2: 'Member pricing · 10% off when signed in', nav1: 'Bath & Body', nav2: 'Kashayams', nav3: 'Spiritual', nav4: 'Our Story', eyebrow: 'Rooted in Tradition', heroTitle1: 'Rooted in Nature.', heroTitle2: 'Designed for Your Wellness.', heroSub: 'Chemical-free bath powders, targeted Ayurvedic kashayams and sacred fragrant blends — crafted from time-honoured herbal recipes for holistic body wellness.', shopCta: 'Shop the Collection', exploreCta: 'Explore Kashayams',
-        chemFree: 'Chemical-free', herbalBlends: 'Herbal blends', happyHomes: 'Happy homes',
+        chemFree: 'Chemical-free', herbalBlends: 'Blends & kits', happyHomes: 'Family-founded',
         ritualEye: 'Personalised for this moment', ritualTitle: 'Your Ritual, Right Now', ritualSub: 'Ayurveda tunes wellness to the rhythm of the day and the turning of the seasons.',
         byTime: 'By time of day', bySeason: 'By season & weather', weSuggest: 'We suggest', seasonalPick: 'Seasonal pick', addToCart: 'Add to Cart',
         catEye: 'Find your ritual', catTitle: 'Shop by Category',
@@ -2201,7 +2265,7 @@ class Component extends DCLogic {
         featEye: 'Handpicked for you', featTitle: 'Featured Products',
         s: { eye: 'Our Story', title: 'Healing Inspired by Purpose', sub: 'Aakashik Wellness was born from a simple belief: nature has the power to support health when combined with traditional wisdom, genuine care, and a deep commitment to helping people live healthier lives.', famEye: 'A family journey', famTitle: 'From a time of uncertainty, a mission of care', p1a: 'Founded by ', gopi: 'Mr. Gopi', p1b: " — an experienced astrologer, Vasthu expert & Pranic healer with a profound interest in holistic wellness — Aakashik Wellness began its journey during one of the most challenging periods in recent history: the COVID-19 pandemic in 2021. Witnessing the fear and uncertainty of the outbreak, he was inspired to create a natural herbal formulation that could support people's immunity and respiratory wellness.", p2a: 'This vision was brought to life with the unwavering support of his wife and co-founder, ', devi: 'Mrs. Syamala Devi', p2b: '. Together they began carefully preparing their herbal formulations with dedication — combining traditional knowledge with a sincere desire to serve the community through natural wellness.', kaphaTag: 'FIRST FORMULATION', kaphaBody: 'Developed using carefully selected herbs traditionally known to support respiratory health — created to provide natural support for cough, cold, sore throat, fever and respiratory discomfort. When families were seeking natural solutions, Kaphahara earned the trust of many, strengthening the couple\'s commitment to herbal wellness.', navoTag: 'GUT & METABOLIC BALANCE', navoBody: "Rooted in the belief that a healthy gut forms the foundation of well-being, Navojas was formulated to promote digestive wellness and metabolic balance. Alongside supporting healthy blood sugar management, it was developed to support joint comfort, mobility and the body's natural lubrication of the joints.", quote: '"At Aakashik Wellness, every product begins with a purpose — not a trend. We believe true wellness focuses on prevention, balance, and supporting the body\'s natural ability to maintain health."', missionTitle: 'Our Mission', missionBody: 'To create trusted herbal wellness formulations inspired by traditional wisdom and real-life health needs — empowering individuals to embrace preventive care and holistic well-being through nature.', visionTitle: 'Our Vision', visionBody: 'To become a trusted name in herbal wellness by preserving traditional knowledge and offering natural formulations that support healthier communities for generations to come.', valuesTitle: 'Our Values', v1t: 'Purpose Before Profit', v1b: 'Every formulation is created to address genuine wellness needs and improve quality of life.', v2t: 'Rooted in Tradition', v2b: "We honour generations of herbal knowledge while creating products for today's needs.", v3t: 'Quality & Purity', v3b: 'Prepared with carefully selected ingredients, maintaining authenticity, consistency and uncompromising quality.', v4t: 'Care That Builds Trust', v4b: 'The confidence and well-being of the people who use our products remain at the heart of all we do.', journeyTitle: 'Our Journey Continues', jp1: "What started as one family's heartfelt effort to support people during a global health crisis has grown into a mission to make traditional herbal wellness more accessible. With every formulation, Mr. Gopi and Mrs. Syamala Devi continue to uphold the values on which Aakashik Wellness was founded — care, integrity, and the timeless wisdom of nature.", jp2: 'Aakashik Wellness is more than a wellness brand. It is a family-driven commitment to helping people nurture their health naturally, one formulation at a time.', tagline: 'Rooted in Tradition, Nurtured with Care, Dedicated to your Wellness.' } },
       ta: { ann1: '100% இயற்கை பொருட்கள்', ann2: 'உறுப்பினர் விலை · உள்நுழைந்தால் 10% தள்ளுபடி', nav1: 'குளியல் & உடல்', nav2: 'கஷாயங்கள்', nav3: 'ஆன்மீகம்', nav4: 'எங்கள் கதை', eyebrow: 'பாரம்பரியத்தில் வேரூன்றி', heroTitle1: 'இயற்கையில் வேரூன்றி.', heroTitle2: 'உங்கள் ஆரோக்கியத்திற்காக.', heroSub: 'ரசாயனமற்ற குளியல் பொடிகள், இலக்கு கஷாயங்கள் மற்றும் புனித நறுமணக் கலவைகள் — பாரம்பரிய மூலிகை செய்முறைகளில் இருந்து முழு உடல் நலனுக்காக.', shopCta: 'தொகுப்பை வாங்குங்கள்', exploreCta: 'கஷாயங்களைப் பாருங்கள்',
-        chemFree: 'ரசாயனமற்றது', herbalBlends: 'மூலிகைக் கலவைகள்', happyHomes: 'மகிழ்ச்சியான வீடுகள்',
+        chemFree: 'ரசாயனமற்றது', herbalBlends: 'கலவைகள் & கிட்கள்', happyHomes: 'குடும்ப நிறுவனம்',
         ritualEye: 'இந்தத் தருணத்திற்காக', ritualTitle: 'உங்கள் சடங்கு, இப்போதே', ritualSub: 'ஆயுர்வேதம் நாளின் தாளத்திற்கும் பருவங்களின் மாற்றத்திற்கும் ஏற்ப நலனை சீரமைக்கிறது.',
         byTime: 'நேரத்தின்படி', bySeason: 'பருவம் & வானிலைப்படி', weSuggest: 'நாங்கள் பரிந்துரைக்கிறோம்', seasonalPick: 'பருவத் தேர்வு', addToCart: 'கூடையில் சேர்',
         catEye: 'உங்கள் சடங்கைக் கண்டறியுங்கள்', catTitle: 'வகைவாரியாக வாங்குங்கள்',
@@ -2215,7 +2279,7 @@ class Component extends DCLogic {
         featEye: 'உங்களுக்காக தேர்ந்தெடுக்கப்பட்டது', featTitle: 'சிறப்பு தயாரிப்புகள்',
         s: { eye: 'எங்கள் கதை', title: 'நோக்கத்தால் ஈர்க்கப்பட்ட நலம்', sub: 'ஆகாஷிக் வெல்னஸ் ஒரு எளிய நம்பிக்கையில் பிறந்தது: பாரம்பரிய ஞானம், உண்மையான அக்கறை மற்றும் மக்கள் ஆரோக்கியமாக வாழ உதவும் ஆழ்ந்த அர்ப்பணிப்புடன் இணைந்தால் இயற்கைக்கு ஆரோக்கியத்தை ஆதரிக்கும் சக்தி உண்டு.', famEye: 'ஒரு குடும்பப் பயணம்', famTitle: 'நிச்சயமற்ற காலத்திலிருந்து, ஒரு அக்கறையின் பணி', p1a: 'நிறுவியவர் ', gopi: 'திரு. கோபி', p1b: ' — முழுமையான நலனில் ஆழ்ந்த ஆர்வம் கொண்ட அனுபவமிக்க ஜோதிடர், வாஸ்து நிபுணர் & பிராணிக் ஹீலர் — ஆகாஷிக் வெல்னஸ் சமீபகால வரலாற்றின் மிகவும் சவாலான காலகட்டமான 2021 கோவிட்-19 பெருந்தொற்றின் போது தனது பயணத்தைத் தொடங்கியது. தொற்றின் அச்சத்தையும் நிச்சயமற்ற தன்மையையும் கண்டு, மக்களின் நோய் எதிர்ப்பு சக்தி மற்றும் சுவாச நலனை ஆதரிக்கும் இயற்கை மூலிகைக் கலவையை உருவாக்க அவர் ஈர்க்கப்பட்டார்.', p2a: 'இந்த தொலைநோக்கு அவரது மனைவி மற்றும் இணை நிறுவனர் ', devi: 'திருமதி. ஷ்யாமளா தேவி', p2b: ' அவர்களின் அசைக்க முடியாத ஆதரவுடன் நனவாக்கப்பட்டது. இருவரும் அர்ப்பணிப்புடன் தங்கள் மூலிகைக் கலவைகளை கவனமாக தயாரிக்கத் தொடங்கினர் — பாரம்பரிய அறிவை சமூகத்திற்கு சேவை செய்யும் உண்மையான விருப்பத்துடன் இணைத்தனர்.', kaphaTag: 'முதல் கலவை', kaphaBody: 'சுவாச ஆரோக்கியத்தை ஆதரிப்பதாக பாரம்பரியமாக அறியப்படும் கவனமாக தேர்ந்தெடுக்கப்பட்ட மூலிகைகளைப் பயன்படுத்தி உருவாக்கப்பட்டது — இருமல், சளி, தொண்டை வலி, காய்ச்சல் மற்றும் சுவாச அசௌகரியத்திற்கு இயற்கை ஆதரவை வழங்குகிறது. குடும்பங்கள் இயற்கை தீர்வுகளைத் தேடியபோது, கஃபஹரா பலரின் நம்பிக்கையைப் பெற்றது.', navoTag: 'குடல் & வளர்சிதை சமநிலை', navoBody: 'ஆரோக்கியமான குடல் நல்வாழ்வின் அடித்தளம் என்ற நம்பிக்கையில் வேரூன்றி, நவோஜஸ் செரிமான நலனையும் வளர்சிதை சமநிலையையும் ஊக்குவிக்க உருவாக்கப்பட்டது. ஆரோக்கியமான ரத்த சர்க்கரை மேலாண்மையை ஆதரிப்பதுடன், மூட்டு சௌகரியம் மற்றும் இயக்கத்தையும் ஆதரிக்கிறது.', quote: '"ஆகாஷிக் வெல்னஸில், ஒவ்வொரு தயாரிப்பும் ஒரு நோக்கத்துடன் தொடங்குகிறது — ஒரு போக்குடன் அல்ல. உண்மையான நலம் தடுப்பு, சமநிலை மற்றும் உடலின் இயற்கை திறனை ஆதரிப்பதில் கவனம் செலுத்துகிறது என்று நாங்கள் நம்புகிறோம்."', missionTitle: 'எங்கள் நோக்கம்', missionBody: 'பாரம்பரிய ஞானம் மற்றும் நிஜ வாழ்க்கை ஆரோக்கியத் தேவைகளால் ஈர்க்கப்பட்ட நம்பகமான மூலிகை நல்வாழ்வுக் கலவைகளை உருவாக்குதல் — இயற்கையின் மூலம் தடுப்பு பராமரிப்பையும் முழுமையான நல்வாழ்வையும் தழுவ தனிநபர்களுக்கு உதவுதல்.', visionTitle: 'எங்கள் தொலைநோக்கு', visionBody: 'பாரம்பரிய அறிவைப் பாதுகாத்து, தலைமுறைகளுக்கு ஆரோக்கியமான சமூகங்களை ஆதரிக்கும் இயற்கைக் கலவைகளை வழங்குவதன் மூலம் மூலிகை நல்வாழ்வில் நம்பகமான பெயராக மாறுதல்.', valuesTitle: 'எங்கள் மதிப்புகள்', v1t: 'லாபத்தை விட நோக்கம்', v1b: 'ஒவ்வொரு கலவையும் உண்மையான நல்வாழ்வுத் தேவைகளை நிவர்த்தி செய்து வாழ்க்கைத் தரத்தை மேம்படுத்த உருவாக்கப்படுகிறது.', v2t: 'பாரம்பரியத்தில் வேரூன்றி', v2b: 'இன்றைய தேவைகளுக்கான தயாரிப்புகளை உருவாக்கும்போது தலைமுறை மூலிகை அறிவை மதிக்கிறோம்.', v3t: 'தரம் & தூய்மை', v3b: 'கவனமாக தேர்ந்தெடுக்கப்பட்ட பொருட்களுடன் தயாரிக்கப்பட்டு, நம்பகத்தன்மை, நிலைத்தன்மை மற்றும் சமரசமற்ற தரத்தை பராமரிக்கிறது.', v4t: 'நம்பிக்கையை உருவாக்கும் அக்கறை', v4b: 'எங்கள் தயாரிப்புகளைப் பயன்படுத்தும் மக்களின் நம்பிக்கையும் நல்வாழ்வும் நாங்கள் செய்யும் அனைத்திலும் மையமாக உள்ளன.', journeyTitle: 'எங்கள் பயணம் தொடர்கிறது', jp1: 'உலகளாவிய சுகாதார நெருக்கடியின் போது மக்களுக்கு உதவும் ஒரு குடும்பத்தின் இதயப்பூர்வமான முயற்சியாகத் தொடங்கியது, பாரம்பரிய மூலிகை நலனை மேலும் அணுகக்கூடியதாக்கும் பணியாக வளர்ந்துள்ளது. ஒவ்வொரு கலவையிலும், திரு. கோபி மற்றும் திருமதி. ஷ்யாமளா தேவி ஆகாஷிக் வெல்னஸ் நிறுவப்பட்ட மதிப்புகளைத் தொடர்ந்து நிலைநிறுத்துகின்றனர்.', jp2: 'ஆகாஷிக் வெல்னஸ் ஒரு நல்வாழ்வு பிராண்டை விட அதிகம். இது மக்கள் தங்கள் ஆரோக்கியத்தை இயற்கையாக வளர்க்க உதவும் குடும்பம் சார்ந்த அர்ப்பணிப்பு.', tagline: 'பாரம்பரியத்தில் வேரூன்றி, அன்புடன் வளர்க்கப்பட்டு, உங்கள் நலனுக்கு அர்ப்பணிக்கப்பட்டது.' } },
       te: { ann1: '100% సహజ పదార్థాలు', ann2: 'మెంబర్ ధర · సైన్ ఇన్‌తో 10% తగ్గింపు', nav1: 'స్నానం & శరీరం', nav2: 'కషాయాలు', nav3: 'ఆధ్యాత్మికం', nav4: 'మా కథ', eyebrow: 'సంప్రదాయంలో పాతుకుని', heroTitle1: 'ప్రకృతిలో పాతుకుని.', heroTitle2: 'మీ ఆరోగ్యం కోసం.', heroSub: 'రసాయనాలు లేని స్నాన పొడులు, లక్ష్య ఆయుర్వేద కషాయాలు మరియు పవిత్ర సుగంధ మిశ్రమాలు — సంప్రదాయ మూలికా వంటకాల నుండి సంపూర్ణ శరీర ఆరోగ్యం కోసం.', shopCta: 'సేకరణను కొనండి', exploreCta: 'కషాయాలను చూడండి',
-        chemFree: 'రసాయనాలు లేనివి', herbalBlends: 'మూలికా మిశ్రమాలు', happyHomes: 'సంతోషకర ఇళ్లు',
+        chemFree: 'రసాయనాలు లేనివి', herbalBlends: 'మిశ్రమాలు & కిట్లు', happyHomes: 'కుటుంబ సంస్థ',
         ritualEye: 'ఈ క్షణం కోసం', ritualTitle: 'మీ ఆచారం, ఇప్పుడే', ritualSub: 'ఆయుర్వేదం రోజు లయకు, రుతువుల మార్పుకు అనుగుణంగా ఆరోగ్యాన్ని సమతుల్యం చేస్తుంది.',
         byTime: 'సమయాన్ని బట్టి', bySeason: 'రుతువు & వాతావరణం బట్టి', weSuggest: 'మేము సూచిస్తున్నాము', seasonalPick: 'రుతు ఎంపిక', addToCart: 'కార్ట్‌కు జోడించు',
         catEye: 'మీ ఆచారాన్ని కనుగొనండి', catTitle: 'వర్గం వారీగా షాపింగ్',
@@ -2229,7 +2293,7 @@ class Component extends DCLogic {
         featEye: 'మీ కోసం ఎంపిక చేసినవి', featTitle: 'ప్రత్యేక ఉత్పత్తులు',
         s: { eye: 'మా కథ', title: 'లక్ష్యంతో ప్రేరేపించబడిన స్వస్థత', sub: 'ఆకాశిక్ వెల్‌నెస్ ఒక సాధారణ నమ్మకంతో పుట్టింది: సంప్రదాయ జ్ఞానం, నిజమైన శ్రద్ధ మరియు ప్రజలు ఆరోగ్యంగా జీవించడంలో సహాయపడే లోతైన నిబద్ధతతో కలిస్తే ప్రకృతికి ఆరోగ్యాన్ని ఆదుకునే శక్తి ఉంది.', famEye: 'ఒక కుటుంబ ప్రయాణం', famTitle: 'అనిశ్చిత సమయం నుండి, ఒక శ్రద్ధ మిషన్', p1a: 'స్థాపించినవారు ', gopi: 'శ్రీ. గోపి', p1b: ' — సంపూర్ణ ఆరోగ్యంపై లోతైన ఆసక్తి గల అనుభవజ్ఞుడైన జ్యోతిష్కుడు, వాస్తు నిపుణుడు & ప్రాణిక్ హీలర్ — ఆకాశిక్ వెల్‌నెస్ ఇటీవలి చరిత్రలో అత్యంత సవాలుతో కూడిన కాలమైన 2021 కోవిడ్-19 మహమ్మారి సమయంలో తన ప్రయాణాన్ని ప్రారంభించింది. వ్యాప్తి భయాన్ని, అనిశ్చితిని చూసి, ప్రజల రోగనిరోధక శక్తి, శ్వాసకోశ ఆరోగ్యాన్ని ఆదుకునే సహజ మూలికా మిశ్రమాన్ని రూపొందించడానికి ప్రేరణ పొందారు.', p2a: 'ఈ దృష్టి ఆయన భార్య మరియు సహ-వ్యవస్థాపకురాలు ', devi: 'శ్రీమతి. శ్యామళా దేవి', p2b: ' యొక్క అచంచల మద్దతుతో సాకారమైంది. వారిద్దరూ అంకితభావంతో తమ మూలికా మిశ్రమాలను జాగ్రత్తగా తయారు చేయడం ప్రారంభించారు — సంప్రదాయ జ్ఞానాన్ని సమాజానికి సేవ చేసే నిజాయితీ కోరికతో కలిపారు.', kaphaTag: 'మొదటి మిశ్రమం', kaphaBody: 'శ్వాసకోశ ఆరోగ్యాన్ని ఆదుకునేందుకు సంప్రదాయంగా తెలిసిన జాగ్రత్తగా ఎంచుకున్న మూలికలతో రూపొందించబడింది — దగ్గు, జలుబు, గొంతు నొప్పి, జ్వరం మరియు శ్వాసకోశ అసౌకర్యానికి సహజ మద్దతును అందిస్తుంది. కుటుంబాలు సహజ పరిష్కారాలను వెతికినప్పుడు, కఫహర చాలామంది నమ్మకాన్ని పొందింది.', navoTag: 'పేగు & జీవక్రియ సమతుల్యం', navoBody: 'ఆరోగ్యకరమైన పేగు శ్రేయస్సుకు పునాది అనే నమ్మకంలో వేళ్లూనుకుని, నవోజస్ జీర్ణ ఆరోగ్యాన్ని, జీవక్రియ సమతుల్యతను ప్రోత్సహించేందుకు రూపొందించబడింది. ఆరోగ్యకరమైన రక్తంలో చక్కెర నిర్వహణకు మద్దతునిస్తూ, కీళ్ల సౌకర్యం, కదలికకు కూడా మద్దతునిస్తుంది.', quote: '"ఆకాశిక్ వెల్‌నెస్‌లో, ప్రతి ఉత్పత్తి ఒక లక్ష్యంతో మొదలవుతుంది — ఒక ధోరణితో కాదు. నిజమైన స్వస్థత నివారణ, సమతుల్యత మరియు శరీర సహజ సామర్థ్యానికి మద్దతునివ్వడంపై దృష్టి పెడుతుందని మేము నమ్ముతాము."', missionTitle: 'మా లక్ష్యం', missionBody: 'సంప్రదాయ జ్ఞానం, నిజ జీవిత ఆరోగ్య అవసరాలతో ప్రేరేపించబడిన నమ్మకమైన మూలికా ఆరోగ్య మిశ్రమాలను సృష్టించడం — ప్రకృతి ద్వారా నివారణ సంరక్షణ, సంపూర్ణ శ్రేయస్సును స్వీకరించడానికి వ్యక్తులకు శక్తినివ్వడం.', visionTitle: 'మా దృష్టి', visionBody: 'సంప్రదాయ జ్ఞానాన్ని కాపాడుతూ, తరతరాలకు ఆరోగ్యకరమైన సమాజాలను ఆదుకునే సహజ మిశ్రమాలను అందించడం ద్వారా మూలికా ఆరోగ్యంలో నమ్మకమైన పేరుగా మారడం.', valuesTitle: 'మా విలువలు', v1t: 'లాభం కంటే లక్ష్యం', v1b: 'ప్రతి మిశ్రమం నిజమైన ఆరోగ్య అవసరాలను తీర్చడానికి, జీవన నాణ్యతను మెరుగుపరచడానికి సృష్టించబడుతుంది.', v2t: 'సంప్రదాయంలో వేళ్లూనుకుని', v2b: 'నేటి అవసరాలకు ఉత్పత్తులను సృష్టిస్తూ తరతరాల మూలికా జ్ఞానాన్ని గౌరవిస్తాము.', v3t: 'నాణ్యత & స్వచ్ఛత', v3b: 'జాగ్రత్తగా ఎంచుకున్న పదార్థాలతో తయారు చేయబడి, ప్రామాణికత, స్థిరత్వం, రాజీలేని నాణ్యతను కాపాడుతుంది.', v4t: 'నమ్మకాన్ని పెంచే శ్రద్ధ', v4b: 'మా ఉత్పత్తులను ఉపయోగించే ప్రజల విశ్వాసం, శ్రేయస్సు మేము చేసే అన్నింటిలో కేంద్రంగా ఉంటాయి.', journeyTitle: 'మా ప్రయాణం కొనసాగుతోంది', jp1: 'ప్రపంచ ఆరోగ్య సంక్షోభ సమయంలో ప్రజలకు సహాయం చేయాలనే ఒక కుటుంబ హృదయపూర్వక ప్రయత్నంగా మొదలైనది, సంప్రదాయ మూలికా ఆరోగ్యాన్ని మరింత అందుబాటులోకి తెచ్చే మిషన్‌గా ఎదిగింది. ప్రతి మిశ్రమంతో, శ్రీ. గోపి, శ్రీమతి. శ్యామళా దేవి ఆకాశిక్ వెల్‌నెస్ స్థాపించబడిన విలువలను కొనసాగిస్తున్నారు.', jp2: 'ఆకాశిక్ వెల్‌నెస్ ఒక ఆరోగ్య బ్రాండ్ కంటే ఎక్కువ. ఇది ప్రజలు తమ ఆరోగ్యాన్ని సహజంగా పెంపొందించుకోవడంలో సహాయపడే కుటుంబ ఆధారిత నిబద్ధత.', tagline: 'సంప్రదాయంలో వేళ్లూనుకుని, ప్రేమతో పెంచబడి, మీ ఆరోగ్యానికి అంకితం.' } },
       hi: { ann1: '100% प्राकृतिक सामग्री', ann2: 'सदस्य मूल्य · साइन इन पर 10% छूट', nav1: 'स्नान और शरीर', nav2: 'कषायम', nav3: 'आध्यात्मिक', nav4: 'हमारी कहानी', eyebrow: 'परंपरा में निहित', heroTitle1: 'प्रकृति में निहित.', heroTitle2: 'आपके स्वास्थ्य के लिए.', heroSub: 'रसायन-मुक्त स्नान चूर्ण, लक्षित आयुर्वेदिक कषायम और पवित्र सुगंधित मिश्रण — पारंपरिक हर्बल विधियों से समग्र शारीरिक स्वास्थ्य के लिए बनाए गए.', shopCta: 'संग्रह खरीदें', exploreCta: 'कषायम देखें',
-        chemFree: 'रसायन-मुक्त', herbalBlends: 'हर्बल मिश्रण', happyHomes: 'खुशहाल घर',
+        chemFree: 'रसायन-मुक्त', herbalBlends: 'मिश्रण व किट', happyHomes: 'परिवार-स्थापित',
         ritualEye: 'इस पल के लिए', ritualTitle: 'आपका अनुष्ठान, अभी', ritualSub: 'आयुर्वेद दिन की लय और ऋतुओं के बदलाव के अनुरूप स्वास्थ्य को संतुलित करता है.',
         byTime: 'समय के अनुसार', bySeason: 'ऋतु और मौसम के अनुसार', weSuggest: 'हमारा सुझाव', seasonalPick: 'मौसमी चयन', addToCart: 'कार्ट में डालें',
         catEye: 'अपना अनुष्ठान खोजें', catTitle: 'श्रेणी अनुसार खरीदें',
@@ -2262,13 +2326,6 @@ class Component extends DCLogic {
     const _commitAdd = (id, subscribe, size, sizePrice) => { this.flyToCart(); this.playChime(); this.showToast('Added to cart'); this.setState(s => { const c = { ...s.cartItems }; const key = cartLineKey(id, size); const cur = c[key]; const nextSize = size !== undefined && size !== null ? size : (cur ? cur.size : null); const nextPrice = sizePrice !== undefined && sizePrice !== null ? sizePrice : (cur ? cur.sizePrice : null); c[key] = { productId: id, qty: (cur ? cur.qty : 0) + 1, subscribe: subscribe !== undefined ? subscribe : (cur ? cur.subscribe : false), size: nextSize, sizePrice: nextPrice }; try { localStorage.setItem('ak_cart', JSON.stringify(c)); } catch (er) {} return { cartItems: c, cartOpen: true, orderPlaced: false, quickView: null, wishlistOpen: false, bump: (s.bump || 0) + 1 }; }); };
     const addToCart = (id, subscribe, size, sizePrice) => {
       _commitAdd(id, subscribe, size, sizePrice);
-    };
-    const _flushPending = () => {
-      const pa = this.state.pendingAdd;
-      if (!pa) return false;
-      this.setState({ pendingAdd: null });
-      setTimeout(() => _commitAdd(pa.id, pa.subscribe, pa.size, pa.sizePrice), 60);
-      return true;
     };
     const setQty = (id, d) => this.setState(s => { const c = { ...s.cartItems }; if (!c[id]) return {}; const q = c[id].qty + d; if (q <= 0) delete c[id]; else c[id] = { ...c[id], qty: q }; try { localStorage.setItem('ak_cart', JSON.stringify(c)); } catch (er) {} return { cartItems: c }; });
     const removeItem = (id) => this.setState(s => { const c = { ...s.cartItems }; delete c[id]; try { localStorage.setItem('ak_cart', JSON.stringify(c)); } catch (er) {} return { cartItems: c }; });
@@ -2590,9 +2647,8 @@ class Component extends DCLogic {
     const bp = bpMap[this.state.breathePhase] || bpMap.in;
     const tintOpacity = (hour >= 19 || hour < 5) ? 0.16 : hour >= 16 ? 0.09 : 0;
     const dayNightStyle = 'position:fixed;inset:0;z-index:40;pointer-events:none;background:radial-gradient(ellipse at 50% 118%, rgba(190,106,69,0.55), transparent 72%);opacity:' + tintOpacity + ';';
-    const mo = new Date().getMonth(), da = new Date().getDate();
-    let festive = null;
     const recentProducts = (this.state.recent || []).map(id => ALL[id]).filter(Boolean).map(decorate);
+    const featuredProducts = ['immunity', 'kaphahara', 'sunni', 'ashta'].map(id => ALL[id]).filter(Boolean).map(decorate);
     const DOSHA_Q = [
       { q: t.dq1 || 'How does your body usually feel?', opts: [
         { label: t.dq1a || 'Light, thin, often cold', d: 'vata', color: '#9DB08E' },
@@ -2697,8 +2753,8 @@ class Component extends DCLogic {
       breatheOpen: this.state.breatheOpen, breatheClosed: !this.state.breatheOpen, toggleBreathe: this.toggleBreathe,
       breatheLabel: bp.label, breatheOrbStyle: 'transition: transform ' + bp.dur + ' ease-in-out; transform: scale(' + bp.scale + ');',
       dayNightStyle,
-      festiveActive: !!festive, festiveName: festive ? festive.name : '', festiveMsg: festive ? festive.msg : '',
       recentProducts, hasRecent: recentProducts.length > 0,
+      featuredProducts,
       reviews,
       legalOpen: !!legalDoc, legalTitle: legalDoc ? legalDoc.title : '', legalTabs, legalBlocks,
       openLegal: (k) => this.setState({ legal: k }),
@@ -2720,16 +2776,15 @@ class Component extends DCLogic {
       stepCart: this.state.checkoutStep === 'cart', stepAuth: this.state.checkoutStep === 'auth', stepDetails: this.state.checkoutStep === 'details',
       notStepCart: this.state.checkoutStep !== 'cart',
       goCheckout: () => this.setState({ checkoutStep: this.state.loggedIn ? 'details' : 'auth' }),
-      backToCart: () => this.setState({ checkoutStep: 'cart', pendingAdd: null }),
+      backToCart: () => this.setState({ checkoutStep: 'cart' }),
       cartEmptyOnCartStep: cartList.length === 0 && this.state.checkoutStep === 'cart',
       showCartSteps: cartList.length > 0 || this.state.checkoutStep === 'auth',
-      authGateTitle: this.state.pendingAdd ? 'Sign in to add to cart' : 'Sign in to check out',
-      authGateSub: this.state.pendingAdd
-        ? 'Please sign in or create an account to add this to your cart — we\'ll add it for you straight away.'
-        : 'Please sign in or create an account to place your order — it keeps your rituals and orders in one place.',
+      authGateTitle: 'Sign in to check out',
+      authGateSub: 'Please sign in or create an account to place your order — it keeps your rituals and orders in one place.',
       loggedIn: this.state.loggedIn, notLoggedIn: !this.state.loggedIn,
       accountMenuOpen: this.state.accountMenuOpen,
-      toggleAccountMenu: () => this.setState(s => ({ accountMenuOpen: !s.accountMenuOpen })),
+      toggleAccountMenu: () => this.setState(s => ({ accountMenuOpen: !s.accountMenuOpen, langOpen: false })),
+      socialSoon: () => this.showToast('Social links coming soon'),
       profileOpen: this.state.profileOpen,
       openProfile: () => this.setState({ profileOpen: true, ordersOpen: false, accountMenuOpen: false }),
       closeProfile: () => this.setState({ profileOpen: false }),
@@ -2882,9 +2937,7 @@ class Component extends DCLogic {
         };
         this._setSession(profile, false);
         this.showToast('Signed in');
-        const hadPending = !!this.state.pendingAdd;
-        this.setState({ loggedIn: true, authFailCount: 0, authLockUntil: 0, checkoutStep: hadPending ? 'cart' : 'details', authOtp: false, authError: '', profileName: profile.name || '', profilePhone: profile.phone || '', profileEmail: profile.email || '', profileAddress: profile.address || '', profileCity: profile.city || '', profileState: profile.state || '', profilePincode: profile.pincode || '' });
-        _flushPending();
+        this.setState({ loggedIn: true, authFailCount: 0, authLockUntil: 0, checkoutStep: 'details', authOtp: false, authError: '', profileName: profile.name || '', profilePhone: profile.phone || '', profileEmail: profile.email || '', profileAddress: profile.address || '', profileCity: profile.city || '', profileState: profile.state || '', profilePincode: profile.pincode || '' });
       },
       verifyOtp: (e) => {
         if (e && e.preventDefault) e.preventDefault();
@@ -2914,9 +2967,7 @@ class Component extends DCLogic {
         try { localStorage.setItem('ak_users', JSON.stringify(users)); localStorage.removeItem('ak_pending_otp'); } catch (er) {}
         this._setSession(profile, false);
         this.showToast('Verified — welcome!');
-        const hadPending2 = !!this.state.pendingAdd;
-        this.setState({ loggedIn: true, checkoutStep: hadPending2 ? 'cart' : 'details', authOtp: false, authError: '', profileName: profile.name || '', profilePhone: profile.phone || '', profileEmail: profile.email || '', profileAddress: profile.address || '', profileCity: profile.city || '', profileState: profile.state || '', profilePincode: profile.pincode || '' });
-        _flushPending();
+        this.setState({ loggedIn: true, checkoutStep: 'details', authOtp: false, authError: '', profileName: profile.name || '', profilePhone: profile.phone || '', profileEmail: profile.email || '', profileAddress: profile.address || '', profileCity: profile.city || '', profileState: profile.state || '', profilePincode: profile.pincode || '' });
       },
       resendOtp: () => {
         const code = String(1000 + Math.floor(Math.random() * 9000));
@@ -3034,7 +3085,7 @@ class Component extends DCLogic {
       t,
       langOpen: this.state.langOpen,
       langLabel: LANGS[this.state.lang],
-      toggleLang: () => this.setState(s => ({ langOpen: !s.langOpen })),
+      toggleLang: () => this.setState(s => ({ langOpen: !s.langOpen, accountMenuOpen: false })),
       langOptions: Object.keys(LANGS).map(k => ({ code: k, label: LANGS[k], active: k === this.state.lang, onClick: () => { try { localStorage.setItem('ak_lang', k); } catch (er) {} this.showToast(LANGS[k]); this.setState({ lang: k, langOpen: false }); } })),
 
       subscribed: this.state.subscribed,

@@ -161,6 +161,24 @@ View runs under the repo **Actions** tab → **E2E Tests**.
 
 ---
 
+## Low UX / a11y polish (`ux-low.spec.js`)
+
+| ID | Test case | Expected result |
+|----|-----------|-----------------|
+| TC-L29 | Featured Products rendered | Section visible with catalog products |
+| TC-L29b | Recently viewed | Appears after opening Quick View |
+| TC-L30 | Dead links fixed | Ingredients → `#ingredients`; Home → `#top`; social = coming soon |
+| TC-L31 | Empty image slots | Founders + category cards use real `<img>` |
+| TC-L32 | Escape closes modals | Quick View closes on Escape |
+| TC-L33 | Toast / menus a11y | `aria-live` toast; account menu outside-click |
+| TC-L34 | Mobile gap 820–860 | At 840px mobile bar shown, desktop nav hidden |
+| TC-L35 | Marketing stats | Honest `9` blends & `2021` founded (no 40+/12k+) |
+| TC-L36 | Auth terms link | Points to Landing `#legal-terms` |
+| TC-L37 | Net-banking copy | Not advertised |
+| TC-L38 | Diwali / pendingAdd | No festival banner; checkout auth is “Sign in to check out” only |
+
+---
+
 ## Notes
 
 - OTP and reset codes are read from `localStorage` (`ak_pending_otp`, `ak_reset`) — same as the demo UI toasts.

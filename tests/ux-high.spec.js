@@ -333,7 +333,7 @@ test.describe('UX high fixes', () => {
   test('TC-H23 positive: night ritual maps to Ashtagandham (real SKU)', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Night' }).click();
-    await expect(page.getByRole('heading', { name: 'Ashtagandham' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Ashtagandham' }).first()).toBeVisible();
     await expect(page.getByText(/Calm & Restore/i)).toHaveCount(0);
     await expect(page.getByText('₹199').first()).toBeVisible();
   });
@@ -341,7 +341,7 @@ test.describe('UX high fixes', () => {
   test('TC-H24 positive: summer season maps to Herbal Sunni Pindi with Quick View', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Summer' }).click();
-    await expect(page.getByRole('heading', { name: 'Herbal Sunni Pindi', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Herbal Sunni Pindi', exact: true }).first()).toBeVisible();
     await expect(page.getByText(/Cooling Sattva/i)).toHaveCount(0);
     await page.getByRole('button', { name: 'Quick View' }).first().click({ force: true });
     await expect(page.getByText('Herbal Sunni Pindi').first()).toBeVisible();
