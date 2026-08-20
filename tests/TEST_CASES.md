@@ -20,6 +20,19 @@ Other commands:
 
 ---
 
+## GitHub Actions (automatic testing on push)
+
+When code is pushed to [github.com/Sai-Sandilya/aakashik](https://github.com/Sai-Sandilya/aakashik), GitHub automatically:
+
+1. Installs Node.js and dependencies
+2. Installs Playwright Chromium
+3. Runs all 15 E2E tests
+4. Uploads a test report if any test fails
+
+View runs under the repo **Actions** tab → **E2E Tests**.
+
+---
+
 ## Auth page (`Aakashik Auth.dc.html`)
 
 ### Validation
