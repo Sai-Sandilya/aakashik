@@ -52,7 +52,10 @@ async function fillDeliveryBasics(page) {
   await form.locator('select').selectOption({ label: 'Telangana' });
 }
 
-/** @param {import('@playwright/test').Page} page */
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {Record<string, { productId: string, qty: number, subscribe: boolean, size: string | null, sizePrice: number | null }>} cart
+ */
 async function seedCartAndOpen(page, cart) {
   await page.goto(LANDING_URL);
   await page.evaluate((c) => localStorage.setItem('ak_cart', JSON.stringify(c)), cart);
@@ -208,7 +211,9 @@ test.describe('UX high fixes', () => {
     await page.getByRole('button', { name: 'Cash on Delivery' }).click();
     await page.getByRole('button', { name: 'Place Order' }).click();
     await expect(page.getByRole('heading', { name: 'Order Placed!' })).toBeVisible({ timeout: 8000 });
-    const orders = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_orders') || '[]'));
+    const orders = /** @type {Array<{ payMethod: string, returnsAccepted: boolean, payment?: { mock?: boolean, last4?: string } }>} */ (
+      await page.evaluate(() => JSON.parse(localStorage.getItem('ak_orders') || '[]'))
+    );
     expect(orders[0].payMethod).toBe('cod');
     expect(orders[0].returnsAccepted).toBe(false);
   });
@@ -220,9 +225,11 @@ test.describe('UX high fixes', () => {
     await page.getByPlaceholder('UPI ID (e.g. name@upi)').fill('buyer@upi');
     await page.getByRole('button', { name: 'Place Order' }).click();
     await expect(page.getByRole('heading', { name: 'Order Placed!' })).toBeVisible({ timeout: 8000 });
-    const orders = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_orders') || '[]'));
+    const orders = /** @type {Array<{ payMethod: string, payment?: { mock?: boolean, last4?: string } }>} */ (
+      await page.evaluate(() => JSON.parse(localStorage.getItem('ak_orders') || '[]'))
+    );
     expect(orders[0].payMethod).toBe('upi');
-    expect(orders[0].payment.mock).toBe(true);
+    expect(orders[0].payment && orders[0].payment.mock).toBe(true);
   });
 
   test('TC-H15 negative: empty UPI ID blocks place order', async ({ page }) => {
@@ -252,9 +259,11 @@ test.describe('UX high fixes', () => {
     await page.getByPlaceholder('CVV').fill('123');
     await page.getByRole('button', { name: 'Place Order' }).click();
     await expect(page.getByRole('heading', { name: 'Order Placed!' })).toBeVisible({ timeout: 8000 });
-    const orders = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_orders') || '[]'));
+    const orders = /** @type {Array<{ payMethod: string, payment?: { mock?: boolean, last4?: string } }>} */ (
+      await page.evaluate(() => JSON.parse(localStorage.getItem('ak_orders') || '[]'))
+    );
     expect(orders[0].payMethod).toBe('card');
-    expect(orders[0].payment.last4).toBe('1111');
+    expect(orders[0].payment && orders[0].payment.last4).toBe('1111');
   });
 
   test('TC-H18 negative: short card number is rejected', async ({ page }) => {
@@ -311,7 +320,9 @@ test.describe('UX high fixes', () => {
       }));
     });
     await page.reload();
-    const cart = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_cart') || '{}'));
+    const cart = /** @type {Record<string, { qty: number }>} */ (
+      await page.evaluate(() => JSON.parse(localStorage.getItem('ak_cart') || '{}'))
+    );
     expect(cart['kaphahara::100g'].qty).toBe(2);
     expect(Object.keys(cart).filter((k) => k.startsWith('kaphahara::')).length).toBe(1);
     await cartButton(page).click({ force: true });
