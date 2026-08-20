@@ -109,20 +109,21 @@
       </a>
       <!-- Nav -->
       <nav id="store-nav" style="display: flex; align-items: center; gap: 28px; font-size: 14px; letter-spacing: 0.02em;">
-        <a href="#categories" style="text-decoration: none; color: #45543E;">{{ t.nav1 }}</a>
-        <a href="#shop" style="text-decoration: none; color: #45543E;">{{ t.nav2 }}</a>
-        <a href="#categories" style="text-decoration: none; color: #45543E;">{{ t.nav3 }}</a>
+        <a href="#categories" onClick="{{ filterConcernSkin }}" style="text-decoration: none; color: #45543E;">{{ t.nav1 }}</a>
+        <a href="#shop" onClick="{{ filterConcernImmunity }}" style="text-decoration: none; color: #45543E;">{{ t.nav2 }}</a>
+        <a href="#shop" onClick="{{ filterConcernSpiritual }}" style="text-decoration: none; color: #45543E;">{{ t.nav3 }}</a>
         <a href="#story" style="text-decoration: none; color: #45543E;">{{ t.nav4 }}</a>
       </nav>
       <!-- Actions -->
       <div style="display: flex; align-items: center; gap: 6px;">
         <div style="position: relative;">
-          <button aria-label="Language" onClick="{{ toggleLang }}" style="display: inline-flex; align-items: center; gap: 5px; background: transparent; border: 1px solid #D7CDB4; padding: 7px 12px; border-radius: 30px; color: #45543E; font-size: 13px; cursor: pointer;">
+          <button aria-label="Language" onClick="{{ toggleLang }}" title="Partial translation — hero & nav" style="display: inline-flex; align-items: center; gap: 5px; background: transparent; border: 1px solid #D7CDB4; padding: 7px 12px; border-radius: 30px; color: #45543E; font-size: 13px; cursor: pointer;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             {{ langLabel }}
           </button>
           <sc-if value="{{ langOpen }}">
-            <div style="position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; background: #FBF7EE; border: 1px solid #E4DBC8; border-radius: 14px; padding: 6px; box-shadow: 0 18px 40px -20px rgba(46,61,44,0.5); min-width: 130px;">
+            <div style="position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; background: #FBF7EE; border: 1px solid #E4DBC8; border-radius: 14px; padding: 6px; box-shadow: 0 18px 40px -20px rgba(46,61,44,0.5); min-width: 160px;">
+              <p style="font-size: 11px; color: #8A9678; margin: 4px 10px 8px; line-height: 1.4;">Partial — hero &amp; nav only</p>
               <sc-for list="{{ langOptions }}" as="lo" hint-placeholder-count="4">
                 <button onClick="{{ lo.onClick }}" style="display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 10px; background: transparent; border: none; padding: 9px 12px; border-radius: 9px; font-size: 14px; color: #2E3D2C; cursor: pointer; text-align: left;">
                   {{ lo.label }}
@@ -136,7 +137,7 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
         </button>
         <sc-if value="{{ notLoggedIn }}" hint-placeholder-val="{{ true }}">
-          <a aria-label="Sign in" href="Aakashik Auth.dc.html" style="background: transparent; border: none; padding: 9px; border-radius: 50%; color: #45543E; display: inline-flex;">
+          <a aria-label="Sign in" href="Aakashik%20Auth.dc.html" style="background: transparent; border: none; padding: 9px; border-radius: 50%; color: #45543E; display: inline-flex;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           </a>
         </sc-if>
@@ -359,7 +360,7 @@
     </div>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 22px;">
       <!-- cat 1 -->
-      <a href="#shop" style="text-decoration: none; display: block;">
+      <a href="#shop" onClick="{{ filterConcernSkin }}" style="text-decoration: none; display: block; cursor: pointer;">
         <div class="catCard" style="border-radius: 18px; overflow: hidden; background: #FBF7EE; border: 1px solid #E7DECB;">
           <div style="position: relative; height: 190px; overflow: hidden;">
             <div class="catImg" style="position: absolute; inset: 0; background: repeating-linear-gradient(45deg, #E7D9BE, #E7D9BE 13px, #DECEAF 13px, #DECEAF 26px);"></div>
@@ -374,7 +375,7 @@
         </div>
       </a>
       <!-- cat 2 -->
-      <a href="#shop" style="text-decoration: none; display: block;">
+      <a href="#shop" onClick="{{ filterConcernSugar }}" style="text-decoration: none; display: block; cursor: pointer;">
         <div class="catCard" style="border-radius: 18px; overflow: hidden; background: #FBF7EE; border: 1px solid #E7DECB;">
           <div style="position: relative; height: 190px; overflow: hidden;">
             <div class="catImg" style="position: absolute; inset: 0; background: repeating-linear-gradient(45deg, #D9C3B4, #D9C3B4 13px, #CFB6A5 13px, #CFB6A5 26px);"></div>
@@ -389,7 +390,7 @@
         </div>
       </a>
       <!-- cat 3 -->
-      <a href="#shop" style="text-decoration: none; display: block;">
+      <a href="#shop" onClick="{{ filterConcernImmunity }}" style="text-decoration: none; display: block; cursor: pointer;">
         <div class="catCard" style="border-radius: 18px; overflow: hidden; background: #FBF7EE; border: 1px solid #E7DECB;">
           <div style="position: relative; height: 190px; overflow: hidden;">
             <div class="catImg" style="position: absolute; inset: 0; background: repeating-linear-gradient(45deg, #C9D3B4, #C9D3B4 13px, #BCC8A2 13px, #BCC8A2 26px);"></div>
@@ -404,7 +405,7 @@
         </div>
       </a>
       <!-- cat 4 -->
-      <a href="#shop" style="text-decoration: none; display: block;">
+      <a href="#shop" onClick="{{ filterConcernSpiritual }}" style="text-decoration: none; display: block; cursor: pointer;">
         <div class="catCard" style="border-radius: 18px; overflow: hidden; background: #FBF7EE; border: 1px solid #E7DECB;">
           <div style="position: relative; height: 190px; overflow: hidden;">
             <div class="catImg" style="position: absolute; inset: 0; background: repeating-linear-gradient(45deg, #E0C7A0, #E0C7A0 13px, #D6BA8D 13px, #D6BA8D 26px);"></div>
@@ -1279,7 +1280,7 @@
                   <sc-if value="{{ authIsPhone }}"><p style="font-size: 12px; color: #8A9678; margin: 0;">We'll text a one-time verification code to your 10-digit number</p></sc-if>
                   <sc-if value="{{ authIsEmail }}"><sc-if value="{{ isAuthSignup }}"><p style="font-size: 12px; color: #8A9678; margin: 0;">We'll email a verification code before activating the account</p></sc-if></sc-if>
                   <button type="submit" style="width: 100%; background: #BE6A45; color: #FBF7EE; border: none; padding: 14px; border-radius: 30px; font-size: 14.5px; font-weight: 500; margin-top: 4px;">Continue</button>
-                  <a href="Aakashik Auth.dc.html" style="text-align:center; font-size:12.5px; color:#B65E38; text-decoration:none;">Forgot password? / Full account page</a>
+                  <a href="Aakashik%20Auth.dc.html" style="text-align:center; font-size:12.5px; color:#B65E38; text-decoration:none;">Forgot password? / Full account page</a>
                 </form>
               </sc-if>
               <sc-if value="{{ authOtp }}">
@@ -1302,9 +1303,10 @@
               <h3 style="font-family: 'Marcellus', serif; font-size: 23px; color: #2E3D2C; margin: 0 0 16px;">Delivery details</h3>
               <form onSubmit="{{ placeOrder }}" style="display: flex; flex-direction: column; gap: 12px;">
                 <input value="{{ profileName }}" onInput="{{ onProfileName }}" required placeholder="Full name" style="background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
+                <p style="font-size: 12px; color: #8A9678; margin: 0;">Provide phone or email (at least one).</p>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                  <input value="{{ profilePhone }}" onInput="{{ onProfilePhone }}" required placeholder="Phone" style="flex: 1; min-width: 120px; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
-                  <input type="email" value="{{ profileEmail }}" onInput="{{ onProfileEmail }}" required placeholder="Email" style="flex: 1; min-width: 120px; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
+                  <input value="{{ profilePhone }}" onInput="{{ onProfilePhone }}" placeholder="Phone (or email below)" style="flex: 1; min-width: 120px; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
+                  <input type="email" value="{{ profileEmail }}" onInput="{{ onProfileEmail }}" placeholder="Email (or phone above)" style="flex: 1; min-width: 120px; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
                 </div>
                 <input value="{{ profileAddress }}" onInput="{{ onProfileAddress }}" required placeholder="Address (house, street, area)" style="background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
@@ -1550,7 +1552,7 @@
           </sc-if>
           <div style="display: flex; gap: 10px; margin-bottom: 18px;">
             <button onClick="{{ qv.chooseOnce }}" style="{{ qv.onceBtnStyle }}">One-time · {{ qv.origStr }}</button>
-            <button onClick="{{ qv.chooseSub }}" style="{{ qv.subBtnStyle }}">Subscribe · Save 10%</button>
+            <button onClick="{{ qv.chooseSub }}" style="{{ qv.subBtnStyle }}">Save 10% (demo)</button>
           </div>
           <div style="display: flex; align-items: center; gap: 12px;">
             <span style="font-family: 'Marcellus', serif; font-size: 26px; color: #2E3D2C;">{{ qv.priceStr }}</span>
@@ -1707,7 +1709,11 @@
             </div>
           </sc-if>
           <sc-if value="{{ trackMissing }}">
-            <div style="background: #F8E8E2; border: 1px solid #E8B8A8; color: #8A3E2A; border-radius: 12px; padding: 14px 16px; font-size: 13.5px; line-height: 1.6;">No order found for <strong>{{ trackDisplayId }}</strong>. Check the ID from your confirmation or profile.</div>
+            <div style="background: #F8E8E2; border: 1px solid #E8B8A8; color: #8A3E2A; border-radius: 12px; padding: 14px 16px; font-size: 13.5px; line-height: 1.6; margin-bottom: 14px;">No order found for <strong>{{ trackDisplayId }}</strong>. Check Order History or try another ID.</div>
+            <button type="button" onClick="{{ trackTryAgain }}" style="width: 100%; background: #2E3D2C; color: #F1EEDF; border: none; padding: 14px; border-radius: 30px; font-size: 14.5px; font-weight: 500; cursor: pointer;">Track another order</button>
+          </sc-if>
+          <sc-if value="{{ trackFound }}">
+            <button type="button" onClick="{{ trackTryAgain }}" style="margin-top: 16px; width: 100%; background: transparent; color: #2E3D2C; border: 1px solid #C2B591; padding: 12px; border-radius: 30px; font-size: 13.5px; cursor: pointer;">Track another order</button>
           </sc-if>
         </sc-if>
       </div>
@@ -1788,7 +1794,7 @@
       Cart
     </button>
     <sc-if value="{{ notLoggedIn }}">
-      <a href="Aakashik Auth.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none; color: #45543E; font-size: 10px; padding: 4px 12px;">
+      <a href="Aakashik%20Auth.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none; color: #45543E; font-size: 10px; padding: 4px 12px;">
         <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Account
       </a>
@@ -1865,6 +1871,56 @@ class Component extends DCLogic {
   _readOrders() {
     const orders = this._readJSON('ak_orders', []);
     return Array.isArray(orders) ? orders : [];
+  }
+  _userOrders() {
+    const all = this._readOrders();
+    if (!this.state.loggedIn) return [];
+    const email = String(this.state.profileEmail || '').trim().toLowerCase();
+    const phone = String(this.state.profilePhone || '').replace(/\D/g, '');
+    return all.filter((o) => {
+      const d = o && o.delivery ? o.delivery : {};
+      const oe = String(d.email || '').trim().toLowerCase();
+      const op = String(d.phone || '').replace(/\D/g, '');
+      if (email && oe && email === oe) return true;
+      if (phone && op && (phone === op || phone.slice(-10) === op.slice(-10))) return true;
+      return false;
+    });
+  }
+  _setSession(profile, persist) {
+    try {
+      localStorage.setItem('ak_profile', JSON.stringify(profile || {}));
+      if (persist) {
+        localStorage.setItem('ak_logged', '1');
+        localStorage.setItem('ak_persist', '1');
+        try { sessionStorage.removeItem('ak_logged'); } catch (er) {}
+      } else {
+        localStorage.removeItem('ak_persist');
+        localStorage.removeItem('ak_logged');
+        try { sessionStorage.setItem('ak_logged', '1'); } catch (er) {}
+      }
+      localStorage.removeItem('ak_lock_until');
+      localStorage.removeItem('ak_fail_count');
+    } catch (e) {}
+  }
+  _authIsLocked() {
+    try {
+      const until = Number(localStorage.getItem('ak_lock_until') || 0);
+      if (until > Date.now()) return until;
+    } catch (e) {}
+    return (this.state.authLockUntil || 0) > Date.now() ? this.state.authLockUntil : 0;
+  }
+  _authFail() {
+    let failCount = 0;
+    try { failCount = Number(localStorage.getItem('ak_fail_count') || 0); } catch (e) {}
+    failCount = (failCount || this.state.authFailCount || 0) + 1;
+    if (failCount >= 5) {
+      const until = Date.now() + 5 * 60 * 1000;
+      try { localStorage.setItem('ak_lock_until', String(until)); localStorage.setItem('ak_fail_count', '0'); } catch (e) {}
+      this.setState({ authFailCount: 0, authLockUntil: until, authError: 'Too many failed attempts. Account temporarily locked for 5 minutes.' });
+      return;
+    }
+    try { localStorage.setItem('ak_fail_count', String(failCount)); } catch (e) {}
+    this.setState({ authFailCount: failCount, authError: 'Incorrect email or password' });
   }
   _orderTrackSteps(placedAt) {
     const hours = (Date.now() - placedAt) / 3600000;
@@ -1977,8 +2033,20 @@ class Component extends DCLogic {
     if (Object.keys(boot).length) this.setState(boot);
     this._syncLogin = () => {
       try {
-        const on = localStorage.getItem('ak_logged') === '1';
-        const p = JSON.parse(localStorage.getItem('ak_profile') || '{}');
+        const persist = localStorage.getItem('ak_persist') === '1';
+        const localLogged = localStorage.getItem('ak_logged') === '1';
+        let sessionLogged = false;
+        try { sessionLogged = sessionStorage.getItem('ak_logged') === '1'; } catch (er) {}
+        // Persist sessions require ak_persist; otherwise sessionStorage only
+        let on = false;
+        if (persist && localLogged) on = true;
+        else if (!persist && sessionLogged) on = true;
+        else if (localLogged && !persist) {
+          // Legacy: clear sticky login without persist
+          try { localStorage.removeItem('ak_logged'); } catch (er) {}
+          on = sessionLogged;
+        }
+        const p = on ? JSON.parse(localStorage.getItem('ak_profile') || '{}') : {};
         const nextProfile = {
           profileName: p && typeof p.name === 'string' ? p.name : '',
           profilePhone: p && typeof p.phone === 'string' ? p.phone : '',
@@ -2357,7 +2425,7 @@ class Component extends DCLogic {
       if (memberPricing) unit = unit * (1 - MEMBER_RATE);
       return { id: key, productId: pid, name: p.name, sub: it.size ? it.size + ' · ' + p.sub : p.sub, jar: p.jar, cap: p.cap, qty: it.qty, subscribe: it.subscribe,
         lineN: unit * it.qty, priceStr: money(unit), lineStr: money(unit * it.qty),
-        subLabel: it.subscribe ? 'Subscribed · 10% off' : 'One-time',
+        subLabel: it.subscribe ? 'Save 10% (demo) · on' : 'Save 10% (demo)',
         inc: () => setQty(key, 1), dec: () => setQty(key, -1), remove: () => removeItem(key), toggleSub: () => toggleLineSub(key) };
     });
     const cartCount = cartList.reduce((a, l) => a + l.qty, 0);
@@ -2403,18 +2471,24 @@ class Component extends DCLogic {
     const PRICES = [{ k: 'all', label: 'All prices' }, { k: 'u300', label: 'Under ₹300' }, { k: 'm', label: '₹300–400' }, { k: 'p400', label: '₹400+' }];
     const q = this.state.searchQuery.trim().toLowerCase();
     const inPrice = (n) => this.state.fPrice === 'all' || (this.state.fPrice === 'u300' && n < 300) || (this.state.fPrice === 'm' && n >= 300 && n <= 400) || (this.state.fPrice === 'p400' && n > 400);
-    const results = PRODUCTS.filter(p => (this.state.fConcern === 'all' || p.concern === this.state.fConcern) && (this.state.fElement === 'all' || p.element === this.state.fElement) && inPrice(p.priceN) && (!q || (p.name + ' ' + p.concern + ' ' + p.element + ' ' + p.herbs.join(' ')).toLowerCase().includes(q))).map(decorate);
+    const priceMatches = (p) => {
+      if (this.state.fPrice === 'all') return true;
+      const prices = (p.sizes && p.sizes.length) ? p.sizes.map((s) => s.p) : [p.priceN];
+      return prices.some((n) => inPrice(n));
+    };
+    const catalog = PRODUCTS.concat(BUNDLES);
+    const results = catalog.filter(p => (this.state.fConcern === 'all' || p.concern === this.state.fConcern) && (this.state.fElement === 'all' || p.element === this.state.fElement || p.element === 'All') && priceMatches(p) && (!q || (p.name + ' ' + p.sub + ' ' + p.concern + ' ' + p.element + ' ' + (p.herbs || []).join(' ')).toLowerCase().includes(q))).map(decorate);
     const concernChips = CONCERNS.map(c => ({ label: c === 'all' ? 'All' : c, active: this.state.fConcern === c, style: chip(this.state.fConcern === c), onClick: () => this.setState({ fConcern: c }) }));
     const elementChips = ELEMENTS.map(c => ({ label: c === 'all' ? 'All' : c, active: this.state.fElement === c, style: chip(this.state.fElement === c), onClick: () => this.setState({ fElement: c }) }));
     const priceChips = PRICES.map(c => ({ label: c.label, active: this.state.fPrice === c.k, style: chip(this.state.fPrice === c.k), onClick: () => this.setState({ fPrice: c.k }) }));
-    const suggestions = q ? PRODUCTS.filter(p => p.name.toLowerCase().includes(q)).slice(0, 4).map(p => ({ name: p.name, onClick: () => openQuickView(p.id) })) : [];
+    const suggestions = q ? catalog.filter(p => p.name.toLowerCase().includes(q)).slice(0, 4).map(p => ({ name: p.name, onClick: () => openQuickView(p.id) })) : [];
 
     // ---- Order tracking ----
     const trackOrder = this.state.trackOrder;
     const trackSteps = trackOrder ? this._orderTrackSteps(trackOrder.placedAt) : [];
     const trackHoursLeft = trackOrder ? Math.max(1, Math.ceil(72 - (Date.now() - trackOrder.placedAt) / 3600000)) : 0;
     const trackEta = trackOrder ? ('estimated delivery in ' + trackHoursLeft + ' hour(s)') : '';
-    const userOrders = this._readOrders();
+    const userOrders = this._userOrders();
     const orderHistory = userOrders.slice(0, 20).map(o => {
       const status = this._orderStatusLabel(o.placedAt || Date.now());
       const items = Array.isArray(o.items) ? o.items : [];
@@ -2707,18 +2781,34 @@ class Component extends DCLogic {
           return;
         }
         try {
-          localStorage.setItem('ak_profile', JSON.stringify(p));
           const users = JSON.parse(localStorage.getItem('ak_users') || '{}');
-          const key = p.email || p.phone;
-          if (key && users[key]) {
-            users[key] = Object.assign({}, users[key], p);
-            localStorage.setItem('ak_users', JSON.stringify(users));
-          }
+          const prev = JSON.parse(localStorage.getItem('ak_profile') || '{}');
+          const oldKeys = [prev.email, prev.phone].filter(Boolean);
+          const newKeys = [p.email, p.phone].filter(Boolean);
+          let base = {};
+          oldKeys.concat(newKeys).forEach((k) => { if (users[k]) base = Object.assign({}, base, users[k]); });
+          const entry = Object.assign({}, base, p, { verified: true });
+          oldKeys.forEach((k) => { if (newKeys.indexOf(k) < 0) delete users[k]; });
+          newKeys.forEach((k) => { users[k] = Object.assign({}, entry); });
+          localStorage.setItem('ak_users', JSON.stringify(users));
+          localStorage.setItem('ak_profile', JSON.stringify(p));
         } catch (er) {}
-        this.showToast('Profile updated · confirmation notice sent');
+        this.showToast('Profile updated');
         this.setState({ profileOpen: false });
       },
-      logout: () => { try { localStorage.removeItem('ak_logged'); localStorage.removeItem('ak_persist'); } catch (e) {} this.showToast('Signed out'); this.setState({ loggedIn: false, checkoutStep: 'cart', accountMenuOpen: false, profileOpen: false, ordersOpen: false }); },
+      logout: () => {
+        try {
+          localStorage.removeItem('ak_logged');
+          localStorage.removeItem('ak_persist');
+          localStorage.removeItem('ak_profile');
+          sessionStorage.removeItem('ak_logged');
+        } catch (e) {}
+        this.showToast('Signed out');
+        this.setState({
+          loggedIn: false, checkoutStep: 'cart', accountMenuOpen: false, profileOpen: false, ordersOpen: false,
+          profileName: '', profilePhone: '', profileEmail: '', profileAddress: '', profileCity: '', profileState: '', profilePincode: '',
+        });
+      },
       authMode: this.state.authMode, isAuthSignin: this.state.authMode === 'signin', isAuthSignup: this.state.authMode === 'signup',
       setAuthSignin: () => this.setState({ authMode: 'signin' }), setAuthSignup: () => this.setState({ authMode: 'signup' }),
       authSigninStyle: 'flex:1;padding:10px;border-radius:26px;font-size:13.5px;font-weight:500;cursor:pointer;border:none;background:' + (this.state.authMode === 'signin' ? '#2E3D2C' : 'transparent') + ';color:' + (this.state.authMode === 'signin' ? '#F1EEDF' : '#5E6A54') + ';',
@@ -2735,8 +2825,8 @@ class Component extends DCLogic {
       authOtpCode: this.state.authOtpCode,
       onAuthOtpCode: (e) => this.setState({ authOtpCode: String(e.target.value || '').replace(/\D/g, '').slice(0, 4) }),
       authError: this.state.authError, hasAuthError: !!this.state.authError,
-      authLocked: Date.now() < (this.state.authLockUntil || 0),
-      authLockMins: Date.now() < (this.state.authLockUntil || 0) ? Math.max(1, Math.ceil((this.state.authLockUntil - Date.now()) / 60000)) : 0,
+      authLocked: !!this._authIsLocked(),
+      authLockMins: (() => { const u = this._authIsLocked(); return u ? Math.max(1, Math.ceil((u - Date.now()) / 60000)) : 0; })(),
       authIsPhone: _authIsPhone, authIsEmail: _authIsEmail, authPwShown: !_authIsPhone,
       showAuthStrength: !!(this.state.authPassword),
       authStrengthPct: _pwPcts[Math.min(_pwScore, 5)],
@@ -2746,9 +2836,10 @@ class Component extends DCLogic {
       otpContact: this.state.authContact,
       doAuth: (e) => {
         if (e && e.preventDefault) e.preventDefault();
-        if (Date.now() < (this.state.authLockUntil || 0)) {
-          const mins = Math.max(1, Math.ceil((this.state.authLockUntil - Date.now()) / 60000));
-          return this.setState({ authError: 'Too many failed attempts. Try again in ' + mins + ' minute(s).' });
+        const lockUntil = this._authIsLocked();
+        if (lockUntil) {
+          const mins = Math.max(1, Math.ceil((lockUntil - Date.now()) / 60000));
+          return this.setState({ authError: 'Too many failed attempts. Try again in ' + mins + ' minute(s).', authLockUntil: lockUntil });
         }
         const contact = (this.state.authContact || '').trim();
         if (!contact) return this.setState({ authError: 'Enter your phone number or email.' });
@@ -2777,11 +2868,8 @@ class Component extends DCLogic {
         const key = contact.toLowerCase();
         const user = users[key];
         if (!user || user.password !== this.state.authPassword) {
-          const failCount = (this.state.authFailCount || 0) + 1;
-          if (failCount >= 5) {
-            return this.setState({ authFailCount: 0, authLockUntil: Date.now() + 5 * 60 * 1000, authError: 'Too many failed attempts. Account temporarily locked for 5 minutes.' });
-          }
-          return this.setState({ authFailCount: failCount, authError: 'Incorrect email or password' });
+          this._authFail();
+          return;
         }
         const profile = {
           name: user.name || '',
@@ -2792,7 +2880,7 @@ class Component extends DCLogic {
           state: user.state || '',
           pincode: user.pincode || '',
         };
-        try { localStorage.setItem('ak_profile', JSON.stringify(profile)); localStorage.setItem('ak_logged', '1'); } catch (er) {}
+        this._setSession(profile, false);
         this.showToast('Signed in');
         const hadPending = !!this.state.pendingAdd;
         this.setState({ loggedIn: true, authFailCount: 0, authLockUntil: 0, checkoutStep: hadPending ? 'cart' : 'details', authOtp: false, authError: '', profileName: profile.name || '', profilePhone: profile.phone || '', profileEmail: profile.email || '', profileAddress: profile.address || '', profileCity: profile.city || '', profileState: profile.state || '', profilePincode: profile.pincode || '' });
@@ -2804,23 +2892,27 @@ class Component extends DCLogic {
         if (!/^\d{4}$/.test(code)) return this.setState({ authError: 'Enter the 4-digit verification code.' });
         let pending = null;
         try { pending = JSON.parse(localStorage.getItem('ak_pending_otp') || 'null'); } catch (er) {}
-        if (pending && pending.expiresAt && Date.now() > pending.expiresAt) return this.setState({ authError: 'Code expired. Please request a new one.', authOtp: false });
-        if (pending && pending.code && code !== pending.code) return this.setState({ authError: 'Incorrect verification code.' });
-        const existing = (() => { try { return JSON.parse(localStorage.getItem('ak_profile') || '{}'); } catch (er) { return {}; } })();
+        if (!pending || !pending.code) {
+          return this.setState({ authError: 'No active verification code. Please request a new one.', authOtp: false, authOtpCode: '' });
+        }
+        if (pending.expiresAt && Date.now() > pending.expiresAt) return this.setState({ authError: 'Code expired. Please request a new one.', authOtp: false });
+        if (code !== String(pending.code)) return this.setState({ authError: 'Incorrect verification code.' });
         const users = (() => { try { return JSON.parse(localStorage.getItem('ak_users') || '{}'); } catch (er) { return {}; } })();
         const key = _authIsPhone ? _ad : _av.toLowerCase();
+        const stored = users[key] || {};
         const profile = {
-          name: (this.state.authMode === 'signup' ? this.state.authName : this.state.profileName || existing.name || '').trim(),
-          phone: _authIsPhone ? _ad : (existing.phone || this.state.profilePhone || ''),
-          email: _authIsEmail ? _av.toLowerCase() : (existing.email || this.state.profileEmail || ''),
-          address: existing.address || this.state.profileAddress || '',
-          city: existing.city || this.state.profileCity || '',
-          state: existing.state || this.state.profileState || '',
-          pincode: existing.pincode || this.state.profilePincode || '',
+          name: (this.state.authMode === 'signup' ? this.state.authName : (stored.name || '')).trim(),
+          phone: _authIsPhone ? _ad : (stored.phone || ''),
+          email: _authIsEmail ? _av.toLowerCase() : (stored.email || ''),
+          address: stored.address || '',
+          city: stored.city || '',
+          state: stored.state || '',
+          pincode: stored.pincode || '',
           verified: true,
         };
-        users[key] = Object.assign({}, users[key] || {}, profile, { password: this.state.authPassword || (users[key] && users[key].password) || '' });
-        try { localStorage.setItem('ak_users', JSON.stringify(users)); localStorage.setItem('ak_profile', JSON.stringify(profile)); localStorage.setItem('ak_logged', '1'); localStorage.removeItem('ak_pending_otp'); } catch (er) {}
+        users[key] = Object.assign({}, stored, profile, { password: this.state.authPassword || stored.password || '' });
+        try { localStorage.setItem('ak_users', JSON.stringify(users)); localStorage.removeItem('ak_pending_otp'); } catch (er) {}
+        this._setSession(profile, false);
         this.showToast('Verified — welcome!');
         const hadPending2 = !!this.state.pendingAdd;
         this.setState({ loggedIn: true, checkoutStep: hadPending2 ? 'cart' : 'details', authOtp: false, authError: '', profileName: profile.name || '', profilePhone: profile.phone || '', profileEmail: profile.email || '', profileAddress: profile.address || '', profileCity: profile.city || '', profileState: profile.state || '', profilePincode: profile.pincode || '' });
@@ -2919,6 +3011,11 @@ class Component extends DCLogic {
 
       trackOpen: this.state.trackOpen, openTrack: () => this.setState({ trackOpen: true, trackSubmitted: false, trackOrder: null, trackNotFound: false }),
       closeTrack: () => this.setState({ trackOpen: false, trackSubmitted: false, trackOrder: null, trackNotFound: false }),
+      trackTryAgain: () => this.setState({ trackSubmitted: false, trackOrder: null, trackNotFound: false, trackOrderId: '' }),
+      filterConcernSkin: () => this.setState({ fConcern: 'Skin & Body', searchOpen: true, searchQuery: '' }),
+      filterConcernSugar: () => this.setState({ fConcern: 'Sugar', searchOpen: true, searchQuery: '' }),
+      filterConcernImmunity: () => this.setState({ fConcern: 'Immunity', searchOpen: true, searchQuery: '' }),
+      filterConcernSpiritual: () => this.setState({ fConcern: 'Spiritual', searchOpen: true, searchQuery: '' }),
       trackOrderId: this.state.trackOrderId,
       onTrackOrderId: (e) => this.setState({ trackOrderId: e.target.value }),
       onTrackSubmit: (e) => {
@@ -2976,8 +3073,16 @@ class Component extends DCLogic {
       setReminder: (e) => {
         if (e && e.preventDefault) e.preventDefault();
         const contact = (this.state.reminderContact || '').trim();
+        const channel = this.state.reminderChannel || 'whatsapp';
         if (!contact) { this.showToast('Enter phone or email for reminders'); return; }
-        this._writeJSON('ak_reminder', { contact, time: this.state.reminderTime || '08:00', channel: this.state.reminderChannel || 'whatsapp', setAt: Date.now() });
+        const isEmailChannel = channel === 'email';
+        if (isEmailChannel) {
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(contact)) { this.showToast('Enter a valid email for email reminders'); return; }
+        } else {
+          const digits = contact.replace(/\D/g, '');
+          if (!/^\d{10}$/.test(digits) || !/^[6-9]/.test(digits)) { this.showToast('Enter a valid 10-digit phone for WhatsApp/SMS reminders'); return; }
+        }
+        this._writeJSON('ak_reminder', { contact, time: this.state.reminderTime || '08:00', channel, setAt: Date.now() });
         this.setState({ reminderSet: true });
       },
     };

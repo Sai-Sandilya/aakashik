@@ -7,10 +7,11 @@ const {
 } = require('./helpers/storage');
 
 const LANDING_URL = '/Aakashik%20Landing.dc.html';
+const ORDERS_EMAIL = `orders-${Date.now()}@test.com`;
 
 /** @param {import('@playwright/test').Page} page */
-async function seedOrders(page) {
-  await page.evaluate(() => {
+async function seedOrders(page, email = ORDERS_EMAIL) {
+  await page.evaluate((userEmail) => {
     localStorage.setItem('ak_orders', JSON.stringify([
       {
         id: 'AAK-77777',
@@ -20,23 +21,24 @@ async function seedOrders(page) {
           { id: 'immunity', name: 'Daily Immunity', qty: 1 },
           { id: 'ashta', name: 'Ashtagandham', qty: 1 },
         ],
-        delivery: { name: 'Test' },
+        delivery: { name: 'Test', email: userEmail, phone: '' },
       },
       {
         id: 'AAK-66666',
         placedAt: Date.now() - 80 * 3600000,
         total: 199,
         items: [{ id: 'kaphahara', name: 'Kaphahara', qty: 1, size: '100g' }],
+        delivery: { name: 'Someone Else', email: 'other-user@test.com', phone: '' },
       },
     ]));
-  });
+  }, email);
 }
 
 test.describe('Order History UX', () => {
   test.beforeEach(async ({ page }) => {
     await clearAuthStorage(page);
     await seedEmailUser(page, {
-      email: `orders-${Date.now()}@test.com`,
+      email: ORDERS_EMAIL,
       password: STRONG_PASSWORD,
       name: 'Order User',
     });
@@ -50,6 +52,7 @@ test.describe('Order History UX', () => {
     await page.getByRole('button', { name: 'Order History' }).click();
     await expect(page.getByRole('heading', { name: 'Order History' })).toBeVisible();
     await expect(page.getByText('AAK-77777')).toBeVisible();
+    await expect(page.getByText('AAK-66666')).toHaveCount(0);
     await expect(page.getByText('Products: Daily Immunity, Ashtagandham')).toBeVisible();
   });
 
@@ -108,8 +111,8 @@ test.describe('Order History UX', () => {
     await expect(page.getByRole('heading', { name: 'Delivery details' })).toBeVisible({ timeout: 8000 });
     const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'Place Order' }) });
     await form.getByPlaceholder('Full name').fill('Buyer');
-    await form.getByPlaceholder('Phone').fill('9876543210');
-    await form.getByPlaceholder('Email').fill(`buyer-${Date.now()}@test.com`);
+    await form.getByPlaceholder('Phone (or email below)').fill('9876543210');
+    await form.getByPlaceholder('Email (or phone above)').fill(`buyer-${Date.now()}@test.com`);
     await form.getByPlaceholder('Address (house, street, area)').fill('12 Lane');
     await form.getByPlaceholder('City').fill('Hyderabad');
     await form.getByPlaceholder('Pincode').fill('500001');

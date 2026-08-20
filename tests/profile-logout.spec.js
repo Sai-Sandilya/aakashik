@@ -107,7 +107,13 @@ test.describe('Landing — logout', () => {
 
     expect(await isLoggedIn(page)).toBe(false);
 
-    const persist = await page.evaluate(() => localStorage.getItem('ak_persist'));
-    expect(persist).toBeNull();
+    const cleared = await page.evaluate(() => ({
+      persist: localStorage.getItem('ak_persist'),
+      profile: localStorage.getItem('ak_profile'),
+      session: sessionStorage.getItem('ak_logged'),
+    }));
+    expect(cleared.persist).toBeNull();
+    expect(cleared.profile).toBeNull();
+    expect(cleared.session).toBeNull();
   });
 });

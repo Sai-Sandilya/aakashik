@@ -136,6 +136,31 @@ View runs under the repo **Actions** tab → **E2E Tests**.
 
 ---
 
+## Medium UX fixes (`ux-medium.spec.js`)
+
+| ID | Test case | Expected result |
+|----|-----------|-----------------|
+| TC-M11 | Checkout delivery contact | Phone **or** email accepted (hint shown) |
+| TC-M12 | Keep me signed in off | Session in `sessionStorage` only; Landing still logged in |
+| TC-M13 | Login with leftover profile | New login **replaces** profile (no merge) |
+| TC-M14 | Logout | Clears `ak_profile` as well as session flags |
+| TC-M15 | Forgot password with phone | Rejected — email-only reset |
+| TC-M16 | Google / GitHub buttons | Labeled **(demo)** |
+| TC-M17 | OTP when pending missing | "No active verification code" |
+| TC-M18 | Track modal wrong ID | "Track another order" retries without reopen |
+| TC-M19 | Order history | Only current user's orders shown |
+| TC-M20 | Language switcher | Discloses partial translation |
+| TC-M21 | Category card | Opens search filtered by concern |
+| TC-M22 | Search kits | Bundles/kits appear in results |
+| TC-M23 | Price filter | Size price ranges included |
+| TC-M24 | Subscribe & Save | Labeled Save 10% (demo) |
+| TC-M25 | Auth lockout | Shared via `ak_lock_until` |
+| TC-M26 | Reminder validation | WhatsApp/SMS requires valid phone |
+| TC-M27 | Profile email change | Migrates `ak_users` login key |
+| TC-M28 | Filenames in links | Percent-encoded (`Aakashik%20…`) |
+
+---
+
 ## Notes
 
 - OTP and reset codes are read from `localStorage` (`ak_pending_otp`, `ak_reset`) — same as the demo UI toasts.

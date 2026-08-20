@@ -26,7 +26,12 @@ async function switchToSignin(page) {
 }
 
 async function fillContact(page, value) {
-  await page.getByPlaceholder('10-digit phone or you@gmail.com').fill(value);
+  const main = page.getByPlaceholder('10-digit phone or you@gmail.com');
+  if (await main.count()) {
+    await main.fill(value);
+    return;
+  }
+  await page.getByPlaceholder('you@gmail.com').fill(value);
 }
 
 async function fillPassword(page, value) {
