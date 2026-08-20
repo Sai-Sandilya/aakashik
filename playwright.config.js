@@ -1,10 +1,5 @@
 // @ts-check
-const path = require('path');
 const { defineConfig } = require('@playwright/test');
-
-if (!process.env.CI) {
-  process.env.PLAYWRIGHT_BROWSERS_PATH = path.join(__dirname, '.playwright-browsers');
-}
 
 const PORT = 8080;
 const BASE_URL = `http://127.0.0.1:${PORT}`;
