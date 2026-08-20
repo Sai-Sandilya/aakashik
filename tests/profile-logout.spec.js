@@ -1,0 +1,112 @@
+// @ts-check
+const { test, expect } = require('@playwright/test');
+const {
+  clearAuthStorage,
+  seedEmailUser,
+  readProfile,
+  isLoggedIn,
+  STRONG_PASSWORD,
+} = require('./helpers/storage');
+
+const LANDING_URL = '/Aakashik%20Landing.dc.html';
+
+test.describe('Landing — guest vs logged-in UI', () => {
+  test.beforeEach(async ({ page }) => {
+    await clearAuthStorage(page);
+  });
+
+  // TC-P03
+  test('guest sees sign-in link instead of account menu', async ({ page }) => {
+    await page.goto(LANDING_URL);
+    await expect(page.getByRole('link', { name: 'Sign in' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Account options' })).not.toBeVisible();
+  });
+});
+
+test.describe('Landing — profile', () => {
+  const email = `profile-${Date.now()}@test.com`;
+
+  test.beforeEach(async ({ page }) => {
+    await clearAuthStorage(page);
+    await seedEmailUser(page, {
+      email,
+      password: STRONG_PASSWORD,
+      name: 'Profile Tester',
+    });
+  });
+
+  // TC-P01
+  test('logged-in user sees account menu with Profile and Log out', async ({ page }) => {
+    await page.goto(LANDING_URL);
+    await page.getByRole('button', { name: 'Account options' }).click();
+
+    await expect(page.getByRole('button', { name: 'Profile' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Log out' })).toBeVisible();
+  });
+
+  // TC-P02
+  test('profile modal saves delivery details and persists after reload', async ({ page }) => {
+    await page.goto(LANDING_URL);
+    await page.getByRole('button', { name: 'Account options' }).click();
+    await page.getByRole('button', { name: 'Profile' }).click();
+
+    await expect(page.getByRole('heading', { name: 'My Profile' })).toBeVisible();
+
+    await page.getByPlaceholder('Full name').fill('Updated Name');
+    await page.getByPlaceholder('Phone number').fill('9876543210');
+    await page.getByPlaceholder('Email address').fill(email);
+    await page.getByPlaceholder('Address (house, street, area)').fill('12 MG Road');
+    await page.getByPlaceholder('City').fill('Hyderabad');
+    await page.getByPlaceholder('Pin code').fill('500001');
+    await page.locator('select').selectOption('Telangana');
+
+    await page.getByRole('button', { name: 'Save changes' }).click();
+
+    const profile = await readProfile(page);
+    expect(profile.name).toBe('Updated Name');
+    expect(profile.phone).toBe('9876543210');
+    expect(profile.address).toBe('12 MG Road');
+    expect(profile.city).toBe('Hyderabad');
+    expect(profile.state).toBe('Telangana');
+    expect(profile.pincode).toBe('500001');
+
+    await page.reload();
+    await page.getByRole('button', { name: 'Account options' }).click();
+    await page.getByRole('button', { name: 'Profile' }).click();
+
+    await expect(page.getByPlaceholder('Full name')).toHaveValue('Updated Name');
+    await expect(page.getByPlaceholder('Address (house, street, area)')).toHaveValue('12 MG Road');
+    await expect(page.getByPlaceholder('City')).toHaveValue('Hyderabad');
+    await expect(page.getByPlaceholder('Pin code')).toHaveValue('500001');
+  });
+});
+
+test.describe('Landing — logout', () => {
+  const email = `logout-${Date.now()}@test.com`;
+
+  test.beforeEach(async ({ page }) => {
+    await clearAuthStorage(page);
+    await seedEmailUser(page, {
+      email,
+      password: STRONG_PASSWORD,
+      name: 'Logout Tester',
+    });
+  });
+
+  // TC-L01
+  test('logout clears session and shows sign-in link', async ({ page }) => {
+    await page.goto(LANDING_URL);
+    await expect(page.getByRole('button', { name: 'Account options' })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Account options' }).click();
+    await page.getByRole('button', { name: 'Log out' }).click();
+
+    await expect(page.getByRole('link', { name: 'Sign in' })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('button', { name: 'Account options' })).not.toBeVisible();
+
+    expect(await isLoggedIn(page)).toBe(false);
+
+    const persist = await page.evaluate(() => localStorage.getItem('ak_persist'));
+    expect(persist).toBeNull();
+  });
+});
