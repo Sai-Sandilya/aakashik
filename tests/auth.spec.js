@@ -89,7 +89,7 @@ test.describe('Auth page — create account', () => {
 
     await signupWithEmail(page, { name, email, password: STRONG_PASSWORD });
 
-    await expect(page.getByText(/Verification code sent/i).first()).toBeVisible();
+    await expect(page.getByText(/Demo verification code/i).first()).toBeVisible();
 
     const otp = await readStoredCode(page, 'ak_pending_otp');
     expect(otp).toMatch(/^\d{4}$/);
@@ -114,7 +114,7 @@ test.describe('Auth page — create account', () => {
     await fillContact(page, phone);
     await submitButton(page, 'Create Account').click();
 
-    await expect(page.getByText(/Verification code sent/i).first()).toBeVisible();
+    await expect(page.getByText(/Demo verification code/i).first()).toBeVisible();
 
     const otp = await readStoredCode(page, 'ak_pending_otp');
     await enterOtpAndVerify(page, otp);
