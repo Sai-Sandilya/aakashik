@@ -149,8 +149,9 @@
               </span>
             </button>
             <sc-if value="{{ accountMenuOpen }}">
-              <div style="position: absolute; right: 0; top: calc(100% + 8px); min-width: 170px; background: #FBF7EE; border: 1px solid #E4DBC8; border-radius: 14px; padding: 6px; box-shadow: 0 18px 40px -20px rgba(46,61,44,0.5); z-index: 80;">
+              <div style="position: absolute; right: 0; top: calc(100% + 8px); min-width: 190px; background: #FBF7EE; border: 1px solid #E4DBC8; border-radius: 14px; padding: 6px; box-shadow: 0 18px 40px -20px rgba(46,61,44,0.5); z-index: 80;">
                 <button onClick="{{ openProfile }}" style="display: flex; width: 100%; align-items: center; gap: 8px; background: transparent; border: none; padding: 10px 12px; border-radius: 10px; color: #2E3D2C; cursor: pointer; text-align: left; font-size: 14px;">Profile</button>
+                <button onClick="{{ openOrders }}" style="display: flex; width: 100%; align-items: center; gap: 8px; background: transparent; border: none; padding: 10px 12px; border-radius: 10px; color: #2E3D2C; cursor: pointer; text-align: left; font-size: 14px;">Order History</button>
                 <button onClick="{{ logout }}" style="display: flex; width: 100%; align-items: center; gap: 8px; background: transparent; border: none; padding: 10px 12px; border-radius: 10px; color: #B65E38; cursor: pointer; text-align: left; font-size: 14px;">Log out</button>
               </div>
             </sc-if>
@@ -977,6 +978,7 @@
           <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#B7C7A6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
         </span>
         <h3 style="font-family: 'Marcellus', serif; font-size: 19px; font-weight: 400; color: #F4EEE1; margin: 0 0 8px;">Track Your Order</h3>
+        <p style="font-size: 12.5px; line-height: 1.5; color: #AFB6A2; margin: 0 0 12px;">Forgot the ID? Open Order History from your account menu.</p>
         <button onClick="{{ openTrack }}" style="display: inline-flex; align-items: center; gap: 7px; background: #BE6A45; color: #FBF7EE; border: none; padding: 10px 18px; border-radius: 30px; font-size: 13px; font-weight: 500;">
           Track now
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -1149,10 +1151,15 @@
           <p style="font-size: 14px; color: #5E6A54; margin: 0 0 8px; line-height: 1.6;">Thank you — a confirmation is on its way. Your ritual is being packed with care.</p>
           <p style="font-size: 12.5px; color: #8A3E2A; margin: 0 0 8px; line-height: 1.5;">All sales are final. We do not accept returns on placed orders.</p>
           <sc-if value="{{ hasLastOrderId }}">
-            <p style="font-size: 13px; color: #8A9678; margin: 0 0 22px;">Order ID: <strong style="color: #2E3D2C; letter-spacing: 0.04em;">{{ lastOrderId }}</strong></p>
+            <p style="font-size: 13px; color: #8A9678; margin: 0 0 16px;">Order ID: <strong style="color: #2E3D2C; letter-spacing: 0.04em;">{{ lastOrderId }}</strong></p>
           </sc-if>
-          <sc-if value="{{ notLastOrderId }}"><span style="display:block;height:22px;"></span></sc-if>
-          <button onClick="{{ closeCart }}" style="background: #2E3D2C; color: #F1EEDF; border: none; padding: 13px 26px; border-radius: 30px; font-size: 14px; font-weight: 500;">Continue Shopping</button>
+          <sc-if value="{{ notLastOrderId }}"><span style="display:block;height:16px;"></span></sc-if>
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+            <sc-if value="{{ hasLastOrderId }}">
+              <button type="button" onClick="{{ trackLastOrder }}" style="background: #BE6A45; color: #FBF7EE; border: none; padding: 13px 22px; border-radius: 30px; font-size: 14px; font-weight: 500; cursor: pointer;">Track Order</button>
+            </sc-if>
+            <button onClick="{{ closeCart }}" style="background: #2E3D2C; color: #F1EEDF; border: none; padding: 13px 22px; border-radius: 30px; font-size: 14px; font-weight: 500; cursor: pointer;">Continue Shopping</button>
+          </div>
         </div>
       </sc-if>
 
@@ -1411,16 +1418,49 @@
             <button type="submit" style="flex: 1; background: #2E3D2C; color: #F1EEDF; border: none; padding: 13px; border-radius: 30px; font-size: 14px; font-weight: 500;">Save changes</button>
             <button type="button" onClick="{{ closeProfile }}" style="flex: 1; background: transparent; color: #2E3D2C; border: 1px solid #C2B591; padding: 13px; border-radius: 30px; font-size: 14px; font-weight: 500;">Cancel</button>
           </div>
+        </form>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===== ORDER HISTORY MODAL ===== -->
+  <sc-if value="{{ ordersOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeOrders }}" style="position: fixed; inset: 0; background: rgba(35,45,25,0.42); z-index: 240; display: flex; align-items: center; justify-content: center; padding: 20px; animation: sceneFade .25s ease;">
+      <div onClick="{{ stop }}" style="position: relative; width: min(560px, 100%); max-height: 88vh; background: #F6F1E4; border-radius: 24px; overflow: hidden; box-shadow: 0 40px 80px -30px rgba(35,45,25,0.6); display: flex; flex-direction: column; animation: modalIn .3s cubic-bezier(.34,1.4,.6,1);">
+        <div style="padding: 24px 26px 18px; border-bottom: 1px solid #E4DBC8; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-shrink: 0;">
+          <div>
+            <h3 style="font-family: 'Marcellus', serif; font-size: 28px; color: #2E3D2C; margin: 0;">Order History</h3>
+            <p style="font-size: 13px; color: #7A8570; margin: 4px 0 0;">Find your order ID and track status here.</p>
+          </div>
+          <button onClick="{{ closeOrders }}" aria-label="Close order history" style="width: 36px; height: 36px; border-radius: 50%; background: rgba(46,61,44,0.06); border: none; cursor: pointer; color: #2E3D2C; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m18 6-12 12"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
+        <div style="padding: 18px 24px 24px; overflow-y: auto; flex: 1;">
+          <sc-if value="{{ ordersEmpty }}">
+            <div style="text-align: center; padding: 36px 12px;">
+              <h4 style="font-family: 'Marcellus', serif; font-size: 22px; color: #2E3D2C; margin: 0 0 8px;">No orders yet</h4>
+              <p style="font-size: 13.5px; color: #7A8570; margin: 0 0 16px;">When you place an order, it will appear here with tracking.</p>
+              <button type="button" onClick="{{ closeOrders }}" style="background: #2E3D2C; color: #F1EEDF; border: none; padding: 12px 20px; border-radius: 30px; font-size: 14px; cursor: pointer;">Browse products</button>
+            </div>
+          </sc-if>
           <sc-if value="{{ hasOrderHistory }}">
-            <span style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A9678; margin-top: 14px;">Recent orders</span>
             <sc-for list="{{ orderHistory }}" as="ord" hint-placeholder-count="3">
-              <div style="background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 12px 14px; font-size: 13px; color: #2E3D2C; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
-                <span><strong>{{ ord.id }}</strong> · {{ ord.dateStr }}</span>
-                <span>{{ ord.totalStr }}</span>
+              <div style="background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 16px; padding: 16px; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: flex-start;">
+                  <div>
+                    <span style="display: block; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A9678;">Order ID</span>
+                    <strong style="font-size: 15px; color: #2E3D2C; letter-spacing: 0.03em;">{{ ord.id }}</strong>
+                    <span style="display: block; font-size: 12.5px; color: #7A8570; margin-top: 4px;">{{ ord.dateStr }} · {{ ord.totalStr }}</span>
+                  </div>
+                  <span style="{{ ord.statusStyle }}">{{ ord.status }}</span>
+                </div>
+                <p style="font-size: 13px; color: #45543E; margin: 12px 0 14px; line-height: 1.55;"><strong style="color: #2E3D2C;">Products:</strong> {{ ord.productsStr }}</p>
+                <button type="button" onClick="{{ ord.onTrack }}" style="background: #BE6A45; color: #FBF7EE; border: none; padding: 10px 16px; border-radius: 24px; font-size: 13px; font-weight: 500; cursor: pointer;">Track Order</button>
               </div>
             </sc-for>
           </sc-if>
-        </form>
+        </div>
       </div>
     </div>
   </sc-if>
@@ -1809,7 +1849,7 @@ class Component extends DCLogic {
     authFailCount: 0, authLockUntil: 0,
     profileName: '', profilePhone: '', profileEmail: '',
     profileAddress: '', profileCity: '', profileState: '', profilePincode: '',
-    accountMenuOpen: false, profileOpen: false,
+    accountMenuOpen: false, profileOpen: false, ordersOpen: false,
     lastOrderId: '', trackOrderId: '', trackOrder: null, trackNotFound: false,
     newsletterEmail: '',
     reminderContact: '', reminderTime: '08:00',
@@ -1836,10 +1876,6 @@ class Component extends DCLogic {
     }
     if (hours >= 72) activeIdx = 4;
     return labels.map((label, i) => {
-      const done = i < activeIdx || (hours >= 72 && i === 4);
-      const active = !done && i === activeIdx && hours < 72;
-      const pending = !done && !active;
-      // when fully delivered, mark all done
       const allDone = hours >= 72;
       return {
         label,
@@ -1848,6 +1884,29 @@ class Component extends DCLogic {
         pending: allDone ? false : (i > activeIdx),
         notDone: allDone ? false : (i > activeIdx),
       };
+    });
+  }
+
+  _orderStatusLabel(placedAt) {
+    const steps = this._orderTrackSteps(placedAt);
+    const active = steps.find(s => s.active);
+    if (active) return active.label;
+    if (steps.every(s => s.done)) return 'Delivered';
+    return steps[0] ? steps[0].label : 'Order Confirmed';
+  }
+
+  _trackOrderById(id) {
+    const clean = String(id || '').trim().toUpperCase();
+    const found = this._readOrders().find(o => String(o.id || '').toUpperCase() === clean) || null;
+    this.setState({
+      cartOpen: false,
+      ordersOpen: false,
+      accountMenuOpen: false,
+      trackOpen: true,
+      trackOrderId: clean,
+      trackSubmitted: true,
+      trackOrder: found,
+      trackNotFound: !found,
     });
   }
 
@@ -2356,11 +2415,23 @@ class Component extends DCLogic {
     const trackHoursLeft = trackOrder ? Math.max(1, Math.ceil(72 - (Date.now() - trackOrder.placedAt) / 3600000)) : 0;
     const trackEta = trackOrder ? ('estimated delivery in ' + trackHoursLeft + ' hour(s)') : '';
     const userOrders = this._readOrders();
-    const orderHistory = userOrders.slice(0, 5).map(o => ({
-      id: o.id,
-      dateStr: new Date(o.placedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-      totalStr: '₹' + (o.total || 0),
-    }));
+    const orderHistory = userOrders.slice(0, 20).map(o => {
+      const status = this._orderStatusLabel(o.placedAt || Date.now());
+      const items = Array.isArray(o.items) ? o.items : [];
+      const productsStr = items.length
+        ? items.map(it => (it.name || 'Item') + (it.qty > 1 ? ' ×' + it.qty : '') + (it.size ? ' (' + it.size + ')' : '')).join(', ')
+        : 'Products unavailable';
+      const delivered = status === 'Delivered';
+      return {
+        id: o.id,
+        dateStr: new Date(o.placedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+        totalStr: '₹' + Math.round(o.total || 0),
+        productsStr,
+        status,
+        statusStyle: 'display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:11.5px;font-weight:500;background:' + (delivered ? '#EAF0E1' : '#F3E9D8') + ';color:' + (delivered ? '#4E6B3C' : '#A8894E') + ';',
+        onTrack: () => this._trackOrderById(o.id),
+      };
+    });
 
     // ---- Legal pages ----
     const LEGAL = {
@@ -2571,7 +2642,7 @@ class Component extends DCLogic {
       memberPricing, notMemberPricing: !memberPricing,
       orderPlaced: this.state.orderPlaced, notOrderPlaced: !this.state.orderPlaced,
       lastOrderId: this.state.lastOrderId, hasLastOrderId: !!this.state.lastOrderId, notLastOrderId: !this.state.lastOrderId,
-      orderHistory, hasOrderHistory: orderHistory.length > 0,
+      orderHistory, hasOrderHistory: orderHistory.length > 0, ordersEmpty: orderHistory.length === 0,
       stepCart: this.state.checkoutStep === 'cart', stepAuth: this.state.checkoutStep === 'auth', stepDetails: this.state.checkoutStep === 'details',
       notStepCart: this.state.checkoutStep !== 'cart',
       goCheckout: () => this.setState({ checkoutStep: this.state.loggedIn ? 'details' : 'auth' }),
@@ -2586,8 +2657,12 @@ class Component extends DCLogic {
       accountMenuOpen: this.state.accountMenuOpen,
       toggleAccountMenu: () => this.setState(s => ({ accountMenuOpen: !s.accountMenuOpen })),
       profileOpen: this.state.profileOpen,
-      openProfile: () => this.setState({ profileOpen: true, accountMenuOpen: false }),
+      openProfile: () => this.setState({ profileOpen: true, ordersOpen: false, accountMenuOpen: false }),
       closeProfile: () => this.setState({ profileOpen: false }),
+      openOrders: () => this.setState({ ordersOpen: true, profileOpen: false, accountMenuOpen: false }),
+      closeOrders: () => this.setState({ ordersOpen: false }),
+      ordersOpen: this.state.ordersOpen,
+      trackLastOrder: () => this._trackOrderById(this.state.lastOrderId),
       profileName: this.state.profileName,
       profilePhone: this.state.profilePhone,
       profileEmail: this.state.profileEmail,
@@ -2643,7 +2718,7 @@ class Component extends DCLogic {
         this.showToast('Profile updated · confirmation notice sent');
         this.setState({ profileOpen: false });
       },
-      logout: () => { try { localStorage.removeItem('ak_logged'); localStorage.removeItem('ak_persist'); } catch (e) {} this.showToast('Signed out'); this.setState({ loggedIn: false, checkoutStep: 'cart', accountMenuOpen: false, profileOpen: false }); },
+      logout: () => { try { localStorage.removeItem('ak_logged'); localStorage.removeItem('ak_persist'); } catch (e) {} this.showToast('Signed out'); this.setState({ loggedIn: false, checkoutStep: 'cart', accountMenuOpen: false, profileOpen: false, ordersOpen: false }); },
       authMode: this.state.authMode, isAuthSignin: this.state.authMode === 'signin', isAuthSignup: this.state.authMode === 'signup',
       setAuthSignin: () => this.setState({ authMode: 'signin' }), setAuthSignup: () => this.setState({ authMode: 'signup' }),
       authSigninStyle: 'flex:1;padding:10px;border-radius:26px;font-size:13.5px;font-weight:500;cursor:pointer;border:none;background:' + (this.state.authMode === 'signin' ? '#2E3D2C' : 'transparent') + ';color:' + (this.state.authMode === 'signin' ? '#F1EEDF' : '#5E6A54') + ';',

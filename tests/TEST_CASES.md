@@ -69,6 +69,19 @@ View runs under the repo **Actions** tab → **E2E Tests**.
 
 ---
 
+## Order History UX (`tests/order-history.spec.js`)
+
+| ID | Focus | Type |
+|----|--------|------|
+| TC-OH01 | Order History opens from account menu | + |
+| TC-OH02 | Shows products, status, Track | + |
+| TC-OH03 | Track from history opens steps | + |
+| TC-OH04 | Empty history state | − |
+| TC-OH05 | Profile no longer lists orders | − |
+| TC-OH06 | Track from Order Placed success | + |
+
+---
+
 
 ## Auth page (`Aakashik Auth.dc.html`)
 

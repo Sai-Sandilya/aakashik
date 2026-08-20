@@ -36,11 +36,12 @@ test.describe('Landing — profile', () => {
   });
 
   // TC-P01
-  test('logged-in user sees account menu with Profile and Log out', async ({ page }) => {
+  test('logged-in user sees account menu with Profile, Order History and Log out', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Account options' }).click();
 
     await expect(page.getByRole('button', { name: 'Profile' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Order History' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Log out' })).toBeVisible();
   });
 
