@@ -33,6 +33,25 @@ View runs under the repo **Actions** tab → **E2E Tests**.
 
 ---
 
+## Category 1 UX fixes (`tests/category1-ux.spec.js`)
+
+| ID | Test case | Expected result |
+|----|-----------|-----------------|
+| TC-C01 | Guest adds item to cart | No sign-in required; toast "Added to cart" |
+| TC-C02 | Cart survives page reload | Items still in cart (`ak_cart` in localStorage) |
+| TC-C03 | Wishlist survives reload | Wishlist saved in `ak_wishlist` |
+| TC-C04 | Newsletter subscribe | Email stored in `ak_newsletter` |
+| TC-C05 | Ritual reminder form | Contact/time stored in `ak_reminder` |
+| TC-C06 | Profile save validation | Requires phone OR email |
+| TC-C07 | Order tracking (valid ID) | Shows order steps for stored order |
+| TC-C08 | Order tracking (invalid ID) | Shows "No order found" |
+| TC-C09 | Checkout login lockout | Locks after 5 failed email/password attempts |
+| TC-C10 | Language preference | `ak_lang` persists after reload |
+
+**Phone auth rule:** Phone login/signup uses **OTP only** — no password required.
+
+---
+
 ## Auth page (`Aakashik Auth.dc.html`)
 
 ### Validation

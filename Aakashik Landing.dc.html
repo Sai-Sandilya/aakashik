@@ -998,11 +998,11 @@
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
               <div style="flex: 1; min-width: 130px;">
                 <label style="display: block; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A9678; margin-bottom: 9px;">Contact</label>
-                <input type="text" required placeholder="Phone or email" style="width: 100%; background: rgba(255,255,255,0.7); border: 1px solid #D7CDB4; color: #2E3D2C; padding: 12px 14px; border-radius: 12px; font-size: 14px; outline: none;">
+                <input type="text" value="{{ reminderContact }}" onInput="{{ onReminderContact }}" required placeholder="Phone or email" style="width: 100%; background: rgba(255,255,255,0.7); border: 1px solid #D7CDB4; color: #2E3D2C; padding: 12px 14px; border-radius: 12px; font-size: 14px; outline: none;">
               </div>
               <div style="min-width: 110px;">
                 <label style="display: block; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A9678; margin-bottom: 9px;">Time</label>
-                <input type="time" value="08:00" style="background: rgba(255,255,255,0.7); border: 1px solid #D7CDB4; color: #2E3D2C; padding: 12px 14px; border-radius: 12px; font-size: 14px; outline: none;">
+                <input type="time" value="{{ reminderTime }}" onInput="{{ onReminderTime }}" style="background: rgba(255,255,255,0.7); border: 1px solid #D7CDB4; color: #2E3D2C; padding: 12px 14px; border-radius: 12px; font-size: 14px; outline: none;">
               </div>
             </div>
             <button type="submit" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #BE6A45; color: #FBF7EE; border: none; padding: 14px 22px; border-radius: 30px; font-size: 15px; font-weight: 500; box-shadow: 0 12px clamp(24px, 5vw, 90px) -12px rgba(190,106,69,0.7);">
@@ -1041,7 +1041,7 @@
           <p style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #B2B79E; margin: 0 0 10px;">Join our newsletter</p>
           <sc-if value="{{ notSubscribed }}">
             <form onSubmit="{{ subscribe }}" style="display: flex; gap: 8px; max-width: 320px;">
-              <input type="email" required="" placeholder="Your email" style="flex: 1; min-width: 0; background: #303E27; border: 1px solid #435138; color: #E8E4D2; padding: 11px 14px; border-radius: 30px; font-size: 13.5px; outline: none;">
+              <input type="email" value="{{ newsletterEmail }}" onInput="{{ onNewsletterEmail }}" required="" placeholder="Your email" style="flex: 1; min-width: 0; background: #303E27; border: 1px solid #435138; color: #E8E4D2; padding: 11px 14px; border-radius: 30px; font-size: 13.5px; outline: none;">
               <button type="submit" style="background: #BE6A45; color: #FBF7EE; border: none; padding: 11px 18px; border-radius: 30px; font-size: 13.5px; font-weight: 500; white-space: nowrap;">Subscribe</button>
             </form>
           </sc-if>
@@ -1133,7 +1133,11 @@
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#C8D4B9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
           </span>
           <h3 style="font-family: 'Marcellus', serif; font-size: 26px; color: #2E3D2C; margin: 0 0 8px;">Order Placed!</h3>
-          <p style="font-size: 14px; color: #5E6A54; margin: 0 0 22px; line-height: 1.6;">Thank you — a confirmation is on its way. Your ritual is being packed with care.</p>
+          <p style="font-size: 14px; color: #5E6A54; margin: 0 0 8px; line-height: 1.6;">Thank you — a confirmation is on its way. Your ritual is being packed with care.</p>
+          <sc-if value="{{ hasLastOrderId }}">
+            <p style="font-size: 13px; color: #8A9678; margin: 0 0 22px;">Order ID: <strong style="color: #2E3D2C; letter-spacing: 0.04em;">{{ lastOrderId }}</strong></p>
+          </sc-if>
+          <sc-if value="{{ notLastOrderId }}"><span style="display:block;height:22px;"></span></sc-if>
           <button onClick="{{ closeCart }}" style="background: #2E3D2C; color: #F1EEDF; border: none; padding: 13px 26px; border-radius: 30px; font-size: 14px; font-weight: 500;">Continue Shopping</button>
         </div>
       </sc-if>
@@ -1228,6 +1232,9 @@
               </div>
               <sc-if value="{{ hasAuthError }}">
                 <div style="background: #F8E8E2; border: 1px solid #E8B8A8; color: #8A3E2A; border-radius: 12px; padding: 10px 12px; font-size: 12.5px; margin-bottom: 12px; line-height: 1.5;">{{ authError }}</div>
+              </sc-if>
+              <sc-if value="{{ authLocked }}">
+                <div style="background: #F8E8E2; border: 1px solid #E8B8A8; color: #8A3E2A; border-radius: 12px; padding: 10px 12px; font-size: 12.5px; margin-bottom: 12px; line-height: 1.5;">Too many failed attempts. Try again in {{ authLockMins }} minute(s).</div>
               </sc-if>
               <sc-if value="{{ notAuthOtp }}">
                 <form onSubmit="{{ doAuth }}" style="display: flex; flex-direction: column; gap: 12px;">
@@ -1358,6 +1365,15 @@
             <button type="submit" style="flex: 1; background: #2E3D2C; color: #F1EEDF; border: none; padding: 13px; border-radius: 30px; font-size: 14px; font-weight: 500;">Save changes</button>
             <button type="button" onClick="{{ closeProfile }}" style="flex: 1; background: transparent; color: #2E3D2C; border: 1px solid #C2B591; padding: 13px; border-radius: 30px; font-size: 14px; font-weight: 500;">Cancel</button>
           </div>
+          <sc-if value="{{ hasOrderHistory }}">
+            <span style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A9678; margin-top: 14px;">Recent orders</span>
+            <sc-for list="{{ orderHistory }}" as="ord" hint-placeholder-count="3">
+              <div style="background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 12px 14px; font-size: 13px; color: #2E3D2C; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                <span><strong>{{ ord.id }}</strong> · {{ ord.dateStr }}</span>
+                <span>{{ ord.totalStr }}</span>
+              </div>
+            </sc-for>
+          </sc-if>
         </form>
       </div>
     </div>
@@ -1537,14 +1553,15 @@
         <sc-if value="{{ notTrackSubmitted }}">
           <form onSubmit="{{ onTrackSubmit }}">
             <p style="font-size: 13.5px; color: #5E6A54; margin: 0 0 14px; line-height: 1.6;">Enter your order ID (from your confirmation email or SMS).</p>
-            <input required placeholder="e.g. AAK-10482" style="width: 100%; background: #FBF7EE; border: 1px solid #D7CDB4; color: #2E3D2C; padding: 13px 16px; border-radius: 12px; font-size: 14px; outline: none; margin-bottom: 14px;">
+            <input value="{{ trackOrderId }}" onInput="{{ onTrackOrderId }}" required placeholder="e.g. AAK-10482" style="width: 100%; background: #FBF7EE; border: 1px solid #D7CDB4; color: #2E3D2C; padding: 13px 16px; border-radius: 12px; font-size: 14px; outline: none; margin-bottom: 14px;">
             <button type="submit" style="width: 100%; background: #2E3D2C; color: #F1EEDF; border: none; padding: 14px; border-radius: 30px; font-size: 14.5px; font-weight: 500;">Track Order</button>
           </form>
         </sc-if>
         <sc-if value="{{ trackSubmitted }}">
-          <p style="font-size: 13px; color: #8A9678; margin: 0 0 20px;">Order <strong style="color: #2E3D2C;">AAK-10482</strong> · estimated delivery in 2 days</p>
-          <div style="display: flex; flex-direction: column; gap: 0;">
-            <sc-for list="{{ trackSteps }}" as="st" hint-placeholder-count="5">
+          <sc-if value="{{ trackFound }}">
+            <p style="font-size: 13px; color: #8A9678; margin: 0 0 20px;">Order <strong style="color: #2E3D2C;">{{ trackDisplayId }}</strong> · {{ trackEta }}</p>
+            <div style="display: flex; flex-direction: column; gap: 0;">
+              <sc-for list="{{ trackSteps }}" as="st" hint-placeholder-count="5">
               <div style="display: flex; align-items: center; gap: 14px; padding: 8px 0;">
                 <sc-if value="{{ st.done }}">
                   <span style="width: 26px; height: 26px; border-radius: 50%; background: #2E3D2C; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -1558,7 +1575,11 @@
                 </sc-if>
               </div>
             </sc-for>
-          </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ trackMissing }}">
+            <div style="background: #F8E8E2; border: 1px solid #E8B8A8; color: #8A3E2A; border-radius: 12px; padding: 14px 16px; font-size: 13.5px; line-height: 1.6;">No order found for <strong>{{ trackDisplayId }}</strong>. Check the ID from your confirmation or profile.</div>
+          </sc-if>
         </sc-if>
       </div>
     </div>
@@ -1695,11 +1716,36 @@ class Component extends DCLogic {
     hoverJar: null, weather: null,
     checkoutStep: 'cart', loggedIn: false, authMode: 'signin', payMethod: 'cod',
     authContact: '', authName: '', authPassword: '', authConfirmPw: '', authOtpCode: '', authError: '', authOtp: false, pendingAdd: null,
+    authFailCount: 0, authLockUntil: 0,
     profileName: '', profilePhone: '', profileEmail: '',
     profileAddress: '', profileCity: '', profileState: '', profilePincode: '',
     accountMenuOpen: false, profileOpen: false,
+    lastOrderId: '', trackOrderId: '', trackOrder: null, trackNotFound: false,
+    newsletterEmail: '',
+    reminderContact: '', reminderTime: '08:00',
     lang: 'en', langOpen: false,
   };
+
+  _readJSON(key, fb) {
+    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fb; } catch (e) { return fb; }
+  }
+  _writeJSON(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+  }
+  _readOrders() {
+    const orders = this._readJSON('ak_orders', []);
+    return Array.isArray(orders) ? orders : [];
+  }
+  _orderTrackSteps(placedAt) {
+    const hours = (Date.now() - placedAt) / 3600000;
+    return [
+      { label: 'Order Confirmed', done: true, notDone: false },
+      { label: 'Packed with care', done: hours >= 2, notDone: hours < 2 },
+      { label: 'Shipped', done: hours >= 24, notDone: hours >= 2 && hours < 24 },
+      { label: 'Out for delivery', done: hours >= 48, notDone: hours >= 24 && hours < 48 },
+      { label: 'Delivered', done: hours >= 72, notDone: hours >= 48 && hours < 72 },
+    ];
+  }
 
 
   _loadWeather() {
@@ -1730,7 +1776,29 @@ class Component extends DCLogic {
   _pos = { x: 0, y: 0 };
 
   componentDidMount() {
-    try { const r = JSON.parse(localStorage.getItem('ak_recent') || '[]'); if (Array.isArray(r)) this.setState({ recent: r }); } catch (e) {}
+    const boot = {};
+    try { const r = JSON.parse(localStorage.getItem('ak_recent') || '[]'); if (Array.isArray(r)) boot.recent = r; } catch (e) {}
+    const cart = this._readJSON('ak_cart', null);
+    if (cart && typeof cart === 'object') boot.cartItems = cart;
+    const wish = this._readJSON('ak_wishlist', null);
+    if (wish && typeof wish === 'object') boot.wishlist = wish;
+    const lang = localStorage.getItem('ak_lang');
+    if (lang && ['en', 'hi', 'ta', 'te'].indexOf(lang) >= 0) boot.lang = lang;
+    const dosha = this._readJSON('ak_dosha', null);
+    if (dosha && Array.isArray(dosha.ans) && dosha.ans.length >= 4) {
+      boot.doshaAns = dosha.ans;
+      boot.doshaStep = 4;
+    }
+    const nl = this._readJSON('ak_newsletter', null);
+    if (nl && nl.email) { boot.subscribed = true; boot.newsletterEmail = nl.email; }
+    const rem = this._readJSON('ak_reminder', null);
+    if (rem && rem.contact) {
+      boot.reminderSet = true;
+      boot.reminderContact = rem.contact;
+      boot.reminderTime = rem.time || '08:00';
+      boot.reminderChannel = rem.channel || 'whatsapp';
+    }
+    if (Object.keys(boot).length) this.setState(boot);
     this._syncLogin = () => {
       try {
         const on = localStorage.getItem('ak_logged') === '1';
@@ -1766,6 +1834,10 @@ class Component extends DCLogic {
     document.addEventListener('visibilitychange', this._onVis);
     try { this._setupMagic(); } catch (e) {}
     try { this._loadWeather(); } catch (e) {}
+  }
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.cartItems !== this.state.cartItems) this._writeJSON('ak_cart', this.state.cartItems);
+    if (prevState.wishlist !== this.state.wishlist) this._writeJSON('ak_wishlist', this.state.wishlist);
   }
   componentWillUnmount() {
     if (this._onPageShow) { window.removeEventListener('pageshow', this._onPageShow); window.removeEventListener('focus', this._onPageShow); }
@@ -1942,13 +2014,8 @@ class Component extends DCLogic {
       { id: 'sample-trio', name: 'Sample Trio', sub: 'Try before you commit', element: 'All', concern: 'Immunity', priceN: 99, jar: '#E3D6BC', cap: '#A8894E', benefit: 'Three mini sachets of our bestsellers — a low-risk first taste.', herbs: ['Daily Immunity', 'Kaphahara', 'Navojas'], tag: 'Trial Pack', bundle: true },
     ];
     const ALL = {}; PRODUCTS.concat(BUNDLES).forEach(p => ALL[p.id] = p);
-    const _commitAdd = (id, subscribe, size, sizePrice) => { this.flyToCart(); this.playChime(); this.showToast('Added to cart'); this.setState(s => { const c = { ...s.cartItems }; const cur = c[id]; c[id] = { qty: (cur ? cur.qty : 0) + 1, subscribe: subscribe !== undefined ? subscribe : (cur ? cur.subscribe : false), size: size !== undefined && size !== null ? size : (cur ? cur.size : null), sizePrice: sizePrice !== undefined && sizePrice !== null ? sizePrice : (cur ? cur.sizePrice : null) }; return { cartItems: c, cartOpen: true, orderPlaced: false, quickView: null, bump: (s.bump || 0) + 1 }; }); };
+    const _commitAdd = (id, subscribe, size, sizePrice) => { this.flyToCart(); this.playChime(); this.showToast('Added to cart'); this.setState(s => { const c = { ...s.cartItems }; const cur = c[id]; c[id] = { qty: (cur ? cur.qty : 0) + 1, subscribe: subscribe !== undefined ? subscribe : (cur ? cur.subscribe : false), size: size !== undefined && size !== null ? size : (cur ? cur.size : null), sizePrice: sizePrice !== undefined && sizePrice !== null ? sizePrice : (cur ? cur.sizePrice : null) }; try { localStorage.setItem('ak_cart', JSON.stringify(c)); } catch (er) {} return { cartItems: c, cartOpen: true, orderPlaced: false, quickView: null, bump: (s.bump || 0) + 1 }; }); };
     const addToCart = (id, subscribe, size, sizePrice) => {
-      if (!this.state.loggedIn) {
-        this.showToast('Please sign in to add items');
-        this.setState({ pendingAdd: { id, subscribe, size, sizePrice }, quickView: null, cartOpen: true, checkoutStep: 'auth', orderPlaced: false, authOtp: false });
-        return;
-      }
       _commitAdd(id, subscribe, size, sizePrice);
     };
     const _flushPending = () => {
@@ -1958,10 +2025,10 @@ class Component extends DCLogic {
       setTimeout(() => _commitAdd(pa.id, pa.subscribe, pa.size, pa.sizePrice), 60);
       return true;
     };
-    const setQty = (id, d) => this.setState(s => { const c = { ...s.cartItems }; if (!c[id]) return {}; const q = c[id].qty + d; if (q <= 0) delete c[id]; else c[id] = { ...c[id], qty: q }; return { cartItems: c }; });
-    const removeItem = (id) => this.setState(s => { const c = { ...s.cartItems }; delete c[id]; return { cartItems: c }; });
-    const toggleLineSub = (id) => this.setState(s => { const c = { ...s.cartItems }; if (c[id]) c[id] = { ...c[id], subscribe: !c[id].subscribe }; return { cartItems: c }; });
-    const toggleWish = (id) => { if (!this.state.wishlist[id]) this.heartBurst(); this.setState(s => { const w = { ...s.wishlist }; if (w[id]) delete w[id]; else w[id] = true; return { wishlist: w }; }); };
+    const setQty = (id, d) => this.setState(s => { const c = { ...s.cartItems }; if (!c[id]) return {}; const q = c[id].qty + d; if (q <= 0) delete c[id]; else c[id] = { ...c[id], qty: q }; try { localStorage.setItem('ak_cart', JSON.stringify(c)); } catch (er) {} return { cartItems: c }; });
+    const removeItem = (id) => this.setState(s => { const c = { ...s.cartItems }; delete c[id]; try { localStorage.setItem('ak_cart', JSON.stringify(c)); } catch (er) {} return { cartItems: c }; });
+    const toggleLineSub = (id) => this.setState(s => { const c = { ...s.cartItems }; if (c[id]) c[id] = { ...c[id], subscribe: !c[id].subscribe }; try { localStorage.setItem('ak_cart', JSON.stringify(c)); } catch (er) {} return { cartItems: c }; });
+    const toggleWish = (id) => { if (!this.state.wishlist[id]) this.heartBurst(); this.setState(s => { const w = { ...s.wishlist }; if (w[id]) delete w[id]; else w[id] = true; try { localStorage.setItem('ak_wishlist', JSON.stringify(w)); } catch (er) {} return { wishlist: w }; }); };
     const openQuickView = (id) => { this.pushRecent(id); this.setState({ quickView: id, qvSubscribe: false, qvFace: 'front', qvSize: 0 }); };
     const decorate = (p) => ({ ...p, priceStr: p.sizes ? 'from ' + money(p.sizes[0].p) : money(p.priceN), addLabel: p.sizes ? 'Choose Size' : 'Add to Cart', wished: !!this.state.wishlist[p.id], notWished: !this.state.wishlist[p.id], onQuick: () => openQuickView(p.id), onAdd: () => (p.sizes ? openQuickView(p.id) : addToCart(p.id)), onWish: () => toggleWish(p.id) });
 
@@ -2148,11 +2215,17 @@ class Component extends DCLogic {
     const priceChips = PRICES.map(c => ({ label: c.label, active: this.state.fPrice === c.k, style: chip(this.state.fPrice === c.k), onClick: () => this.setState({ fPrice: c.k }) }));
     const suggestions = q ? PRODUCTS.filter(p => p.name.toLowerCase().includes(q)).slice(0, 4).map(p => ({ name: p.name, onClick: () => openQuickView(p.id) })) : [];
 
-    // ---- Order tracking demo ----
-    const trackSteps = [
-      { label: 'Order Confirmed', done: true, notDone: false }, { label: 'Packed with care', done: true, notDone: false },
-      { label: 'Shipped', done: true, notDone: false }, { label: 'Out for delivery', done: false, notDone: true }, { label: 'Delivered', done: false, notDone: true },
-    ];
+    // ---- Order tracking ----
+    const trackOrder = this.state.trackOrder;
+    const trackSteps = trackOrder ? this._orderTrackSteps(trackOrder.placedAt) : [];
+    const trackHoursLeft = trackOrder ? Math.max(1, Math.ceil(72 - (Date.now() - trackOrder.placedAt) / 3600000)) : 0;
+    const trackEta = trackOrder ? ('estimated delivery in ' + trackHoursLeft + ' hour(s)') : '';
+    const userOrders = this._readOrders();
+    const orderHistory = userOrders.slice(0, 5).map(o => ({
+      id: o.id,
+      dateStr: new Date(o.placedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+      totalStr: '₹' + (o.total || 0),
+    }));
 
     // ---- Legal pages ----
     const LEGAL = {
@@ -2318,11 +2391,19 @@ class Component extends DCLogic {
       doshaQuestion: doshaDone ? '' : DOSHA_Q[dStep].q,
       doshaOptions: doshaDone ? [] : DOSHA_Q[dStep].opts.map(o => ({
         label: o.label, color: o.color,
-        pick: () => this.setState(s => ({ doshaAns: (s.doshaAns || []).slice(0, s.doshaStep || 0).concat([o.d]), doshaStep: (s.doshaStep || 0) + 1 })),
+        pick: () => this.setState(s => {
+          const step = s.doshaStep || 0;
+          const ans = (s.doshaAns || []).slice(0, step).concat([o.d]);
+          const nextStep = step + 1;
+          if (nextStep >= DOSHA_Q.length) {
+            try { localStorage.setItem('ak_dosha', JSON.stringify({ ans, completedAt: Date.now() })); } catch (er) {}
+          }
+          return { doshaAns: ans, doshaStep: nextStep };
+        }),
       })),
       doshaCanBack: dStep > 0 && !doshaDone,
       doshaBack: () => this.setState(s => ({ doshaStep: Math.max(0, (s.doshaStep || 0) - 1) })),
-      doshaRestart: () => this.setState({ doshaStep: 0, doshaAns: [] }),
+      doshaRestart: () => { try { localStorage.removeItem('ak_dosha'); } catch (er) {} this.setState({ doshaStep: 0, doshaAns: [] }); },
       doshaResultName: dInfo.name, doshaResultTrait: dInfo.trait, doshaResultBody: dInfo.body,
       doshaResultColor: dInfo.color, doshaResultTint: dInfo.tint, doshaPicks,
       cart: cartCount,
@@ -2350,6 +2431,8 @@ class Component extends DCLogic {
       cartList, cartEmpty: cartList.length === 0, notCartEmpty: cartList.length > 0,
       subtotalStr: money(subtotalN), freeReached, notFreeReached: !freeReached, remainingStr: money(remaining), shipWidth,
       orderPlaced: this.state.orderPlaced, notOrderPlaced: !this.state.orderPlaced,
+      lastOrderId: this.state.lastOrderId, hasLastOrderId: !!this.state.lastOrderId, notLastOrderId: !this.state.lastOrderId,
+      orderHistory, hasOrderHistory: orderHistory.length > 0,
       stepCart: this.state.checkoutStep === 'cart', stepAuth: this.state.checkoutStep === 'auth', stepDetails: this.state.checkoutStep === 'details',
       notStepCart: this.state.checkoutStep !== 'cart',
       goCheckout: () => this.setState({ checkoutStep: this.state.loggedIn ? 'details' : 'auth' }),
@@ -2393,6 +2476,10 @@ class Component extends DCLogic {
           state: (this.state.profileState || '').trim(),
           pincode: (this.state.profilePincode || '').trim(),
         };
+        if (!p.phone && !p.email) {
+          this.showToast('Enter at least a phone number or email');
+          return;
+        }
         if (p.phone && (!/^\d{10}$/.test(p.phone.replace(/\D/g, '')) || !/^[6-9]/.test(p.phone.replace(/\D/g, '')))) {
           this.showToast('Enter a valid 10-digit phone');
           return;
@@ -2434,6 +2521,8 @@ class Component extends DCLogic {
       authOtpCode: this.state.authOtpCode,
       onAuthOtpCode: (e) => this.setState({ authOtpCode: String(e.target.value || '').replace(/\D/g, '').slice(0, 4) }),
       authError: this.state.authError, hasAuthError: !!this.state.authError,
+      authLocked: Date.now() < (this.state.authLockUntil || 0),
+      authLockMins: Date.now() < (this.state.authLockUntil || 0) ? Math.max(1, Math.ceil((this.state.authLockUntil - Date.now()) / 60000)) : 0,
       authIsPhone: _authIsPhone, authIsEmail: _authIsEmail, authPwShown: !_authIsPhone,
       showAuthStrength: !!(this.state.authPassword),
       authStrengthPct: _pwPcts[Math.min(_pwScore, 5)],
@@ -2443,6 +2532,10 @@ class Component extends DCLogic {
       otpContact: this.state.authContact,
       doAuth: (e) => {
         if (e && e.preventDefault) e.preventDefault();
+        if (Date.now() < (this.state.authLockUntil || 0)) {
+          const mins = Math.max(1, Math.ceil((this.state.authLockUntil - Date.now()) / 60000));
+          return this.setState({ authError: 'Too many failed attempts. Try again in ' + mins + ' minute(s).' });
+        }
         const contact = (this.state.authContact || '').trim();
         if (!contact) return this.setState({ authError: 'Enter your phone number or email.' });
         if (_authIsBadEmail) return this.setState({ authError: _authContactErr() });
@@ -2450,7 +2543,8 @@ class Component extends DCLogic {
         if (!_authIsPhone && !_authIsEmail) return this.setState({ authError: _authContactErr() });
         if (this.state.authMode === 'signup') {
           if (!(this.state.authName || '').trim()) return this.setState({ authError: 'Please enter your full name.' });
-          if (!_authIsPhone) {
+          if (!_authIsPhone && !_authIsEmail) return this.setState({ authError: _authContactErr() });
+          if (_authIsEmail) {
             if (!_pwOk) return this.setState({ authError: 'Password must be 8+ chars with upper, lower, number and symbol.' });
             if (this.state.authPassword !== this.state.authConfirmPw) return this.setState({ authError: 'Passwords do not match.' });
           }
@@ -2469,7 +2563,11 @@ class Component extends DCLogic {
         const key = contact.toLowerCase();
         const user = users[key];
         if (!user || user.password !== this.state.authPassword) {
-          return this.setState({ authError: 'Incorrect email or password' });
+          const failCount = (this.state.authFailCount || 0) + 1;
+          if (failCount >= 5) {
+            return this.setState({ authFailCount: 0, authLockUntil: Date.now() + 5 * 60 * 1000, authError: 'Too many failed attempts. Account temporarily locked for 5 minutes.' });
+          }
+          return this.setState({ authFailCount: failCount, authError: 'Incorrect email or password' });
         }
         const profile = {
           name: user.name || '',
@@ -2483,7 +2581,7 @@ class Component extends DCLogic {
         try { localStorage.setItem('ak_profile', JSON.stringify(profile)); localStorage.setItem('ak_logged', '1'); } catch (er) {}
         this.showToast('Signed in');
         const hadPending = !!this.state.pendingAdd;
-        this.setState({ loggedIn: true, checkoutStep: hadPending ? 'cart' : 'details', authOtp: false, authError: '', profileName: profile.name || '', profilePhone: profile.phone || '', profileEmail: profile.email || '', profileAddress: profile.address || '', profileCity: profile.city || '', profileState: profile.state || '', profilePincode: profile.pincode || '' });
+        this.setState({ loggedIn: true, authFailCount: 0, authLockUntil: 0, checkoutStep: hadPending ? 'cart' : 'details', authOtp: false, authError: '', profileName: profile.name || '', profilePhone: profile.phone || '', profileEmail: profile.email || '', profileAddress: profile.address || '', profileCity: profile.city || '', profileState: profile.state || '', profilePincode: profile.pincode || '' });
         _flushPending();
       },
       verifyOtp: (e) => {
@@ -2536,9 +2634,17 @@ class Component extends DCLogic {
           state: (this.state.profileState || '').trim(),
           pincode: pin,
         };
+        if (!p.phone && !p.email) { this.showToast('Enter phone or email for delivery'); return; }
         try { localStorage.setItem('ak_profile', JSON.stringify(p)); } catch (er) {}
-        this.confetti(); this.playChime(); this.showToast('Order placed!');
-        this.setState({ orderPlaced: true, cartItems: {}, checkoutStep: 'cart' });
+        const orderId = 'AAK-' + String(10000 + Math.floor(Math.random() * 90000));
+        const items = cartList.map(it => ({ id: it.id, name: it.name, qty: it.qty, line: it.lineStr }));
+        const order = { id: orderId, placedAt: Date.now(), items, total: subtotalN, payMethod: this.state.payMethod, delivery: p };
+        const orders = this._readOrders();
+        orders.unshift(order);
+        this._writeJSON('ak_orders', orders.slice(0, 50));
+        try { localStorage.setItem('ak_cart', JSON.stringify({})); } catch (er) {}
+        this.confetti(); this.playChime(); this.showToast('Order placed! ID: ' + orderId);
+        this.setState({ orderPlaced: true, lastOrderId: orderId, cartItems: {}, checkoutStep: 'cart' });
       },
 
       openSearch: () => this.setState({ searchOpen: true }),
@@ -2554,20 +2660,40 @@ class Component extends DCLogic {
 
       bundles, wishCount: Object.keys(this.state.wishlist).length,
 
-      trackOpen: this.state.trackOpen, openTrack: () => this.setState({ trackOpen: true, trackSubmitted: false }),
-      closeTrack: () => this.setState({ trackOpen: false }),
-      onTrackSubmit: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ trackSubmitted: true }); },
-      trackSubmitted: this.state.trackSubmitted, notTrackSubmitted: !this.state.trackSubmitted, trackSteps,
+      trackOpen: this.state.trackOpen, openTrack: () => this.setState({ trackOpen: true, trackSubmitted: false, trackOrder: null, trackNotFound: false }),
+      closeTrack: () => this.setState({ trackOpen: false, trackSubmitted: false, trackOrder: null, trackNotFound: false }),
+      trackOrderId: this.state.trackOrderId,
+      onTrackOrderId: (e) => this.setState({ trackOrderId: e.target.value }),
+      onTrackSubmit: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        const id = (this.state.trackOrderId || '').trim().toUpperCase();
+        const found = this._readOrders().find(o => String(o.id || '').toUpperCase() === id) || null;
+        this.setState({ trackSubmitted: true, trackOrder: found, trackNotFound: !found });
+      },
+      trackSubmitted: this.state.trackSubmitted, notTrackSubmitted: !this.state.trackSubmitted,
+      trackFound: this.state.trackSubmitted && !!this.state.trackOrder,
+      trackMissing: this.state.trackSubmitted && !this.state.trackOrder,
+      trackDisplayId: (this.state.trackOrderId || '').trim().toUpperCase() || '—',
+      trackEta,
+      trackSteps,
 
       t,
       langOpen: this.state.langOpen,
       langLabel: LANGS[this.state.lang],
       toggleLang: () => this.setState(s => ({ langOpen: !s.langOpen })),
-      langOptions: Object.keys(LANGS).map(k => ({ code: k, label: LANGS[k], active: k === this.state.lang, onClick: () => { this.showToast(LANGS[k]); this.setState({ lang: k, langOpen: false }); } })),
+      langOptions: Object.keys(LANGS).map(k => ({ code: k, label: LANGS[k], active: k === this.state.lang, onClick: () => { try { localStorage.setItem('ak_lang', k); } catch (er) {} this.showToast(LANGS[k]); this.setState({ lang: k, langOpen: false }); } })),
 
       subscribed: this.state.subscribed,
       notSubscribed: !this.state.subscribed,
-      subscribe: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ subscribed: true }); },
+      newsletterEmail: this.state.newsletterEmail,
+      onNewsletterEmail: (e) => this.setState({ newsletterEmail: e.target.value }),
+      subscribe: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        const email = (this.state.newsletterEmail || '').trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { this.showToast('Enter a valid email'); return; }
+        this._writeJSON('ak_newsletter', { email, subscribedAt: Date.now() });
+        this.setState({ subscribed: true });
+      },
 
       circadian: { greeting: PERIODS[autoKey].greet, autoLabel: PERIODS[autoKey].label },
       period, periodChips,
@@ -2584,9 +2710,19 @@ class Component extends DCLogic {
       herbs, activeHerbData, webNodes, herbCenter,
 
       channels,
+      reminderContact: this.state.reminderContact,
+      onReminderContact: (e) => this.setState({ reminderContact: e.target.value }),
+      reminderTime: this.state.reminderTime,
+      onReminderTime: (e) => this.setState({ reminderTime: e.target.value }),
       reminderSet: this.state.reminderSet,
       notReminded: !this.state.reminderSet,
-      setReminder: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ reminderSet: true }); },
+      setReminder: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        const contact = (this.state.reminderContact || '').trim();
+        if (!contact) { this.showToast('Enter phone or email for reminders'); return; }
+        this._writeJSON('ak_reminder', { contact, time: this.state.reminderTime || '08:00', channel: this.state.reminderChannel || 'whatsapp', setAt: Date.now() });
+        this.setState({ reminderSet: true });
+      },
     };
   }
 }

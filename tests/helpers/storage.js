@@ -7,6 +7,14 @@ const AUTH_KEYS = [
   'ak_pending_otp',
   'ak_reset',
   'ak_persist',
+  'ak_cart',
+  'ak_wishlist',
+  'ak_orders',
+  'ak_newsletter',
+  'ak_reminder',
+  'ak_dosha',
+  'ak_lang',
+  'ak_recent',
 ];
 
 /** Clear all Aakashik auth-related localStorage keys. */
