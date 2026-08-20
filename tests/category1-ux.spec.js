@@ -8,6 +8,7 @@ const {
 
 const LANDING_URL = '/Aakashik%20Landing.dc.html';
 
+/** @param {import('@playwright/test').Page} page */
 function cartButton(page) {
   return page.locator('[data-cart-icon="true"]');
 }
@@ -130,6 +131,7 @@ test.describe('Category 1 UX fixes', () => {
     const email = `lock-${Date.now()}@test.com`;
     await page.goto(LANDING_URL);
     await page.evaluate(({ email, password, name }) => {
+      /** @type {Record<string, { name: string, email: string, phone: string, password: string, verified: boolean }>} */
       const users = {};
       users[email] = { name, email, phone: '', password, verified: true };
       localStorage.setItem('ak_users', JSON.stringify(users));
