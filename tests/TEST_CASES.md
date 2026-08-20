@@ -52,6 +52,24 @@ View runs under the repo **Actions** tab → **E2E Tests**.
 
 ---
 
+## UX high fixes (`tests/ux-high.spec.js`)
+
+| ID | Focus | Type |
+|----|--------|------|
+| TC-H01–H02 | Shipping ads removed (no ₹500 / ₹49) | + / − |
+| TC-H03 | Diwali / promo offer removed | + |
+| TC-H04–H06 | No returns (trust, order success, policy) | + / − |
+| TC-H07–H09 | Order tracking always shows 5 steps | + / − |
+| TC-H10–H12 | Member 10% pricing | + / − |
+| TC-H13–H20 | Mock COD / UPI / Card payment | + / − |
+| TC-H21–H22 | Cart lines separated by size | + / − |
+| TC-H23–H26 | Real product mapping + price truth | + / − |
+| TC-H27–H30 | Wishlist drawer | + / − |
+| TC-H31 | Auth member pricing copy | + |
+
+---
+
+
 ## Auth page (`Aakashik Auth.dc.html`)
 
 ### Validation
