@@ -15,6 +15,8 @@ const AUTH_KEYS = [
   'ak_dosha',
   'ak_lang',
   'ak_recent',
+  'ak_lock_until',
+  'ak_fail_count',
 ];
 
 /** Clear all Aakashik auth-related localStorage keys. */
@@ -22,6 +24,7 @@ async function clearAuthStorage(page) {
   await page.goto('/Aakashik%20Landing.dc.html');
   await page.evaluate((keys) => {
     keys.forEach((k) => localStorage.removeItem(k));
+    try { sessionStorage.removeItem('ak_logged'); } catch (e) {}
   }, AUTH_KEYS);
 }
 
@@ -58,7 +61,15 @@ async function readStoredCode(page, key) {
 }
 
 async function isLoggedIn(page) {
-  return page.evaluate(() => localStorage.getItem('ak_logged') === '1');
+  return page.evaluate(() => {
+    const persist = localStorage.getItem('ak_persist') === '1';
+    const local = localStorage.getItem('ak_logged') === '1';
+    let session = false;
+    try { session = sessionStorage.getItem('ak_logged') === '1'; } catch (e) {}
+    if (persist && local) return true;
+    if (!persist && session) return true;
+    return false;
+  });
 }
 
 async function readProfile(page) {

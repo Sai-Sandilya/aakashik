@@ -93,7 +93,7 @@
   </div>
 
   <!-- back to store -->
-  <a href="Aakashik Landing.dc.html" style="position: absolute; top: 22px; left: 24px; z-index: 3; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 13px; letter-spacing: 0.04em; color: #5E6A54;">
+  <a href="Aakashik%20Landing.dc.html" style="position: absolute; top: 22px; left: 24px; z-index: 3; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 13px; letter-spacing: 0.04em; color: #5E6A54;">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
     Back to store
   </a>
@@ -197,7 +197,7 @@
           </div>
           <h2 style="font-family: 'Marcellus', serif; font-weight: 400; font-size: 28px; color: #2E3D2C; margin: 0 0 8px;">{{ successTitle }}</h2>
           <p style="font-size: 14.5px; color: #5E6A54; margin: 0 0 24px; max-width: 300px; line-height: 1.6;">{{ successSub }}</p>
-          <a href="Aakashik Landing.dc.html" style="display: inline-flex; align-items: center; gap: 8px; background: #2E3D2C; color: #F1EEDF; text-decoration: none; padding: 14px 28px; border-radius: 30px; font-size: 14.5px; font-weight: 500;">Enter the store
+          <a href="Aakashik%20Landing.dc.html" style="display: inline-flex; align-items: center; gap: 8px; background: #2E3D2C; color: #F1EEDF; text-decoration: none; padding: 14px 28px; border-radius: 30px; font-size: 14.5px; font-weight: 500;">Enter the store
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
           </a>
           <button onClick="{{ reset }}" style="margin-top: 14px; background: transparent; border: none; cursor: pointer; font-size: 13px; color: #8A9678;">Back to form</button>
@@ -223,11 +223,11 @@
         <sc-if value="{{ forgotOpen }}">
           <form onSubmit="{{ submitForgot }}" style="display: flex; flex-direction: column; gap: 14px;">
             <sc-if value="{{ forgotStepContact }}">
-              <p style="font-size: 13.5px; color: #5E6A54; margin: 0; line-height: 1.6;">Enter your registered phone or email. We’ll send a reset code that expires in 10 minutes.</p>
+              <p style="font-size: 13.5px; color: #5E6A54; margin: 0; line-height: 1.6;">Enter your registered email. Phone accounts sign in with OTP — password reset is email-only.</p>
               <label style="display: block;">
-                <span style="display: block; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A9678; margin-bottom: 7px;">Phone or email</span>
+                <span style="display: block; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A9678; margin-bottom: 7px;">Email</span>
                 <div style="display: flex; align-items: center; gap: 10px; background: #EFEBE0; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px;">
-                  <input value="{{ contact }}" onInput="{{ onContact }}" required placeholder="10-digit phone or you@gmail.com" style="flex: 1; border: none; background: transparent; outline: none; font-size: 14.5px; color: #2E3D2C;">
+                  <input value="{{ contact }}" onInput="{{ onContact }}" required placeholder="you@gmail.com" style="flex: 1; border: none; background: transparent; outline: none; font-size: 14.5px; color: #2E3D2C;">
                 </div>
               </label>
             </sc-if>
@@ -343,17 +343,18 @@
 
         <div style="display: flex; align-items: center; gap: 14px; margin: 22px 0 18px; animation: fieldIn .5s ease both .35s;">
           <span style="flex: 1; height: 1px; background: #E4DBC8;"></span>
-          <span style="font-size: 12px; color: #A99C7E;">or continue with</span>
+          <span style="font-size: 12px; color: #A99C7E;">or continue with (demo)</span>
           <span style="flex: 1; height: 1px; background: #E4DBC8;"></span>
         </div>
+        <p style="font-size: 11.5px; color: #8A9678; margin: 0 0 10px; text-align: center; animation: fieldIn .5s ease both .38s;">Demo-only — no real Google/GitHub OAuth yet.</p>
         <div style="display: flex; gap: 12px; animation: fieldIn .5s ease both .4s;">
-          <button type="button" onClick="{{ socialGoogle }}" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 9px; background: #FBF7EE; border: 1px solid #E0D7BE; border-radius: 12px; padding: 12px; font-size: 14px; color: #2E3D2C; cursor: pointer;">
+          <button type="button" onClick="{{ socialGoogle }}" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 9px; background: #FBF7EE; border: 1px solid #E0D7BE; border-radius: 12px; padding: 12px; font-size: 13px; color: #2E3D2C; cursor: pointer;">
             <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1Z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23Z"/><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84Z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1a11 11 0 0 0-9.82 6.06l3.66 2.84C6.71 7.3 9.14 5.38 12 5.38Z"/></svg>
-            Google
+            Google (demo)
           </button>
-          <button type="button" onClick="{{ socialGithub }}" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 9px; background: #FBF7EE; border: 1px solid #E0D7BE; border-radius: 12px; padding: 12px; font-size: 14px; color: #2E3D2C; cursor: pointer;">
+          <button type="button" onClick="{{ socialGithub }}" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 9px; background: #FBF7EE; border: 1px solid #E0D7BE; border-radius: 12px; padding: 12px; font-size: 13px; color: #2E3D2C; cursor: pointer;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="#24292F"><path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.1 3.29 9.42 7.86 10.95.58.1.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.88-1.54-3.88-1.54-.53-1.36-1.3-1.72-1.3-1.72-1.06-.73.08-.72.08-.72 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.73 1.27 3.4.97.1-.75.41-1.27.74-1.56-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.04 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.64 1.58.24 2.75.12 3.04.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.25 5.69.42.36.79 1.08.79 2.18 0 1.57-.01 2.84-.01 3.23 0 .31.21.67.8.55A10.52 10.52 0 0 0 23.5 12C23.5 5.74 18.27.5 12 .5Z"/></svg>
-            GitHub
+            GitHub (demo)
           </button>
         </div>
         <p style="margin: 16px 0 0; font-size: 13px; color: #7A8570; text-align: center;">
@@ -377,6 +378,14 @@ class Component extends DCLogic {
     forgotOpen: false, forgotStep: 'contact',
     lockUntil: 0, failCount: 0,
   };
+
+  componentDidMount() {
+    try {
+      const until = Number(localStorage.getItem('ak_lock_until') || 0);
+      const fail = Number(localStorage.getItem('ak_fail_count') || 0);
+      if (until > Date.now() || fail) this.setState({ lockUntil: until > Date.now() ? until : 0, failCount: fail || 0 });
+    } catch (e) {}
+  }
 
   _emailOk(v) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
@@ -438,23 +447,34 @@ class Component extends DCLogic {
   }
   _setSession(profile, remember) {
     try {
-      const existing = JSON.parse(localStorage.getItem('ak_profile') || '{}');
-      const merged = Object.assign({}, existing, profile);
-      localStorage.setItem('ak_profile', JSON.stringify(merged));
-      localStorage.setItem('ak_logged', '1');
-      if (remember) localStorage.setItem('ak_persist', '1');
-      else localStorage.removeItem('ak_persist');
+      localStorage.setItem('ak_profile', JSON.stringify(profile || {}));
+      if (remember) {
+        localStorage.setItem('ak_logged', '1');
+        localStorage.setItem('ak_persist', '1');
+        try { sessionStorage.removeItem('ak_logged'); } catch (er) {}
+      } else {
+        localStorage.removeItem('ak_persist');
+        localStorage.removeItem('ak_logged');
+        try { sessionStorage.setItem('ak_logged', '1'); } catch (er) {}
+      }
     } catch (e) {}
   }
   _isLocked() {
+    try {
+      const until = Number(localStorage.getItem('ak_lock_until') || 0);
+      if (until > Date.now()) return true;
+    } catch (e) {}
     return Date.now() < (this.state.lockUntil || 0);
   }
   _failLogin() {
     const failCount = (this.state.failCount || 0) + 1;
     if (failCount >= 5) {
-      this.setState({ failCount: 0, lockUntil: Date.now() + 5 * 60 * 1000, errorMsg: 'Too many failed attempts. Account temporarily locked for 5 minutes.', loading: false });
+      const until = Date.now() + 5 * 60 * 1000;
+      try { localStorage.setItem('ak_lock_until', String(until)); localStorage.setItem('ak_fail_count', '0'); } catch (e) {}
+      this.setState({ failCount: 0, lockUntil: until, errorMsg: 'Too many failed attempts. Account temporarily locked for 5 minutes.', loading: false });
       return;
     }
+    try { localStorage.setItem('ak_fail_count', String(failCount)); } catch (e) {}
     this.setState({ failCount, errorMsg: 'Incorrect email or password', loading: false });
   }
 
@@ -471,13 +491,15 @@ class Component extends DCLogic {
     if (this.state.otp) {
       const code = String(this.state.otpCode || '').trim();
       if (!/^\d{4}$/.test(code)) return this.setState({ errorMsg: 'Enter the 4-digit verification code.' });
-      // demo accepts any 4 digits, or stored pending code
       let pending = null;
       try { pending = JSON.parse(localStorage.getItem('ak_pending_otp') || 'null'); } catch (er) {}
-      if (pending && pending.expiresAt && Date.now() > pending.expiresAt) {
+      if (!pending || !pending.code) {
+        return this.setState({ errorMsg: 'No active verification code. Please request a new one.', otp: false, otpCode: '' });
+      }
+      if (pending.expiresAt && Date.now() > pending.expiresAt) {
         return this.setState({ errorMsg: 'Verification code expired. Please request a new one.', otp: false, otpCode: '' });
       }
-      if (pending && pending.code && code !== pending.code) {
+      if (code !== String(pending.code)) {
         return this.setState({ errorMsg: 'Incorrect verification code.' });
       }
       this.setState({ loading: true, errorMsg: '', infoMsg: '' });
@@ -493,9 +515,9 @@ class Component extends DCLogic {
         };
         users[key] = Object.assign({}, existing, profile, { password: existing.password || this.state.password });
         this._writeUsers(users);
-        try { localStorage.removeItem('ak_pending_otp'); } catch (er) {}
+        try { localStorage.removeItem('ak_pending_otp'); localStorage.removeItem('ak_lock_until'); localStorage.removeItem('ak_fail_count'); } catch (er) {}
         this._setSession(profile, this.state.rememberMe);
-        this.setState({ loading: false, done: true, failCount: 0 });
+        this.setState({ loading: false, done: true, failCount: 0, lockUntil: 0 });
       }, 900);
       return;
     }
@@ -543,8 +565,9 @@ class Component extends DCLogic {
         return;
       }
       const profile = { name: user.name || '', phone: user.phone || '', email: user.email || kind.value, verified: true };
+      try { localStorage.removeItem('ak_lock_until'); localStorage.removeItem('ak_fail_count'); } catch (er) {}
       this._setSession(profile, this.state.rememberMe);
-      this.setState({ loading: false, done: true, failCount: 0 });
+      this.setState({ loading: false, done: true, failCount: 0, lockUntil: 0 });
     }, 900);
   };
 
@@ -553,9 +576,10 @@ class Component extends DCLogic {
     if (this.state.loading) return;
     const kind = this._contactKind(this.state.contact);
     if (this.state.forgotStep === 'contact') {
-      if (kind.kind === 'bad-phone') return this.setState({ errorMsg: this._contactError('bad-phone', this.state.contact) });
+      if (kind.kind === 'empty') return this.setState({ errorMsg: 'Enter the email for your account.' });
+      if (kind.kind === 'phone' || kind.kind === 'bad-phone') return this.setState({ errorMsg: 'Password reset is for email accounts only. Phone accounts sign in with OTP.' });
       if (kind.kind === 'bad-email') return this.setState({ errorMsg: this._contactError('bad-email', this.state.contact) });
-      if (kind.kind === 'empty') return this.setState({ errorMsg: 'Enter your phone number or email.' });
+      if (kind.kind !== 'email') return this.setState({ errorMsg: 'Enter a valid email address.' });
       const code = String(1000 + Math.floor(Math.random() * 9000));
       try {
         localStorage.setItem('ak_reset', JSON.stringify({ contact: kind.value, code, expiresAt: Date.now() + 10 * 60 * 1000 }));
@@ -591,8 +615,13 @@ class Component extends DCLogic {
     const isPhone = kind.kind === 'phone';
     const isEmail = kind.kind === 'email';
     const strength = this._pwScore(this.state.password);
-    const locked = this._isLocked();
-    const lockMins = locked ? Math.max(1, Math.ceil((this.state.lockUntil - Date.now()) / 60000)) : 0;
+    let lockUntilMs = this.state.lockUntil || 0;
+    try {
+      const stored = Number(localStorage.getItem('ak_lock_until') || 0);
+      if (stored > lockUntilMs) lockUntilMs = stored;
+    } catch (e) {}
+    const locked = lockUntilMs > Date.now() || this._isLocked();
+    const lockMins = locked ? Math.max(1, Math.ceil((Math.max(lockUntilMs, this.state.lockUntil || 0) - Date.now()) / 60000)) : 0;
     const contactHint = kind.kind === 'bad-phone'
       ? 'Use a valid 10-digit Indian mobile number (starts with 6–9).'
       : (kind.kind === 'bad-email'
@@ -676,18 +705,18 @@ class Component extends DCLogic {
       forgotSubmitText: this.state.forgotStep === 'contact' ? 'Send reset code' : 'Update password',
       socialGoogle: () => {
         if (this.state.loading || locked) return;
-        this.setState({ loading: true, errorMsg: '' });
+        this.setState({ loading: true, errorMsg: '', infoMsg: 'Demo Google sign-in (no real OAuth yet).' });
         this._t = setTimeout(() => {
-          const profile = { name: 'Google User', email: 'user@gmail.com', phone: '', verified: true };
+          const profile = { name: 'Demo Google User', email: 'demo.google@aakashik.local', phone: '', verified: true, demoSocial: true };
           this._setSession(profile, true);
           this.setState({ loading: false, done: true });
         }, 900);
       },
       socialGithub: () => {
         if (this.state.loading || locked) return;
-        this.setState({ loading: true, errorMsg: '' });
+        this.setState({ loading: true, errorMsg: '', infoMsg: 'Demo GitHub sign-in (no real OAuth yet).' });
         this._t = setTimeout(() => {
-          const profile = { name: 'GitHub User', email: 'user@users.noreply.github.com', phone: '', verified: true };
+          const profile = { name: 'Demo GitHub User', email: 'demo.github@aakashik.local', phone: '', verified: true, demoSocial: true };
           this._setSession(profile, true);
           this.setState({ loading: false, done: true });
         }, 900);

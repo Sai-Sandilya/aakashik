@@ -44,8 +44,8 @@ async function openDeliveryCheckout(page, opts = {}) {
 async function fillDeliveryBasics(page) {
   const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'Place Order' }) });
   await form.getByPlaceholder('Full name').fill('Test Buyer');
-  await form.getByPlaceholder('Phone').fill('9876543210');
-  await form.getByPlaceholder('Email').fill(`buyer-${Date.now()}@test.com`);
+  await form.getByPlaceholder('Phone (or email below)').fill('9876543210');
+  await form.getByPlaceholder('Email (or phone above)').fill(`buyer-${Date.now()}@test.com`);
   await form.getByPlaceholder('Address (house, street, area)').fill('12 Ritual Lane');
   await form.getByPlaceholder('City').fill('Hyderabad');
   await form.getByPlaceholder('Pincode').fill('500001');
