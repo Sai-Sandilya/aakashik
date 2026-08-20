@@ -235,7 +235,7 @@
               </label>
             </sc-if>
             <sc-if value="{{ forgotStepOtp }}">
-              <p style="font-size: 13.5px; color: #5E6A54; margin: 0; line-height: 1.6;">Enter the 4-digit reset code sent to <strong style="color:#2E3D2C;">{{ contact }}</strong>. Code expires in 10 minutes.</p>
+              <p style="font-size: 13.5px; color: #5E6A54; margin: 0; line-height: 1.6;">Enter the demo 4-digit reset code for <strong style="color:#2E3D2C;">{{ contact }}</strong> (shown above — not emailed). Expires in 10 minutes.</p>
               <input value="{{ otpCode }}" onInput="{{ onOtpCode }}" inputmode="numeric" maxlength="4" required placeholder="4-digit code" style="background: #EFEBE0; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 18px; letter-spacing: 0.3em; text-align: center; color: #2E3D2C; outline: none;">
               <label style="display: block;">
                 <span style="display: block; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A9678; margin-bottom: 7px;">New password</span>
@@ -319,10 +319,10 @@
           </sc-if>
 
           <sc-if value="{{ isPhone }}">
-            <p style="font-size: 12.5px; color: #8A9678; margin: 0; display: flex; align-items: center; gap: 7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8A9678" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>We'll send a one-time verification code to your phone</p>
+            <p style="font-size: 12.5px; color: #8A9678; margin: 0; display: flex; align-items: center; gap: 7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8A9678" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Demo OTP shown on screen — not sent by SMS</p>
           </sc-if>
           <sc-if value="{{ isEmail }}">
-            <sc-if value="{{ isSignup }}"><p style="font-size: 12.5px; color: #8A9678; margin: 0;">We'll send a verification code to your email before activating the account.</p></sc-if>
+            <sc-if value="{{ isSignup }}"><p style="font-size: 12.5px; color: #8A9678; margin: 0;">Demo verification code shown on screen — not emailed.</p></sc-if>
           </sc-if>
 
           <div style="display: flex; align-items: center; justify-content: space-between; font-size: 13px; animation: fieldIn .5s ease both .25s;">
@@ -333,9 +333,9 @@
           </sc-if>
 
           <sc-if value="{{ otp }}">
-            <p style="font-size: 13.5px; color: #5E6A54; margin: 0 0 4px; line-height: 1.6;">Enter the 4-digit verification code sent to <strong style="color: #2E3D2C;">{{ contact }}</strong>. <button type="button" onClick="{{ editContact }}" style="background: transparent; border: none; color: #B65E38; cursor: pointer; font-size: 13px; padding: 0;">Edit</button></p>
+            <p style="font-size: 13.5px; color: #5E6A54; margin: 0 0 4px; line-height: 1.6;">Enter the demo 4-digit code for <strong style="color: #2E3D2C;">{{ contact }}</strong> (shown above — not emailed/SMS). <button type="button" onClick="{{ editContact }}" style="background: transparent; border: none; color: #B65E38; cursor: pointer; font-size: 13px; padding: 0;">Edit</button></p>
             <input value="{{ otpCode }}" onInput="{{ onOtpCode }}" inputmode="numeric" maxlength="4" required placeholder="4-digit code" style="background: #EFEBE0; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 22px; letter-spacing: 0.35em; text-align: center; color: #2E3D2C; outline: none;">
-            <button type="button" onClick="{{ resendOtp }}" style="background: transparent; border: none; color: #8A9678; cursor: pointer; font-size: 12.5px;">Didn't get it? Resend code</button>
+            <button type="button" onClick="{{ resendOtp }}" style="background: transparent; border: none; color: #8A9678; cursor: pointer; font-size: 12.5px;">Need a new demo code? Resend</button>
           </sc-if>
 
           <button type="submit" disabled="{{ submitDisabled }}" style="display: inline-flex; align-items: center; justify-content: center; gap: 9px; background: #2E3D2C; color: #F1EEDF; border: none; padding: 15px; border-radius: 30px; font-size: 15px; font-weight: 500; margin-top: 6px; animation: fieldIn .5s ease both .3s; box-shadow: 0 14px 28px -14px rgba(46,61,44,0.7); opacity: {{ submitOpacity }}; cursor: {{ submitCursor }};">
@@ -519,21 +519,27 @@ class Component extends DCLogic {
       if (code !== String(pending.code)) {
         return this.setState({ errorMsg: 'Incorrect verification code.' });
       }
+      // Snapshot pending before async delay so pwHash cannot be lost if storage changes
+      const pendingSnap = Object.assign({}, pending);
       this.setState({ loading: true, errorMsg: '', infoMsg: '' });
       this._t = setTimeout(() => {
-        let pending2 = null;
-        try { pending2 = JSON.parse(localStorage.getItem('ak_pending_otp') || 'null'); } catch (er) {}
         const users = this._readUsers();
         const key = kind.value;
+        if (this.state.mode === 'signup' && kind.kind === 'email' && users[key] && users[key].verified) {
+          this.setState({ loading: false, otp: false, otpCode: '', errorMsg: 'An account already exists for this email. Sign in instead.' });
+          try { localStorage.removeItem('ak_pending_otp'); } catch (er) {}
+          return;
+        }
         const existing = users[key] || {};
         const profile = {
-          name: (this.state.mode === 'signup' ? (this.state.fullName || (pending2 && pending2.name) || '') : existing.name || '').trim(),
+          name: (this.state.mode === 'signup' ? (this.state.fullName || pendingSnap.name || '') : existing.name || '').trim(),
           phone: kind.kind === 'phone' ? kind.value : (existing.phone || ''),
           email: kind.kind === 'email' ? kind.value : (existing.email || ''),
           verified: true,
         };
         const entry = Object.assign({}, existing, profile);
-        if (pending2 && pending2.pwHash) { entry.pwHash = pending2.pwHash; delete entry.password; }
+        if (pendingSnap.pwHash) { entry.pwHash = pendingSnap.pwHash; delete entry.password; }
+        else { delete entry.password; }
         users[key] = entry;
         this._writeUsers(users);
         try { localStorage.removeItem('ak_pending_otp'); localStorage.removeItem('ak_lock_until'); localStorage.removeItem('ak_fail_count'); } catch (er) {}
@@ -561,6 +567,12 @@ class Component extends DCLogic {
         const users = this._readUsers();
         if (!users[kind.value]) {
           return this.setState({ errorMsg: 'No account for this phone. Create an account first.' });
+        }
+      }
+      if (this.state.mode === 'signup' && kind.kind === 'email') {
+        const usersExist = this._readUsers();
+        if (usersExist[kind.value] && usersExist[kind.value].verified) {
+          return this.setState({ errorMsg: 'An account already exists for this email. Sign in instead.' });
         }
       }
       const code = String(1000 + Math.floor(Math.random() * 9000));
@@ -613,6 +625,10 @@ class Component extends DCLogic {
       if (kind.kind === 'phone' || kind.kind === 'bad-phone') return this.setState({ errorMsg: 'Password reset is for email accounts only. Phone accounts sign in with OTP.' });
       if (kind.kind === 'bad-email') return this.setState({ errorMsg: this._contactError('bad-email', this.state.contact) });
       if (kind.kind !== 'email') return this.setState({ errorMsg: 'Enter a valid email address.' });
+      const usersCheck = this._readUsers();
+      if (!usersCheck[kind.value]) {
+        return this.setState({ errorMsg: 'No account found for this email. Create an account first.' });
+      }
       const code = String(1000 + Math.floor(Math.random() * 9000));
       try {
         localStorage.setItem('ak_reset', JSON.stringify({ contact: kind.value, code, expiresAt: Date.now() + 10 * 60 * 1000 }));
@@ -633,10 +649,15 @@ class Component extends DCLogic {
       this._hashPassword(this.state.password).then((pwHash) => {
         const users = this._readUsers();
         const key = reset.contact;
-        const next = Object.assign({}, users[key] || {}, {
+        if (!users[key]) {
+          this.setState({ loading: false, forgotStep: 'contact', errorMsg: 'No account found for this email. Create an account first.' });
+          try { localStorage.removeItem('ak_reset'); } catch (er) {}
+          return;
+        }
+        const next = Object.assign({}, users[key], {
           pwHash,
-          email: key.indexOf('@') >= 0 ? key : (users[key] && users[key].email) || '',
-          phone: key.indexOf('@') < 0 ? key : (users[key] && users[key].phone) || '',
+          email: key.indexOf('@') >= 0 ? key : (users[key].email || ''),
+          phone: key.indexOf('@') < 0 ? key : (users[key].phone || ''),
         });
         delete next.password;
         users[key] = next;
@@ -756,6 +777,11 @@ class Component extends DCLogic {
         this.setState({ loading: true, errorMsg: '', infoMsg: 'Demo Google sign-in (no real OAuth yet).' });
         this._t = setTimeout(() => {
           const profile = { name: 'Demo Google User', email: 'demo.google@aakashik.local', phone: '', verified: true, demoSocial: true };
+          try {
+            const users = this._readUsers();
+            users[profile.email] = Object.assign({}, users[profile.email] || {}, profile);
+            this._writeUsers(users);
+          } catch (er) {}
           this._setSession(profile, true);
           this.setState({ loading: false, done: true });
         }, 900);
@@ -765,6 +791,11 @@ class Component extends DCLogic {
         this.setState({ loading: true, errorMsg: '', infoMsg: 'Demo GitHub sign-in (no real OAuth yet).' });
         this._t = setTimeout(() => {
           const profile = { name: 'Demo GitHub User', email: 'demo.github@aakashik.local', phone: '', verified: true, demoSocial: true };
+          try {
+            const users = this._readUsers();
+            users[profile.email] = Object.assign({}, users[profile.email] || {}, profile);
+            this._writeUsers(users);
+          } catch (er) {}
           this._setSession(profile, true);
           this.setState({ loading: false, done: true });
         }, 900);

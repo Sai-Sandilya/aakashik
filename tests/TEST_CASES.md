@@ -210,6 +210,33 @@ View runs under the repo **Actions** tab → **E2E Tests**.
 
 ---
 
+## Final polish UX (`tests/ux-final.spec.js`)
+
+| ID | Focus | Type |
+|----|--------|------|
+| TC-F01 | Auth demo OTP copy (phone + email) | + |
+| TC-F02 | Auth no longer claims “We'll send” OTP | − |
+| TC-F03 | OTP verify keeps `pwHash` if pending cleared mid-delay | + |
+| TC-F04 | Forgot password rejects unknown email (no orphan) | − |
+| TC-F05 | Forgot password still works for existing email | + |
+| TC-F06 | Email signup blocked when account exists | − |
+| TC-F07 | Demo Google writes `ak_users` | + |
+| TC-F08 | Pan-India delivery planned/demo copy | + |
+| TC-F09 | Live 24–48h dispatch claim removed | − |
+| TC-F10 | Reviews subtitle = sample/demo | + |
+| TC-F11 | Story/herb medical overclaims softened | − |
+| TC-F12 | Kit card padding fixed | + |
+| TC-F13 | Checkout signup blocks existing email | + |
+| TC-F14 | Cart dialog receives focus on open | + |
+| TC-F15 | Tab focus trap inside cart dialog | + |
+| TC-F16 | Footer mailto / tel links | + |
+| TC-F17 | Reminder eyebrow without “dose” | + |
+| TC-F18 | Order history empty = simulated tracking | + |
+| TC-F19 | Privacy describes demo orders / mock payments | + |
+| TC-F20 | Privacy no longer claims live shipping partners | − |
+
+---
+
 ## Notes
 
 - OTP and reset codes are read from `localStorage` (`ak_pending_otp`, `ak_reset`) — same as the demo UI toasts.

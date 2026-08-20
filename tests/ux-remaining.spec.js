@@ -1,6 +1,5 @@
-// @ts-check
 /**
- * Remaining UX audit issues (1–23) — positive and negative E2E coverage.
+ * Remaining UX audit issues (1-23) — positive and negative E2E coverage.
  */
 const { test, expect } = require('@playwright/test');
 const {
@@ -23,9 +22,8 @@ const {
 } = require('./helpers/auth-ui');
 
 const LANDING_URL = '/Aakashik%20Landing.dc.html';
-const AUTH_URL = '/Aakashik%20Auth.dc.html';
 
-test.describe('UX remaining — password hashing & demo OTP (1–2, 11–12)', () => {
+test.describe('UX remaining — password hashing & demo OTP (1-2, 11-12)', () => {
   test.beforeEach(async ({ page }) => {
     await clearAuthStorage(page);
   });
