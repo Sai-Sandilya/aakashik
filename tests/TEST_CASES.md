@@ -262,6 +262,33 @@ View runs under the repo **Actions** tab → **E2E Tests**.
 
 ---
 
+## Admin Orders mock (`tests/admin-orders.spec.js`)
+
+Demo owner console (no database yet). Login: `owner@aakashik.local` / `Admin@1234`.
+
+| ID | Focus | Type |
+|----|--------|------|
+| TC-AD01 | Wrong admin password rejected | − |
+| TC-AD02 | Demo owner can sign in | + |
+| TC-AD03 | Logout clears admin session | + |
+| TC-AD04 | Mock seeds five sample orders | + |
+| TC-AD05 | Pending filter shows only pending | + |
+| TC-AD06 | Search by phone finds order | + |
+| TC-AD07 | Search with no match shows empty state | − |
+| TC-AD08 | Order detail shows customer + items | + |
+| TC-AD09 | Pending → Packed → Shipped → Delivered | + |
+| TC-AD10 | Cannot jump Pending → Delivered | − |
+| TC-AD11 | Delivered order has no further actions | − |
+| TC-AD12 | Pending order can be cancelled | + |
+| TC-AD13 | Sync imports store checkout order | + |
+| TC-AD14 | Sync with no store orders toasts | − |
+| TC-AD15 | Reseed restores mocks, keeps store orders | + |
+| TC-AD16 | Store footer links to owner admin | + |
+| TC-AD17 | Filter + status persists after reload | + |
+| TC-AD18 | Duplicate sync does not duplicate IDs | − |
+
+---
+
 ## Notes
 
 - OTP and reset codes are read from `localStorage` (`ak_pending_otp`, `ak_reset`) — same as the demo UI toasts.
