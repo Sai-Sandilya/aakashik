@@ -262,6 +262,57 @@ View runs under the repo **Actions** tab → **E2E Tests**.
 
 ---
 
+## Admin Orders mock (`tests/admin-orders.spec.js`)
+
+Demo owner console (no database yet). Login: `owner@aakashik.local` / `Admin@1234`.
+
+| ID | Focus | Type |
+|----|--------|------|
+| TC-AD01 | Wrong admin password rejected | − |
+| TC-AD02 | Demo owner can sign in | + |
+| TC-AD03 | Logout clears admin session | + |
+| TC-AD04 | Mock seeds five sample orders | + |
+| TC-AD05 | Confirmed filter shows only confirmed | + |
+| TC-AD06 | Search by phone finds order | + |
+| TC-AD07 | Search with no match shows empty state | − |
+| TC-AD08 | Order detail shows customer + items | + |
+| TC-AD09 | Confirmed → Packed → Shipped → Out for delivery → Delivered | + |
+| TC-AD10 | Cannot jump Confirmed → Delivered | − |
+| TC-AD11 | Delivered order has no further actions | − |
+| TC-AD12 | Confirmed order can be cancelled | + |
+| TC-AD13 | Login auto-pulls store checkout order | + |
+| TC-AD14 | Manual pull with no store orders toasts | − |
+| TC-AD15 | Reseed restores mocks, keeps store orders | + |
+| TC-AD16 | Admin opens by direct URL only (no store footer link) | + |
+| TC-AD17 | Filter + status persists after reload | + |
+| TC-AD18 | Duplicate pull does not duplicate IDs | − |
+| TC-AD19 | Live poll shows new store order without refresh | + |
+| TC-AD20 | Admin status update matches store Track Your Order | + |
+
+---
+
+## Admin Inventory mock (`tests/admin-inventory.spec.js`)
+
+Demo owner inventory in `ak_stock`. Low stock ≤ 5. Store checkout deducts units.
+
+| ID | Focus | Type |
+|----|--------|------|
+| TC-IN01 | Inventory tab shows 9 seeded SKUs | + |
+| TC-IN02 | Orders tab still works after Inventory | + |
+| TC-IN03 | Save sets exact stock quantity | + |
+| TC-IN04 | + / − adjust stock by one | + |
+| TC-IN05 | Save rejects non-numeric stock | − |
+| TC-IN06 | Out of stock filter after zeroing | + |
+| TC-IN07 | Low stock filter for qty 1–5 | + |
+| TC-IN08 | Reseed stock restores defaults | + |
+| TC-IN09 | Zero stock blocks add-to-cart on store | + |
+| TC-IN10 | Checkout deducts stock | + |
+| TC-IN11 | Admin zero → restock unlocks store | + |
+| TC-IN12 | Cannot cart more than available stock | − |
+| TC-IN13 | Search inventory + stock persists reload | + |
+
+---
+
 ## Notes
 
 - OTP and reset codes are read from `localStorage` (`ak_pending_otp`, `ak_reset`) — same as the demo UI toasts.

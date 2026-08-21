@@ -172,7 +172,8 @@ test.describe('UX remaining — shopper honesty (3–7, 10)', () => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Track now' }).scrollIntoViewIfNeeded();
     await page.getByRole('button', { name: 'Track now' }).click({ force: true });
-    await expect(page.getByText(/simulated demo timeline/i)).toBeVisible();
+    await expect(page.getByText(/simulated demo tracking/i)).toBeVisible();
+    await expect(page.getByText(/status matches Admin updates/i)).toBeVisible();
   });
 
   test('TC-R13 positive: reminder + newsletter are device-only demo', async ({ page }) => {

@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { background: #ECE7DF; }
+    button, input, select { font-family: inherit; }
+    ::selection { background: #BE6A45; color: #FBF7EE; }
+    @keyframes toastIn { 0% { opacity: 0; transform: translateX(-50%) translateY(12px); } 100% { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    @keyframes cardIn { 0% { opacity: 0; transform: translateY(18px); } 100% { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 900px) {
+      #admin-layout { grid-template-columns: 1fr !important; }
+      #admin-detail { position: static !important; }
+    }
+  </style>
+</helmet>
+
+<div id="admin-shell" style="font-family: 'Jost', sans-serif; color: #2E3D2C; min-height: 100vh; background: linear-gradient(160deg, #E8E2D4 0%, #F4EEE1 45%, #E7EDE0 100%);">
+
+  <div role="status" style="background: #F3E9D8; border-bottom: 1px solid #E0D7BE; color: #5E6A54; font-size: 12.5px; line-height: 1.5; padding: 10px 18px; text-align: center;">
+    Demo admin — orders + inventory in this browser only. Stock updates apply to the store checkout immediately.
+  </div>
+
+  <sc-if value="{{ notLoggedIn }}">
+    <div style="min-height: calc(100vh - 44px); display: flex; align-items: center; justify-content: center; padding: 28px 16px;">
+      <form onSubmit="{{ login }}" style="width: min(420px, 100%); background: #F6F1E4; border: 1px solid #E0D7BE; border-radius: 22px; padding: 28px 24px; box-shadow: 0 30px 60px -36px rgba(46,61,44,0.45); animation: cardIn .45s ease;">
+        <p style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #A8894E; margin: 0 0 8px;">Owner console</p>
+        <h1 style="font-family: 'Marcellus', serif; font-size: 30px; margin: 0 0 8px; font-weight: 400;">Admin sign in</h1>
+        <p style="font-size: 13.5px; color: #5E6A54; margin: 0 0 18px; line-height: 1.6;">Use the demo owner credentials to review orders and update stock.</p>
+        <sc-if value="{{ hasLoginError }}">
+          <div style="background: #F8E8E2; border: 1px solid #E8B8A8; color: #8A3E2A; border-radius: 12px; padding: 10px 12px; font-size: 12.5px; margin-bottom: 12px;">{{ loginError }}</div>
+        </sc-if>
+        <label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;margin-bottom:6px;">Email</label>
+        <input value="{{ adminEmail }}" onInput="{{ onAdminEmail }}" placeholder="owner@aakashik.local" aria-label="Admin email" style="width:100%; background:#F4EEE1; border:1px solid #E0D7BE; border-radius:12px; padding:13px 15px; font-size:14px; margin-bottom:12px; outline:none;">
+        <label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;margin-bottom:6px;">Password</label>
+        <input type="password" value="{{ adminPassword }}" onInput="{{ onAdminPassword }}" placeholder="Password" aria-label="Admin password" style="width:100%; background:#F4EEE1; border:1px solid #E0D7BE; border-radius:12px; padding:13px 15px; font-size:14px; margin-bottom:16px; outline:none;">
+        <button type="submit" style="width:100%; background:#2E3D2C; color:#F1EEDF; border:none; padding:14px; border-radius:30px; font-size:14.5px; font-weight:500;">Enter Admin</button>
+        <p style="font-size:12px; color:#8A9678; margin:14px 0 0; line-height:1.55;">Demo login: <strong>owner@aakashik.local</strong> / <strong>Admin@1234</strong></p>
+        <a href="Aakashik%20Landing.dc.html" style="display:inline-block; margin-top:14px; font-size:13px; color:#B65E38; text-decoration:none;">← Back to store</a>
+      </form>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ loggedIn }}">
+    <header style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; padding:18px clamp(16px,4vw,36px); border-bottom:1px solid #E0D7BE; background:rgba(246,241,228,0.85); backdrop-filter:blur(10px);">
+      <div>
+        <p style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#A8894E; margin:0 0 4px;">Aakashik Wellness</p>
+        <h1 style="font-family:'Marcellus', serif; font-size:28px; margin:0; font-weight:400;">{{ pageTitle }}</h1>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+        <button type="button" onClick="{{ showOrdersTab }}" style="{{ ordersTabStyle }}">Orders</button>
+        <button type="button" onClick="{{ showInventoryTab }}" style="{{ inventoryTabStyle }}">Inventory</button>
+        <sc-if value="{{ isOrdersTab }}">
+          <button type="button" onClick="{{ syncStoreOrders }}" style="background:transparent; border:1px solid #2E3D2C; color:#2E3D2C; padding:10px 14px; border-radius:30px; font-size:13px;">Pull store orders now</button>
+          <button type="button" onClick="{{ reseedMocks }}" style="background:transparent; border:1px solid #8A9678; color:#5E6A54; padding:10px 14px; border-radius:30px; font-size:13px;">Reseed mocks</button>
+        </sc-if>
+        <sc-if value="{{ isInventoryTab }}">
+          <button type="button" onClick="{{ reseedStock }}" style="background:transparent; border:1px solid #8A9678; color:#5E6A54; padding:10px 14px; border-radius:30px; font-size:13px;">Reseed stock</button>
+        </sc-if>
+        <button type="button" onClick="{{ logout }}" style="background:#2E3D2C; color:#F1EEDF; border:none; padding:10px 14px; border-radius:30px; font-size:13px;">Log out</button>
+      </div>
+    </header>
+
+    <sc-if value="{{ isOrdersTab }}">
+    <div style="padding:18px clamp(16px,4vw,36px) 10px; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+      <input value="{{ search }}" onInput="{{ onSearch }}" placeholder="Search order ID, name, phone…" aria-label="Search orders" style="flex:1; min-width:220px; background:#F6F1E4; border:1px solid #E0D7BE; border-radius:12px; padding:12px 14px; font-size:14px; outline:none;">
+      <div style="display:flex; flex-wrap:wrap; gap:6px;" role="group" aria-label="Status filters">
+        <sc-for list="{{ filterChips }}" as="f" hint-placeholder-count="6">
+          <button type="button" onClick="{{ f.onClick }}" style="{{ f.style }}">{{ f.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="padding:0 clamp(16px,4vw,36px) 14px; display:flex; flex-wrap:wrap; gap:14px; font-size:13px; color:#5E6A54;">
+      <span>Total: <strong style="color:#2E3D2C;">{{ totalCount }}</strong></span>
+      <span>Confirmed: <strong style="color:#2E3D2C;">{{ pendingCount }}</strong></span>
+      <span>Visible: <strong style="color:#2E3D2C;">{{ visibleCount }}</strong></span>
+    </div>
+
+    <div id="admin-layout" style="display:grid; grid-template-columns: 1.1fr 0.9fr; gap:18px; padding:0 clamp(16px,4vw,36px) 36px; align-items:start;">
+      <section aria-label="Orders list" style="background:#F6F1E4; border:1px solid #E0D7BE; border-radius:18px; overflow:hidden;">
+        <sc-if value="{{ listEmpty }}">
+          <div style="padding:28px 20px; text-align:center; color:#5E6A54; font-size:14px; line-height:1.6;">No orders match this filter. Try All, or Sync store orders / Reseed mocks.</div>
+        </sc-if>
+        <sc-if value="{{ listHasItems }}">
+          <div style="display:flex; flex-direction:column;">
+            <sc-for list="{{ orderRows }}" as="o" hint-placeholder-count="5">
+              <button type="button" onClick="{{ o.onSelect }}" style="{{ o.rowStyle }}">
+                <div style="display:flex; justify-content:space-between; gap:10px; align-items:baseline;">
+                  <strong style="font-size:15px;">{{ o.id }}</strong>
+                  <span style="{{ o.badgeStyle }}">{{ o.statusLabel }}</span>
+                </div>
+                <div style="margin-top:6px; font-size:13px; color:#5E6A54;">{{ o.customerLine }}</div>
+                <div style="margin-top:4px; font-size:12.5px; color:#8A9678;">{{ o.metaLine }}</div>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+      </section>
+
+      <aside id="admin-detail" aria-label="Order detail" style="background:#F6F1E4; border:1px solid #E0D7BE; border-radius:18px; padding:20px; min-height:280px; position:sticky; top:12px;">
+        <sc-if value="{{ noSelection }}">
+          <p style="margin:0; color:#5E6A54; font-size:14px; line-height:1.6;">Select an order to view delivery details and update status.</p>
+        </sc-if>
+        <sc-if value="{{ hasSelection }}">
+          <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start; margin-bottom:12px;">
+            <div>
+              <h2 style="font-family:'Marcellus', serif; font-size:26px; margin:0; font-weight:400;">{{ selectedId }}</h2>
+              <p style="margin:6px 0 0; font-size:13px; color:#8A9678;">{{ selectedSourceLabel }} · {{ selectedWhen }}</p>
+            </div>
+            <span style="{{ selectedBadgeStyle }}">{{ selectedStatusLabel }}</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px; color:#5E6A54; margin-bottom:14px;">
+            <div><strong style="color:#2E3D2C;">Customer:</strong> {{ selectedCustomer }}</div>
+            <div><strong style="color:#2E3D2C;">Phone:</strong> {{ selectedPhone }}</div>
+            <div><strong style="color:#2E3D2C;">Email:</strong> {{ selectedEmail }}</div>
+            <div><strong style="color:#2E3D2C;">Ship to:</strong> {{ selectedAddress }}</div>
+            <div><strong style="color:#2E3D2C;">Payment:</strong> {{ selectedPayment }}</div>
+            <div><strong style="color:#2E3D2C;">Total:</strong> {{ selectedTotal }}</div>
+          </div>
+          <p style="font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#8A9678; margin:0 0 8px;">Items</p>
+          <ul style="list-style:none; margin:0 0 16px; padding:0; display:flex; flex-direction:column; gap:6px;">
+            <sc-for list="{{ selectedItems }}" as="it" hint-placeholder-count="2">
+              <li style="background:#F4EEE1; border:1px solid #E0D7BE; border-radius:10px; padding:10px 12px; font-size:13.5px;">{{ it.line }}</li>
+            </sc-for>
+          </ul>
+          <p style="font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#8A9678; margin:0 0 8px;">Update status</p>
+          <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+            <sc-for list="{{ statusActions }}" as="a" hint-placeholder-count="4">
+              <button type="button" onClick="{{ a.onClick }}" disabled="{{ a.disabled }}" style="{{ a.style }}">{{ a.label }}</button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ hasStatusError }}">
+            <div style="background:#F8E8E2; border:1px solid #E8B8A8; color:#8A3E2A; border-radius:12px; padding:10px 12px; font-size:12.5px; margin-bottom:10px;">{{ statusError }}</div>
+          </sc-if>
+          <p style="font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#8A9678; margin:8px 0;">History</p>
+          <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px;">
+            <sc-for list="{{ selectedHistory }}" as="h" hint-placeholder-count="3">
+              <li style="font-size:12.5px; color:#5E6A54;">{{ h.line }}</li>
+            </sc-for>
+          </ul>
+        </sc-if>
+      </aside>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isInventoryTab }}">
+      <div style="padding:18px clamp(16px,4vw,36px) 10px; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+        <input value="{{ invSearch }}" onInput="{{ onInvSearch }}" placeholder="Search product name or id…" aria-label="Search inventory" style="flex:1; min-width:220px; background:#F6F1E4; border:1px solid #E0D7BE; border-radius:12px; padding:12px 14px; font-size:14px; outline:none;">
+        <div style="display:flex; flex-wrap:wrap; gap:6px;" role="group" aria-label="Stock filters">
+          <sc-for list="{{ invFilterChips }}" as="f" hint-placeholder-count="4">
+            <button type="button" onClick="{{ f.onClick }}" style="{{ f.style }}">{{ f.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="padding:0 clamp(16px,4vw,36px) 14px; display:flex; flex-wrap:wrap; gap:14px; font-size:13px; color:#5E6A54;">
+        <span>SKUs: <strong style="color:#2E3D2C;">{{ invTotalCount }}</strong></span>
+        <span>Low stock: <strong style="color:#2E3D2C;">{{ invLowCount }}</strong></span>
+        <span>Out of stock: <strong style="color:#2E3D2C;">{{ invOutCount }}</strong></span>
+        <span>Visible: <strong style="color:#2E3D2C;">{{ invVisibleCount }}</strong></span>
+      </div>
+      <section aria-label="Inventory list" style="margin:0 clamp(16px,4vw,36px) 36px; background:#F6F1E4; border:1px solid #E0D7BE; border-radius:18px; overflow:hidden;">
+        <sc-if value="{{ invEmpty }}">
+          <div style="padding:28px 20px; text-align:center; color:#5E6A54; font-size:14px; line-height:1.6;">No products match this filter.</div>
+        </sc-if>
+        <sc-if value="{{ invHasItems }}">
+          <div style="display:flex; flex-direction:column;">
+            <sc-for list="{{ stockRows }}" as="r" hint-placeholder-count="6">
+              <div data-stock-row="{{ r.id }}" style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid #E4DBC8;">
+                <div style="min-width:200px; flex:1;">
+                  <div style="display:flex; gap:10px; align-items:baseline; flex-wrap:wrap;">
+                    <strong style="font-size:15px;">{{ r.name }}</strong>
+                    <span style="{{ r.badgeStyle }}">{{ r.badgeLabel }}</span>
+                  </div>
+                  <div style="margin-top:4px; font-size:12.5px; color:#8A9678;">{{ r.meta }}</div>
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                  <button type="button" onClick="{{ r.dec }}" aria-label="Decrease stock" style="width:36px; height:36px; border-radius:50%; border:1px solid #D7CDB4; background:#F4EEE1; color:#2E3D2C; font-size:18px; cursor:pointer;">−</button>
+                  <input value="{{ r.draft }}" onInput="{{ r.onDraft }}" aria-label="{{ r.stockAria }}" inputmode="numeric" style="width:72px; text-align:center; background:#FBF7EE; border:1px solid #E0D7BE; border-radius:10px; padding:10px 8px; font-size:14px; outline:none;">
+                  <button type="button" onClick="{{ r.inc }}" aria-label="Increase stock" style="width:36px; height:36px; border-radius:50%; border:1px solid #D7CDB4; background:#F4EEE1; color:#2E3D2C; font-size:18px; cursor:pointer;">+</button>
+                  <button type="button" onClick="{{ r.save }}" style="background:#2E3D2C; color:#F1EEDF; border:none; padding:10px 14px; border-radius:30px; font-size:13px;">Save</button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </section>
+    </sc-if>
+  </sc-if>
+
+  <sc-if value="{{ hasToast }}">
+    <div role="status" aria-live="polite" style="position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:50; background:#2E3D2C; color:#F1EEDF; padding:12px 20px; border-radius:30px; font-size:13.5px; animation:toastIn .25s ease;">{{ toast }}</div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    loggedIn: false,
+    adminEmail: 'owner@aakashik.local',
+    adminPassword: '',
+    loginError: '',
+    tab: 'orders',
+    search: '',
+    filter: 'all',
+    orders: [],
+    selectedId: '',
+    statusError: '',
+    toast: '',
+    stock: {},
+    stockDrafts: {},
+    invSearch: '',
+    invFilter: 'all',
+  };
+
+  componentDidMount() {
+    const logged = localStorage.getItem('ak_admin_logged') === '1';
+    let orders = this._readOrders();
+    if (!orders.length) {
+      orders = this._seedMocks();
+      this._writeOrders(orders);
+    }
+    const pulled = this._mergeStoreOrders(orders);
+    const stock = this._ensureStock();
+    this.setState({ loggedIn: logged, orders: pulled.list, stock, stockDrafts: Object.assign({}, stock) });
+    if (logged) this._startLivePull();
+    this._onStorage = (e) => {
+      if (!this.state.loggedIn) return;
+      if (e && e.key === 'ak_stock') {
+        const next = this._readStock();
+        return this.setState({ stock: next, stockDrafts: Object.assign({}, next) });
+      }
+      if (e && e.key && e.key !== 'ak_orders' && e.key !== 'ak_admin_orders') return;
+      this._livePull({ quiet: true });
+    };
+    this._onFocus = () => {
+      if (!this.state.loggedIn) return;
+      this._livePull({ quiet: true });
+      const next = this._readStock();
+      this.setState({ stock: next, stockDrafts: Object.assign({}, this.state.stockDrafts || {}, next) });
+    };
+    try {
+      window.addEventListener('storage', this._onStorage);
+      window.addEventListener('focus', this._onFocus);
+      document.addEventListener('visibilitychange', this._onFocus);
+    } catch (er) {}
+  }
+
+  componentWillUnmount() {
+    this._stopLivePull();
+    try {
+      window.removeEventListener('storage', this._onStorage);
+      window.removeEventListener('focus', this._onFocus);
+      document.removeEventListener('visibilitychange', this._onFocus);
+    } catch (er) {}
+  }
+
+  _startLivePull() {
+    this._stopLivePull();
+    this._pullTO = setInterval(() => {
+      if (this.state.loggedIn) this._livePull({ quiet: true });
+    }, 2500);
+  }
+
+  _stopLivePull() {
+    if (this._pullTO) {
+      clearInterval(this._pullTO);
+      this._pullTO = null;
+    }
+  }
+
+  /** Merge store `ak_orders` into admin list. Returns { list, added }. */
+  _mergeStoreOrders(baseList) {
+    let list = Array.isArray(baseList) ? baseList.slice() : this._readOrders();
+    const store = this._readJSON('ak_orders', []);
+    let added = 0;
+    if (Array.isArray(store)) {
+      store.forEach((raw) => {
+        if (!raw || !raw.id) return;
+        if (list.some((o) => o.id === raw.id)) return;
+        list.unshift(this._normalizeStoreOrder(raw));
+        added += 1;
+      });
+    }
+    if (added) this._writeOrders(list);
+    return { list, added };
+  }
+
+  _livePull(opts) {
+    const quiet = !!(opts && opts.quiet);
+    const result = this._mergeStoreOrders(this.state.orders);
+    if (result.added) {
+      this.setState({ orders: result.list });
+      if (!quiet) this._showToast('Pulled ' + result.added + ' store order(s)');
+      else this._showToast('New store order received');
+    } else if (!quiet) {
+      const store = this._readJSON('ak_orders', []);
+      if (!Array.isArray(store) || !store.length) this._showToast('No store orders found in this browser');
+      else this._showToast('Store orders already up to date');
+    }
+    return result;
+  }
+
+  _readJSON(key, fb) {
+    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fb; } catch (e) { return fb; }
+  }
+  _writeJSON(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+  }
+  _readOrders() {
+    const list = this._readJSON('ak_admin_orders', []);
+    return Array.isArray(list) ? list : [];
+  }
+  _writeOrders(list) {
+    this._writeJSON('ak_admin_orders', list);
+  }
+  _catalog() {
+    return [
+      { id: 'sunni', name: 'Herbal Sunni Pindi', kind: 'Product' },
+      { id: 'diabetic', name: 'Sugar Balance Support', kind: 'Product' },
+      { id: 'immunity', name: 'Daily Immunity', kind: 'Product' },
+      { id: 'kaphahara', name: 'Kaphahara', kind: 'Product' },
+      { id: 'ashta', name: 'Ashtagandham', kind: 'Product' },
+      { id: 'navojas', name: 'Navojas', kind: 'Product' },
+      { id: 'kit-immunity', name: 'Immunity Ritual Kit', kind: 'Bundle' },
+      { id: 'kit-glow', name: 'Glow & Cleanse Kit', kind: 'Bundle' },
+      { id: 'sample-trio', name: 'Sample Trio', kind: 'Bundle' },
+    ];
+  }
+  _defaultStock() {
+    return {
+      sunni: 25,
+      diabetic: 20,
+      immunity: 30,
+      kaphahara: 40,
+      ashta: 35,
+      navojas: 40,
+      'kit-immunity': 15,
+      'kit-glow': 15,
+      'sample-trio': 50,
+    };
+  }
+  _readStock() {
+    const raw = this._readJSON('ak_stock', null);
+    if (!raw || typeof raw !== 'object') return this._defaultStock();
+    const defaults = this._defaultStock();
+    const next = Object.assign({}, defaults);
+    Object.keys(defaults).forEach((id) => {
+      const n = Number(raw[id]);
+      next[id] = Number.isFinite(n) && n >= 0 ? Math.floor(n) : defaults[id];
+    });
+    return next;
+  }
+  _writeStock(map) {
+    this._writeJSON('ak_stock', map);
+  }
+  _ensureStock() {
+    const existing = this._readJSON('ak_stock', null);
+    if (!existing || typeof existing !== 'object') {
+      const seed = this._defaultStock();
+      this._writeStock(seed);
+      return seed;
+    }
+    return this._readStock();
+  }
+  _setStockQty(id, qty) {
+    const n = Math.max(0, Math.floor(Number(qty) || 0));
+    const stock = Object.assign({}, this._readStock());
+    stock[id] = n;
+    this._writeStock(stock);
+    const drafts = Object.assign({}, this.state.stockDrafts || {});
+    drafts[id] = String(n);
+    this.setState({ stock, stockDrafts: drafts });
+    return n;
+  }
+  _stockBadge(qty) {
+    if (qty <= 0) return { label: 'Out of stock', style: 'display:inline-block;padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:500;background:#F8E8E2;color:#8A3E2A;border:1px solid #E8B8A8;' };
+    if (qty <= 5) return { label: 'Low stock', style: 'display:inline-block;padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:500;background:#F3E9D8;color:#8A6B2E;border:1px solid #E0D7BE;' };
+    return { label: 'In stock', style: 'display:inline-block;padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:500;background:#EAF0E1;color:#4E6B3C;border:1px solid #C3D3AE;' };
+  }
+  _money(n) {
+    const v = Math.round(Number(n) || 0);
+    return '₹' + v.toLocaleString('en-IN');
+  }
+  _fmtWhen(ts) {
+    try { return new Date(ts).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }); }
+    catch (e) { return '—'; }
+  }
+  _statusLabel(s) {
+    const map = {
+      pending: 'Order Confirmed',
+      packed: 'Packed with care',
+      shipped: 'Shipped',
+      out_for_delivery: 'Out for delivery',
+      delivered: 'Delivered',
+      cancelled: 'Cancelled',
+    };
+    return map[s] || s;
+  }
+  _badgeStyle(s) {
+    const colors = {
+      pending: { bg: '#F3E9D8', fg: '#8A6B2E', bd: '#E0D7BE' },
+      packed: { bg: '#EAF0E1', fg: '#4E6B3C', bd: '#C3D3AE' },
+      shipped: { bg: '#E7EFF3', fg: '#3A5A6E', bd: '#B7C9D4' },
+      out_for_delivery: { bg: '#F0E6D8', fg: '#8A5A2E', bd: '#E0C9A8' },
+      delivered: { bg: '#E8F0E8', fg: '#2E3D2C', bd: '#B7C9B0' },
+      cancelled: { bg: '#F8E8E2', fg: '#8A3E2A', bd: '#E8B8A8' },
+    };
+    const c = colors[s] || colors.pending;
+    return 'display:inline-block;padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:500;background:' + c.bg + ';color:' + c.fg + ';border:1px solid ' + c.bd + ';';
+  }
+  _seedMocks() {
+    const now = Date.now();
+    return [
+      {
+        id: 'AAK-10001',
+        source: 'mock',
+        status: 'pending',
+        placedAt: now - 3600 * 1000,
+        total: 539,
+        payMethod: 'cod',
+        paymentStatus: 'cod',
+        customer: { name: 'Ananya Rao', phone: '9876501001', email: 'ananya@example.com' },
+        delivery: { address: '12 Lake View', city: 'Hyderabad', state: 'Telangana', pincode: '500001' },
+        items: [{ name: 'Daily Immunity', qty: 1, line: 'Daily Immunity × 1 · ₹349' }, { name: 'Ashtagandham', qty: 1, line: 'Ashtagandham × 1 · ₹199' }],
+        statusHistory: [{ status: 'pending', at: now - 3600 * 1000 }],
+      },
+      {
+        id: 'AAK-10002',
+        source: 'mock',
+        status: 'packed',
+        placedAt: now - 86400 * 1000,
+        total: 399,
+        payMethod: 'upi',
+        paymentStatus: 'paid',
+        customer: { name: 'Rohit Mehta', phone: '9876501002', email: 'rohit@example.com' },
+        delivery: { address: '88 Palm Grove', city: 'Pune', state: 'Maharashtra', pincode: '411001' },
+        items: [{ name: 'Navojas 250g', qty: 1, line: 'Navojas 250g × 1 · ₹399' }],
+        statusHistory: [
+          { status: 'pending', at: now - 86400 * 1000 },
+          { status: 'packed', at: now - 80000 * 1000 },
+        ],
+      },
+      {
+        id: 'AAK-10003',
+        source: 'mock',
+        status: 'shipped',
+        placedAt: now - 2 * 86400 * 1000,
+        total: 599,
+        payMethod: 'card',
+        paymentStatus: 'paid',
+        customer: { name: 'Sneha Iyer', phone: '9876501003', email: 'sneha@example.com' },
+        delivery: { address: '5 Temple Road', city: 'Chennai', state: 'Tamil Nadu', pincode: '600001' },
+        items: [{ name: 'Immunity Ritual Kit', qty: 1, line: 'Immunity Ritual Kit × 1 · ₹599' }],
+        statusHistory: [
+          { status: 'pending', at: now - 2 * 86400 * 1000 },
+          { status: 'packed', at: now - 1.5 * 86400 * 1000 },
+          { status: 'shipped', at: now - 1 * 86400 * 1000 },
+        ],
+      },
+      {
+        id: 'AAK-10004',
+        source: 'mock',
+        status: 'delivered',
+        placedAt: now - 5 * 86400 * 1000,
+        total: 249,
+        payMethod: 'cod',
+        paymentStatus: 'cod',
+        customer: { name: 'Kabir Singh', phone: '9876501004', email: 'kabir@example.com' },
+        delivery: { address: '21 Ring Road', city: 'Delhi', state: 'Delhi', pincode: '110001' },
+        items: [{ name: 'Herbal Sunni Pindi', qty: 1, line: 'Herbal Sunni Pindi × 1 · ₹249' }],
+        statusHistory: [
+          { status: 'pending', at: now - 5 * 86400 * 1000 },
+          { status: 'packed', at: now - 4.5 * 86400 * 1000 },
+          { status: 'shipped', at: now - 4 * 86400 * 1000 },
+          { status: 'out_for_delivery', at: now - 3.5 * 86400 * 1000 },
+          { status: 'delivered', at: now - 3 * 86400 * 1000 },
+        ],
+      },
+      {
+        id: 'AAK-10005',
+        source: 'mock',
+        status: 'cancelled',
+        placedAt: now - 3 * 86400 * 1000,
+        total: 199,
+        payMethod: 'upi',
+        paymentStatus: 'failed',
+        customer: { name: 'Meera Joshi', phone: '9876501005', email: 'meera@example.com' },
+        delivery: { address: '9 River Lane', city: 'Ahmedabad', state: 'Gujarat', pincode: '380001' },
+        items: [{ name: 'Ashtagandham', qty: 1, line: 'Ashtagandham × 1 · ₹199' }],
+        statusHistory: [
+          { status: 'pending', at: now - 3 * 86400 * 1000 },
+          { status: 'cancelled', at: now - 2.8 * 86400 * 1000 },
+        ],
+      },
+    ];
+  }
+  _allowedNext(status) {
+    if (status === 'pending') return ['packed', 'cancelled'];
+    if (status === 'packed') return ['shipped', 'cancelled'];
+    if (status === 'shipped') return ['out_for_delivery', 'cancelled'];
+    if (status === 'out_for_delivery') return ['delivered', 'cancelled'];
+    return [];
+  }
+  /** Keep store Track Your Order in sync with admin status. */
+  _pushStatusToStore(orderId, status, statusHistory) {
+    const store = this._readJSON('ak_orders', []);
+    if (!Array.isArray(store) || !store.length) return;
+    let changed = false;
+    const next = store.map((o) => {
+      if (!o || o.id !== orderId) return o;
+      changed = true;
+      return Object.assign({}, o, { status: status, statusHistory: statusHistory });
+    });
+    if (changed) this._writeJSON('ak_orders', next);
+  }
+  _showToast(msg) {
+    this.setState({ toast: msg });
+    if (this._toastTO) clearTimeout(this._toastTO);
+    this._toastTO = setTimeout(() => this.setState({ toast: '' }), 2200);
+  }
+  _normalizeStoreOrder(o) {
+    const delivery = o.delivery || {};
+    const items = Array.isArray(o.items) ? o.items.map((it) => ({
+      name: it.name || 'Item',
+      qty: it.qty || 1,
+      line: (it.name || 'Item') + ' × ' + (it.qty || 1) + (it.line ? ' · ' + it.line : ''),
+    })) : [];
+    return {
+      id: o.id,
+      source: 'store',
+      status: o.status || 'pending',
+      placedAt: o.placedAt || Date.now(),
+      total: o.total || 0,
+      payMethod: o.payMethod || 'cod',
+      paymentStatus: (o.payment && o.payment.status) || (o.payMethod === 'cod' ? 'cod' : 'paid'),
+      customer: {
+        name: delivery.name || 'Customer',
+        phone: delivery.phone || '',
+        email: delivery.email || '',
+      },
+      delivery: {
+        address: delivery.address || '',
+        city: delivery.city || '',
+        state: delivery.state || '',
+        pincode: delivery.pincode || '',
+      },
+      items,
+      statusHistory: Array.isArray(o.statusHistory) && o.statusHistory.length
+        ? o.statusHistory
+        : [{ status: o.status || 'pending', at: o.placedAt || Date.now() }],
+    };
+  }
+
+  renderVals() {
+    const orders = Array.isArray(this.state.orders) ? this.state.orders.slice() : [];
+    orders.sort((a, b) => (b.placedAt || 0) - (a.placedAt || 0));
+    const q = String(this.state.search || '').trim().toLowerCase();
+    const filter = this.state.filter || 'all';
+    const filtered = orders.filter((o) => {
+      if (filter !== 'all' && o.status !== filter) return false;
+      if (!q) return true;
+      const blob = [o.id, o.customer && o.customer.name, o.customer && o.customer.phone, o.customer && o.customer.email]
+        .join(' ').toLowerCase();
+      return blob.indexOf(q) >= 0;
+    });
+    const selected = orders.find((o) => o.id === this.state.selectedId) || null;
+    const filterKeys = [
+      { key: 'all', label: 'All' },
+      { key: 'pending', label: 'Confirmed' },
+      { key: 'packed', label: 'Packed' },
+      { key: 'shipped', label: 'Shipped' },
+      { key: 'out_for_delivery', label: 'Out for delivery' },
+      { key: 'delivered', label: 'Delivered' },
+      { key: 'cancelled', label: 'Cancelled' },
+    ];
+    const next = selected ? this._allowedNext(selected.status) : [];
+    const actionDefs = [
+      { key: 'packed', label: 'Mark Packed' },
+      { key: 'shipped', label: 'Mark Shipped' },
+      { key: 'out_for_delivery', label: 'Mark Out for delivery' },
+      { key: 'delivered', label: 'Mark Delivered' },
+      { key: 'cancelled', label: 'Cancel order' },
+    ];
+
+    return {
+      loggedIn: !!this.state.loggedIn,
+      notLoggedIn: !this.state.loggedIn,
+      pageTitle: this.state.tab === 'inventory' ? 'Inventory (mock)' : 'Orders (mock)',
+      isOrdersTab: this.state.tab !== 'inventory',
+      isInventoryTab: this.state.tab === 'inventory',
+      ordersTabStyle: 'padding:10px 14px;border-radius:30px;font-size:13px;border:1px solid #2E3D2C;background:' + (this.state.tab !== 'inventory' ? '#2E3D2C' : 'transparent') + ';color:' + (this.state.tab !== 'inventory' ? '#F1EEDF' : '#2E3D2C') + ';cursor:pointer;',
+      inventoryTabStyle: 'padding:10px 14px;border-radius:30px;font-size:13px;border:1px solid #2E3D2C;background:' + (this.state.tab === 'inventory' ? '#2E3D2C' : 'transparent') + ';color:' + (this.state.tab === 'inventory' ? '#F1EEDF' : '#2E3D2C') + ';cursor:pointer;',
+      showOrdersTab: () => this.setState({ tab: 'orders' }),
+      showInventoryTab: () => {
+        const stock = this._ensureStock();
+        this.setState({ tab: 'inventory', stock, stockDrafts: Object.assign({}, stock) });
+      },
+      adminEmail: this.state.adminEmail,
+      adminPassword: this.state.adminPassword,
+      onAdminEmail: (e) => this.setState({ adminEmail: e.target.value, loginError: '' }),
+      onAdminPassword: (e) => this.setState({ adminPassword: e.target.value, loginError: '' }),
+      loginError: this.state.loginError,
+      hasLoginError: !!this.state.loginError,
+      login: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        const email = String(this.state.adminEmail || '').trim().toLowerCase();
+        const pw = String(this.state.adminPassword || '');
+        if (email !== 'owner@aakashik.local' || pw !== 'Admin@1234') {
+          return this.setState({ loginError: 'Incorrect admin email or password.' });
+        }
+        try { localStorage.setItem('ak_admin_logged', '1'); } catch (er) {}
+        const pulled = this._mergeStoreOrders(this.state.orders);
+        const stock = this._ensureStock();
+        this.setState({ loggedIn: true, loginError: '', adminPassword: '', orders: pulled.list, stock, stockDrafts: Object.assign({}, stock), tab: 'orders' });
+        this._startLivePull();
+        this._showToast(pulled.added ? ('Signed in · pulled ' + pulled.added + ' store order(s)') : 'Signed in to mock admin');
+      },
+      logout: () => {
+        this._stopLivePull();
+        try { localStorage.removeItem('ak_admin_logged'); } catch (er) {}
+        this.setState({ loggedIn: false, selectedId: '', statusError: '', adminPassword: '', tab: 'orders' });
+        this._showToast('Logged out');
+      },
+      search: this.state.search,
+      onSearch: (e) => this.setState({ search: e.target.value }),
+      filterChips: filterKeys.map((f) => ({
+        label: f.label,
+        style: 'padding:8px 12px;border-radius:999px;font-size:12.5px;border:1px solid ' + (filter === f.key ? '#2E3D2C' : '#D7CDB4') + ';background:' + (filter === f.key ? '#2E3D2C' : 'transparent') + ';color:' + (filter === f.key ? '#F1EEDF' : '#5E6A54') + ';cursor:pointer;',
+        onClick: () => this.setState({ filter: f.key, statusError: '' }),
+      })),
+      totalCount: String(orders.length),
+      pendingCount: String(orders.filter((o) => o.status === 'pending').length),
+      visibleCount: String(filtered.length),
+      listEmpty: filtered.length === 0,
+      listHasItems: filtered.length > 0,
+      orderRows: filtered.map((o) => {
+        const active = o.id === this.state.selectedId;
+        return {
+          id: o.id,
+          statusLabel: this._statusLabel(o.status),
+          badgeStyle: this._badgeStyle(o.status),
+          customerLine: (o.customer && o.customer.name ? o.customer.name : 'Customer') + (o.customer && o.customer.phone ? ' · ' + o.customer.phone : ''),
+          metaLine: this._money(o.total) + ' · ' + String(o.payMethod || 'cod').toUpperCase() + ' · ' + (o.source === 'store' ? 'From store' : 'Mock') + ' · ' + this._fmtWhen(o.placedAt),
+          rowStyle: 'width:100%; text-align:left; border:none; border-bottom:1px solid #E4DBC8; padding:14px 16px; cursor:pointer; background:' + (active ? '#EAF0E1' : 'transparent') + ';',
+          onSelect: () => this.setState({ selectedId: o.id, statusError: '' }),
+        };
+      }),
+      noSelection: !selected,
+      hasSelection: !!selected,
+      selectedId: selected ? selected.id : '',
+      selectedSourceLabel: selected ? (selected.source === 'store' ? 'Synced from store checkout' : 'Mock seed') : '',
+      selectedWhen: selected ? this._fmtWhen(selected.placedAt) : '',
+      selectedStatusLabel: selected ? this._statusLabel(selected.status) : '',
+      selectedBadgeStyle: selected ? this._badgeStyle(selected.status) : '',
+      selectedCustomer: selected && selected.customer ? selected.customer.name : '—',
+      selectedPhone: selected && selected.customer && selected.customer.phone ? selected.customer.phone : '—',
+      selectedEmail: selected && selected.customer && selected.customer.email ? selected.customer.email : '—',
+      selectedAddress: selected
+        ? [selected.delivery && selected.delivery.address, selected.delivery && selected.delivery.city, selected.delivery && selected.delivery.state, selected.delivery && selected.delivery.pincode].filter(Boolean).join(', ')
+        : '—',
+      selectedPayment: selected
+        ? String(selected.payMethod || 'cod').toUpperCase() + ' · ' + String(selected.paymentStatus || '—')
+        : '—',
+      selectedTotal: selected ? this._money(selected.total) : '—',
+      selectedItems: selected && Array.isArray(selected.items)
+        ? selected.items.map((it) => ({ line: it.line || ((it.name || 'Item') + ' × ' + (it.qty || 1)) }))
+        : [],
+      selectedHistory: selected && Array.isArray(selected.statusHistory)
+        ? selected.statusHistory.slice().reverse().map((h) => ({
+          line: this._statusLabel(h.status) + ' · ' + this._fmtWhen(h.at),
+        }))
+        : [],
+      statusActions: actionDefs.map((a) => {
+        const allowed = next.indexOf(a.key) >= 0;
+        return {
+          label: a.label,
+          disabled: !allowed,
+          style: 'padding:9px 12px;border-radius:30px;font-size:12.5px;border:1px solid ' + (allowed ? '#2E3D2C' : '#D7CDB4') + ';background:' + (allowed ? (a.key === 'cancelled' ? '#8A3E2A' : '#2E3D2C') : '#EFE7D5') + ';color:' + (allowed ? '#F1EEDF' : '#8A9678') + ';cursor:' + (allowed ? 'pointer' : 'not-allowed') + ';opacity:' + (allowed ? '1' : '0.7') + ';',
+          onClick: () => {
+            if (!selected) return;
+            if (!allowed) {
+              return this.setState({ statusError: 'Cannot move from ' + this._statusLabel(selected.status) + ' to ' + this._statusLabel(a.key) + '.' });
+            }
+            const list = this._readOrders().map((o) => {
+              if (o.id !== selected.id) return o;
+              const hist = Array.isArray(o.statusHistory) ? o.statusHistory.slice() : [];
+              hist.push({ status: a.key, at: Date.now() });
+              return Object.assign({}, o, { status: a.key, statusHistory: hist });
+            });
+            const updated = list.find((o) => o.id === selected.id);
+            this._writeOrders(list);
+            if (updated) this._pushStatusToStore(updated.id, updated.status, updated.statusHistory);
+            this.setState({ orders: list, statusError: '' });
+            this._showToast(selected.id + ' → ' + this._statusLabel(a.key));
+          },
+        };
+      }),
+      statusError: this.state.statusError,
+      hasStatusError: !!this.state.statusError,
+      syncStoreOrders: () => {
+        this._livePull({ quiet: false });
+      },
+      reseedMocks: () => {
+        const keepStore = this._readOrders().filter((o) => o.source === 'store');
+        const mocks = this._seedMocks();
+        const list = mocks.concat(keepStore);
+        this._writeOrders(list);
+        const pulled = this._mergeStoreOrders(list);
+        this.setState({ orders: pulled.list, selectedId: '', statusError: '', filter: 'all', search: '' });
+        this._showToast('Mock orders reseeded');
+      },
+      invSearch: this.state.invSearch || '',
+      onInvSearch: (e) => this.setState({ invSearch: e.target.value }),
+      invFilterChips: [
+        { key: 'all', label: 'All' },
+        { key: 'in', label: 'In stock' },
+        { key: 'low', label: 'Low stock' },
+        { key: 'out', label: 'Out of stock' },
+      ].map((f) => ({
+        label: f.label,
+        style: 'padding:8px 12px;border-radius:999px;font-size:12.5px;border:1px solid ' + ((this.state.invFilter || 'all') === f.key ? '#2E3D2C' : '#D7CDB4') + ';background:' + ((this.state.invFilter || 'all') === f.key ? '#2E3D2C' : 'transparent') + ';color:' + ((this.state.invFilter || 'all') === f.key ? '#F1EEDF' : '#5E6A54') + ';cursor:pointer;',
+        onClick: () => this.setState({ invFilter: f.key }),
+      })),
+      invTotalCount: String(this._catalog().length),
+      invLowCount: String(this._catalog().filter((p) => {
+        const q = Number((this.state.stock || {})[p.id] || 0);
+        return q > 0 && q <= 5;
+      }).length),
+      invOutCount: String(this._catalog().filter((p) => Number((this.state.stock || {})[p.id] || 0) <= 0).length),
+      invVisibleCount: String((() => {
+        const iq = String(this.state.invSearch || '').trim().toLowerCase();
+        const ifilter = this.state.invFilter || 'all';
+        const stock = this.state.stock || {};
+        return this._catalog().filter((p) => {
+          const qty = Number(stock[p.id] || 0);
+          if (ifilter === 'in' && !(qty > 5)) return false;
+          if (ifilter === 'low' && !(qty > 0 && qty <= 5)) return false;
+          if (ifilter === 'out' && !(qty <= 0)) return false;
+          if (!iq) return true;
+          return (p.name + ' ' + p.id + ' ' + p.kind).toLowerCase().indexOf(iq) >= 0;
+        }).length;
+      })()),
+      invEmpty: (() => {
+        const iq = String(this.state.invSearch || '').trim().toLowerCase();
+        const ifilter = this.state.invFilter || 'all';
+        const stock = this.state.stock || {};
+        return this._catalog().filter((p) => {
+          const qty = Number(stock[p.id] || 0);
+          if (ifilter === 'in' && !(qty > 5)) return false;
+          if (ifilter === 'low' && !(qty > 0 && qty <= 5)) return false;
+          if (ifilter === 'out' && !(qty <= 0)) return false;
+          if (!iq) return true;
+          return (p.name + ' ' + p.id + ' ' + p.kind).toLowerCase().indexOf(iq) >= 0;
+        }).length === 0;
+      })(),
+      invHasItems: (() => {
+        const iq = String(this.state.invSearch || '').trim().toLowerCase();
+        const ifilter = this.state.invFilter || 'all';
+        const stock = this.state.stock || {};
+        return this._catalog().filter((p) => {
+          const qty = Number(stock[p.id] || 0);
+          if (ifilter === 'in' && !(qty > 5)) return false;
+          if (ifilter === 'low' && !(qty > 0 && qty <= 5)) return false;
+          if (ifilter === 'out' && !(qty <= 0)) return false;
+          if (!iq) return true;
+          return (p.name + ' ' + p.id + ' ' + p.kind).toLowerCase().indexOf(iq) >= 0;
+        }).length > 0;
+      })(),
+      stockRows: (() => {
+        const iq = String(this.state.invSearch || '').trim().toLowerCase();
+        const ifilter = this.state.invFilter || 'all';
+        const stock = this.state.stock || {};
+        const drafts = this.state.stockDrafts || {};
+        return this._catalog().filter((p) => {
+          const qty = Number(stock[p.id] || 0);
+          if (ifilter === 'in' && !(qty > 5)) return false;
+          if (ifilter === 'low' && !(qty > 0 && qty <= 5)) return false;
+          if (ifilter === 'out' && !(qty <= 0)) return false;
+          if (!iq) return true;
+          return (p.name + ' ' + p.id + ' ' + p.kind).toLowerCase().indexOf(iq) >= 0;
+        }).map((p) => {
+          const qty = Number(stock[p.id] || 0);
+          const badge = this._stockBadge(qty);
+          const draftVal = drafts[p.id] !== undefined ? String(drafts[p.id]) : String(qty);
+          return {
+            id: p.id,
+            name: p.name,
+            meta: p.kind + ' · id: ' + p.id + ' · on hand: ' + qty,
+            badgeLabel: badge.label,
+            badgeStyle: badge.style,
+            draft: draftVal,
+            stockAria: 'Stock for ' + p.name,
+            onDraft: (e) => {
+              const next = Object.assign({}, this.state.stockDrafts || {});
+              next[p.id] = e.target.value;
+              this.setState({ stockDrafts: next });
+            },
+            dec: () => {
+              const n = this._setStockQty(p.id, qty - 1);
+              this._showToast(p.name + ' → ' + n);
+            },
+            inc: () => {
+              const n = this._setStockQty(p.id, qty + 1);
+              this._showToast(p.name + ' → ' + n);
+            },
+            save: () => {
+              const raw = drafts[p.id];
+              if (raw === '' || raw === undefined || !/^\d+$/.test(String(raw).trim())) {
+                return this._showToast('Enter a whole number for stock');
+              }
+              const n = this._setStockQty(p.id, raw);
+              this._showToast(p.name + ' stock set to ' + n);
+            },
+          };
+        });
+      })(),
+      reseedStock: () => {
+        const seed = this._defaultStock();
+        this._writeStock(seed);
+        this.setState({ stock: seed, stockDrafts: Object.assign({}, seed), invFilter: 'all', invSearch: '' });
+        this._showToast('Stock levels reseeded');
+      },
+      toast: this.state.toast,
+      hasToast: !!this.state.toast,
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1608,7 +1608,7 @@
           <div style="display: flex; align-items: center; gap: 12px;">
             <span style="font-family: 'Marcellus', serif; font-size: 26px; color: #2E3D2C;">{{ qv.priceStr }}</span>
             <button onClick="{{ qv.add }}" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #2E3D2C; color: #F1EEDF; border: none; padding: 14px; border-radius: 30px; font-size: 14.5px; font-weight: 500;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add to Cart
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>{{ qv.addLabel }}
             </button>
             <button onClick="{{ qv.toggleWish }}" aria-label="Wishlist" style="width: 48px; height: 48px; border-radius: 50%; background: transparent; border: 1px solid #C2B591; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">
               <sc-if value="{{ qv.wished }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="#BE6A45" stroke="#BE6A45" stroke-width="1.6"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></sc-if>
@@ -1730,7 +1730,7 @@
         </div>
         <sc-if value="{{ notTrackSubmitted }}">
           <form onSubmit="{{ onTrackSubmit }}">
-            <p style="font-size: 13.5px; color: #5E6A54; margin: 0 0 14px; line-height: 1.6;">Enter your order ID. Tracking is a simulated demo timeline (not live shipping).</p>
+            <p style="font-size: 13.5px; color: #5E6A54; margin: 0 0 14px; line-height: 1.6;">Enter your order ID. Simulated demo tracking in this browser — status matches Admin updates (not live courier shipping).</p>
             <input value="{{ trackOrderId }}" onInput="{{ onTrackOrderId }}" required placeholder="e.g. AAK-10482" style="width: 100%; background: #FBF7EE; border: 1px solid #D7CDB4; color: #2E3D2C; padding: 13px 16px; border-radius: 12px; font-size: 14px; outline: none; margin-bottom: 14px;">
             <button type="submit" style="width: 100%; background: #2E3D2C; color: #F1EEDF; border: none; padding: 14px; border-radius: 30px; font-size: 14.5px; font-weight: 500;">Track Order</button>
           </form>
@@ -1738,7 +1738,10 @@
         <sc-if value="{{ trackSubmitted }}">
           <sc-if value="{{ trackFound }}">
             <p style="font-size: 12px; color: #A8894E; margin: 0 0 8px; letter-spacing: 0.06em; text-transform: uppercase;">Simulated timeline (demo)</p>
-            <p style="font-size: 13px; color: #8A9678; margin: 0 0 20px;">Order <strong style="color: #2E3D2C;">{{ trackDisplayId }}</strong> · {{ trackEta }}</p>
+            <p style="font-size: 13px; color: #8A9678; margin: 0 0 12px;">Order <strong style="color: #2E3D2C;">{{ trackDisplayId }}</strong> · {{ trackEta }}</p>
+            <sc-if value="{{ trackCancelled }}">
+              <div style="background: #F8E8E2; border: 1px solid #E8B8A8; color: #8A3E2A; border-radius: 12px; padding: 12px 14px; font-size: 13.5px; line-height: 1.55; margin-bottom: 14px;">This order was cancelled.</div>
+            </sc-if>
             <div style="display: flex; flex-direction: column; gap: 0;">
               <sc-for list="{{ trackSteps }}" as="st" hint-placeholder-count="5">
               <div style="display: flex; align-items: center; gap: 14px; padding: 8px 0;">
@@ -1917,6 +1920,67 @@ class Component extends DCLogic {
     const orders = this._readJSON('ak_orders', []);
     return Array.isArray(orders) ? orders : [];
   }
+  _defaultStock() {
+    return {
+      sunni: 25,
+      diabetic: 20,
+      immunity: 30,
+      kaphahara: 40,
+      ashta: 35,
+      navojas: 40,
+      'kit-immunity': 15,
+      'kit-glow': 15,
+      'sample-trio': 50,
+    };
+  }
+  _readStock() {
+    const raw = this._readJSON('ak_stock', null);
+    const defaults = this._defaultStock();
+    if (!raw || typeof raw !== 'object') {
+      this._writeJSON('ak_stock', defaults);
+      return Object.assign({}, defaults);
+    }
+    const next = Object.assign({}, defaults);
+    Object.keys(defaults).forEach((id) => {
+      const n = Number(raw[id]);
+      next[id] = Number.isFinite(n) && n >= 0 ? Math.floor(n) : defaults[id];
+    });
+    return next;
+  }
+  _writeStock(map) {
+    this._writeJSON('ak_stock', map);
+  }
+  _stockOf(id) {
+    const stock = this._readStock();
+    return Number(stock[id] || 0);
+  }
+  _cartQtyForProduct(cart, productId) {
+    let total = 0;
+    Object.keys(cart || {}).forEach((k) => {
+      const line = cart[k];
+      if (!line) return;
+      const pid = line.productId || String(k).split('::')[0];
+      if (pid === productId) total += Number(line.qty || 0);
+    });
+    return total;
+  }
+  _deductStockForCart(cartItems) {
+    const need = {};
+    Object.keys(cartItems || {}).forEach((k) => {
+      const line = cartItems[k];
+      if (!line) return;
+      const pid = line.productId || String(k).split('::')[0];
+      need[pid] = (need[pid] || 0) + Number(line.qty || 0);
+    });
+    const stock = this._readStock();
+    const missing = Object.keys(need).find((id) => (stock[id] || 0) < need[id]);
+    if (missing) return { ok: false, id: missing, need: need[missing], have: stock[missing] || 0 };
+    Object.keys(need).forEach((id) => {
+      stock[id] = Math.max(0, (stock[id] || 0) - need[id]);
+    });
+    this._writeStock(stock);
+    return { ok: true };
+  }
   _userOrders() {
     const all = this._readOrders();
     if (!this.state.loggedIn) return [];
@@ -1981,29 +2045,68 @@ class Component extends DCLogic {
     try { localStorage.setItem('ak_fail_count', String(failCount)); } catch (e) {}
     this.setState({ authFailCount: failCount, authError: 'Incorrect email or password' });
   }
-  _orderTrackSteps(placedAt) {
-    const hours = (Date.now() - placedAt) / 3600000;
-    const labels = ['Order Confirmed', 'Packed with care', 'Shipped', 'Out for delivery', 'Delivered'];
-    const thresholds = [0, 2, 24, 48, 72];
-    let activeIdx = 0;
-    for (let i = thresholds.length - 1; i >= 0; i--) {
-      if (hours >= thresholds[i]) { activeIdx = i; break; }
+  _trackStatusKeys() {
+    return ['pending', 'packed', 'shipped', 'out_for_delivery', 'delivered'];
+  }
+  _trackStatusLabels() {
+    return ['Order Confirmed', 'Packed with care', 'Shipped', 'Out for delivery', 'Delivered'];
+  }
+  _normalizeTrackStatus(status) {
+    const s = String(status || '').toLowerCase();
+    if (s === 'confirmed') return 'pending';
+    if (s === 'out-for-delivery' || s === 'ofd') return 'out_for_delivery';
+    return s;
+  }
+  _orderTrackSteps(orderOrPlacedAt) {
+    const labels = this._trackStatusLabels();
+    const keys = this._trackStatusKeys();
+    const order = (orderOrPlacedAt && typeof orderOrPlacedAt === 'object')
+      ? orderOrPlacedAt
+      : { placedAt: orderOrPlacedAt, status: null };
+    const placedAt = order.placedAt || Date.now();
+    let status = this._normalizeTrackStatus(order.status);
+    if (status === 'cancelled') {
+      return labels.map((label, i) => ({
+        label,
+        done: i === 0,
+        active: false,
+        pending: i > 0,
+        notDone: i > 0,
+      }));
     }
-    if (hours >= 72) activeIdx = 4;
+    let activeIdx = -1;
+    if (status && keys.indexOf(status) >= 0) {
+      activeIdx = keys.indexOf(status);
+    } else {
+      const hours = (Date.now() - placedAt) / 3600000;
+      const thresholds = [0, 2, 24, 48, 72];
+      activeIdx = 0;
+      for (let i = thresholds.length - 1; i >= 0; i--) {
+        if (hours >= thresholds[i]) { activeIdx = i; break; }
+      }
+      if (hours >= 72) activeIdx = 4;
+    }
+    const allDone = activeIdx === 4 && (status === 'delivered' || (!status && ((Date.now() - placedAt) / 3600000) >= 72));
     return labels.map((label, i) => {
-      const allDone = hours >= 72;
+      if (allDone || (status === 'delivered' && activeIdx === 4)) {
+        return { label, done: true, active: false, pending: false, notDone: false };
+      }
       return {
         label,
-        done: allDone ? true : (i < activeIdx),
-        active: allDone ? false : (i === activeIdx),
-        pending: allDone ? false : (i > activeIdx),
-        notDone: allDone ? false : (i > activeIdx),
+        done: i < activeIdx,
+        active: i === activeIdx,
+        pending: i > activeIdx,
+        notDone: i > activeIdx,
       };
     });
   }
 
-  _orderStatusLabel(placedAt) {
-    const steps = this._orderTrackSteps(placedAt);
+  _orderStatusLabel(orderOrPlacedAt) {
+    const order = (orderOrPlacedAt && typeof orderOrPlacedAt === 'object')
+      ? orderOrPlacedAt
+      : { placedAt: orderOrPlacedAt };
+    if (this._normalizeTrackStatus(order.status) === 'cancelled') return 'Cancelled';
+    const steps = this._orderTrackSteps(order);
     const active = steps.find(s => s.active);
     if (active) return active.label;
     if (steps.every(s => s.done)) return 'Delivered';
@@ -2381,14 +2484,61 @@ class Component extends DCLogic {
     const cartLineKey = (id, size) => id + '::' + (size || 'std');
     const _commitAdd = (id, subscribe, size, sizePrice) => { this.flyToCart(); this.playChime(); this.showToast('Added to cart'); this.setState(s => { const c = { ...s.cartItems }; const key = cartLineKey(id, size); const cur = c[key]; const nextSize = size !== undefined && size !== null ? size : (cur ? cur.size : null); const nextPrice = sizePrice !== undefined && sizePrice !== null ? sizePrice : (cur ? cur.sizePrice : null); c[key] = { productId: id, qty: (cur ? cur.qty : 0) + 1, subscribe: subscribe !== undefined ? subscribe : (cur ? cur.subscribe : false), size: nextSize, sizePrice: nextPrice }; try { localStorage.setItem('ak_cart', JSON.stringify(c)); } catch (er) {} return { cartItems: c, cartOpen: true, orderPlaced: false, quickView: null, wishlistOpen: false, bump: (s.bump || 0) + 1 }; }); };
     const addToCart = (id, subscribe, size, sizePrice) => {
+      const available = this._stockOf(id);
+      if (available <= 0) {
+        this.showToast('Out of stock — ask the owner to restock');
+        return;
+      }
+      const inCart = this._cartQtyForProduct(this.state.cartItems, id);
+      if (inCart + 1 > available) {
+        this.showToast('Only ' + available + ' left in stock');
+        return;
+      }
       _commitAdd(id, subscribe, size, sizePrice);
     };
-    const setQty = (id, d) => this.setState(s => { const c = { ...s.cartItems }; if (!c[id]) return {}; const q = c[id].qty + d; if (q <= 0) delete c[id]; else c[id] = { ...c[id], qty: q }; try { localStorage.setItem('ak_cart', JSON.stringify(c)); } catch (er) {} return { cartItems: c }; });
+    const setQty = (id, d) => {
+      if (d > 0) {
+        const line = this.state.cartItems[id];
+        if (!line) return;
+        const pid = line.productId || String(id).split('::')[0];
+        const available = this._stockOf(pid);
+        const inCart = this._cartQtyForProduct(this.state.cartItems, pid);
+        if (inCart + 1 > available) {
+          this.showToast(available <= 0 ? 'Out of stock' : ('Only ' + available + ' left in stock'));
+          return;
+        }
+      }
+      this.setState(s => {
+        const c = { ...s.cartItems };
+        if (!c[id]) return {};
+        const q = c[id].qty + d;
+        if (q <= 0) delete c[id];
+        else c[id] = { ...c[id], qty: q };
+        try { localStorage.setItem('ak_cart', JSON.stringify(c)); } catch (er) {}
+        return { cartItems: c };
+      });
+    };
     const removeItem = (id) => this.setState(s => { const c = { ...s.cartItems }; delete c[id]; try { localStorage.setItem('ak_cart', JSON.stringify(c)); } catch (er) {} return { cartItems: c }; });
     const toggleLineSub = (id) => this.setState(s => { const c = { ...s.cartItems }; if (c[id]) c[id] = { ...c[id], subscribe: !c[id].subscribe }; try { localStorage.setItem('ak_cart', JSON.stringify(c)); } catch (er) {} return { cartItems: c }; });
     const toggleWish = (id) => { if (!this.state.wishlist[id]) this.heartBurst(); this.setState(s => { const w = { ...s.wishlist }; if (w[id]) delete w[id]; else w[id] = true; try { localStorage.setItem('ak_wishlist', JSON.stringify(w)); } catch (er) {} return { wishlist: w }; }); };
     const openQuickView = (id) => { this.pushRecent(id); this.setState({ quickView: id, qvSubscribe: false, qvFace: 'front', qvSize: 0 }); };
-    const decorate = (p) => ({ ...p, priceStr: p.sizes ? 'from ' + money(p.sizes[0].p) : money(p.priceN), addLabel: p.sizes ? 'Choose Size' : 'Add to Cart', wished: !!this.state.wishlist[p.id], notWished: !this.state.wishlist[p.id], onQuick: () => openQuickView(p.id), onAdd: () => (p.sizes ? openQuickView(p.id) : addToCart(p.id)), onWish: () => toggleWish(p.id) });
+    const decorate = (p) => {
+      const stock = this._stockOf(p.id);
+      const oos = stock <= 0;
+      return {
+        ...p,
+        priceStr: p.sizes ? 'from ' + money(p.sizes[0].p) : money(p.priceN),
+        addLabel: oos ? 'Out of stock' : (p.sizes ? 'Choose Size' : 'Add to Cart'),
+        wished: !!this.state.wishlist[p.id],
+        notWished: !this.state.wishlist[p.id],
+        onQuick: () => openQuickView(p.id),
+        onAdd: () => (oos ? this.showToast('Out of stock — ask the owner to restock') : (p.sizes ? openQuickView(p.id) : addToCart(p.id))),
+        onWish: () => toggleWish(p.id),
+        outOfStock: oos,
+        inStock: !oos,
+        stockLeft: String(stock),
+      };
+    };
 
     // ---- Circadian ----
     const PERIODS = {
@@ -2405,8 +2555,8 @@ class Component extends DCLogic {
     const period = { ...P,
       blend: _pp.name || P.addId,
       price: _pp.sizes ? 'from ' + money(_pp.sizes[0].p) : money(_pp.priceN || 0),
-      addLabel: _pp.sizes ? 'Choose Size' : t.addToCart,
-      add: () => (_pp.sizes ? openQuickView(P.addId) : addToCart(P.addId)),
+      addLabel: this._stockOf(P.addId) <= 0 ? 'Out of stock' : (_pp.sizes ? 'Choose Size' : t.addToCart),
+      add: () => (this._stockOf(P.addId) <= 0 ? this.showToast('Out of stock — ask the owner to restock') : (_pp.sizes ? openQuickView(P.addId) : addToCart(P.addId))),
       onQuick: () => openQuickView(P.addId),
       day: !P.night, bodyStyle: 'position:absolute;left:' + P.bl + '%;top:' + P.bt + '%;width:' + P.bs + 'px;height:' + P.bs + 'px;border-radius:50%;background:radial-gradient(circle at 40% 36%,' + P.b2 + ',' + P.bc + ');box-shadow:0 0 22px 6px ' + P.glow + ';animation:celBob 4s ease-in-out infinite;z-index:3;', haloStyle: 'position:absolute;left:' + P.bl + '%;top:' + P.bt + '%;width:' + (P.bs * 2.8) + 'px;height:' + (P.bs * 2.8) + 'px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,' + P.glow + ',transparent 66%);pointer-events:none;z-index:2;', hill1Style: 'position:absolute;left:-8%;right:-8%;bottom:-30px;height:54px;border-radius:50%;background:' + P.h1 + ';z-index:4;', hill2Style: 'position:absolute;left:-8%;right:-8%;bottom:-16px;height:46px;border-radius:50%;background:' + P.h2 + ';opacity:0.9;z-index:1;' };
     const chip = (active) => 'padding:8px 15px;border-radius:30px;font-size:13px;font-weight:500;letter-spacing:0.02em;cursor:pointer;transition:all .18s;border:1px solid ' + (active ? '#2E3D2C' : '#D7CDB4') + ';background:' + (active ? '#2E3D2C' : 'transparent') + ';color:' + (active ? '#F1EEDF' : '#5E6A54') + ';';
@@ -2429,8 +2579,8 @@ class Component extends DCLogic {
     const season = { ...SEASONS[seasonKey],
       blend: _sp.name || SEASONS[seasonKey].addId,
       price: _sp.sizes ? 'from ' + money(_sp.sizes[0].p) : money(_sp.priceN || 0),
-      addLabel: _sp.sizes ? 'Choose Size' : t.addToCart,
-      add: () => (_sp.sizes ? openQuickView(SEASONS[seasonKey].addId) : addToCart(SEASONS[seasonKey].addId)),
+      addLabel: this._stockOf(SEASONS[seasonKey].addId) <= 0 ? 'Out of stock' : (_sp.sizes ? 'Choose Size' : t.addToCart),
+      add: () => (this._stockOf(SEASONS[seasonKey].addId) <= 0 ? this.showToast('Out of stock — ask the owner to restock') : (_sp.sizes ? openQuickView(SEASONS[seasonKey].addId) : addToCart(SEASONS[seasonKey].addId))),
       onQuick: () => openQuickView(SEASONS[seasonKey].addId),
     };
     const seasonFx = { isRain: season.fx === 'rain', isSnow: season.fx === 'snow', isLeaves: season.fx === 'leaves', isRays: season.fx === 'rays', cloud: season.cloud, hill1Style: 'position:absolute;left:-8%;right:-8%;bottom:-26px;height:50px;border-radius:50%;background:' + season.h1 + ';z-index:4;', hill2Style: 'position:absolute;left:-8%;right:-8%;bottom:-14px;height:44px;border-radius:50%;background:' + season.h2 + ';opacity:0.9;z-index:1;' };
@@ -2465,8 +2615,8 @@ class Component extends DCLogic {
     const _jp = PRODUCTS[this.state.openJar];
     const openJar = { ...JARS[this.state.openJar],
       price: _jp.sizes ? 'from ' + money(_jp.sizes[0].p) : money(_jp.priceN),
-      addLabel: _jp.sizes ? 'Choose Size' : 'Add to Cart',
-      add: () => (_jp.sizes ? openQuickView(_jp.id) : addToCart(_jp.id)),
+      addLabel: this._stockOf(_jp.id) <= 0 ? 'Out of stock' : (_jp.sizes ? 'Choose Size' : 'Add to Cart'),
+      add: () => (this._stockOf(_jp.id) <= 0 ? this.showToast('Out of stock — ask the owner to restock') : (_jp.sizes ? openQuickView(_jp.id) : addToCart(_jp.id))),
       onQuick: () => openQuickView(_jp.id) };
 
     // ---- 3D bottle ----
@@ -2575,7 +2725,9 @@ class Component extends DCLogic {
         subBtnStyle: 'flex:1;padding:11px 10px;border-radius:12px;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .2s;border:1px solid ' + (sub ? '#2E3D2C' : '#D7CDB4') + ';background:' + (sub ? '#2E3D2C' : 'transparent') + ';color:' + (sub ? '#F1EEDF' : '#5E6A54') + ';',
         onceBtnStyle: 'flex:1;padding:11px 10px;border-radius:12px;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .2s;border:1px solid ' + (!sub ? '#2E3D2C' : '#D7CDB4') + ';background:' + (!sub ? '#2E3D2C' : 'transparent') + ';color:' + (!sub ? '#F1EEDF' : '#5E6A54') + ';',
         chooseSub: () => this.setState({ qvSubscribe: true }), chooseOnce: () => this.setState({ qvSubscribe: false }),
-        toggleWish: () => toggleWish(p.id), add: () => addToCart(p.id, sub, p.sizes ? p.sizes[sizeIdx].g : null, basePrice) };
+        toggleWish: () => toggleWish(p.id),
+        addLabel: this._stockOf(p.id) <= 0 ? 'Out of stock' : 'Add to Cart',
+        add: () => addToCart(p.id, sub, p.sizes ? p.sizes[sizeIdx].g : null, basePrice) };
     }
 
     // ---- Bundles ----
@@ -2600,25 +2752,31 @@ class Component extends DCLogic {
     const suggestions = q ? catalog.filter(p => p.name.toLowerCase().includes(q)).slice(0, 4).map(p => ({ name: p.name, onClick: () => openQuickView(p.id) })) : [];
 
     // ---- Order tracking ----
-    const trackOrder = this.state.trackOrder;
-    const trackSteps = trackOrder ? this._orderTrackSteps(trackOrder.placedAt) : [];
-    const trackHoursLeft = trackOrder ? Math.max(1, Math.ceil(72 - (Date.now() - trackOrder.placedAt) / 3600000)) : 0;
-    const trackEta = trackOrder ? ('estimated delivery in ' + trackHoursLeft + ' hour(s)') : '';
+    const trackOrder = this.state.trackOrder
+      ? (this._readOrders().find((o) => String(o.id || '').toUpperCase() === String(this.state.trackOrder.id || '').toUpperCase()) || this.state.trackOrder)
+      : null;
+    const trackSteps = trackOrder ? this._orderTrackSteps(trackOrder) : [];
+    const trackCancelled = !!(trackOrder && this._normalizeTrackStatus(trackOrder.status) === 'cancelled');
+    const trackHoursLeft = trackOrder ? Math.max(1, Math.ceil(72 - (Date.now() - (trackOrder.placedAt || Date.now())) / 3600000)) : 0;
+    const trackEta = trackOrder
+      ? (trackCancelled ? 'cancelled' : (this._normalizeTrackStatus(trackOrder.status) === 'delivered' ? 'delivered' : ('estimated delivery in ' + trackHoursLeft + ' hour(s)')))
+      : '';
     const userOrders = this._userOrders();
     const orderHistory = userOrders.slice(0, 20).map(o => {
-      const status = this._orderStatusLabel(o.placedAt || Date.now());
+      const status = this._orderStatusLabel(o);
       const items = Array.isArray(o.items) ? o.items : [];
       const productsStr = items.length
         ? items.map(it => (it.name || 'Item') + (it.qty > 1 ? ' ×' + it.qty : '') + (it.size ? ' (' + it.size + ')' : '')).join(', ')
         : 'Products unavailable';
       const delivered = status === 'Delivered';
+      const cancelled = status === 'Cancelled';
       return {
         id: o.id,
         dateStr: new Date(o.placedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
         totalStr: '₹' + Math.round(o.total || 0),
         productsStr,
         status,
-        statusStyle: 'display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:11.5px;font-weight:500;background:' + (delivered ? '#EAF0E1' : '#F3E9D8') + ';color:' + (delivered ? '#4E6B3C' : '#A8894E') + ';',
+        statusStyle: 'display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:11.5px;font-weight:500;background:' + (delivered ? '#EAF0E1' : cancelled ? '#F8E8E2' : '#F3E9D8') + ';color:' + (delivered ? '#4E6B3C' : cancelled ? '#8A3E2A' : '#A8894E') + ';',
         onTrack: () => this._trackOrderById(o.id),
       };
     });
@@ -3153,9 +3311,28 @@ class Component extends DCLogic {
           paymentMeta = { method: 'card', mock: true, status: 'authorized', last4: num.slice(-4) };
         }
         try { localStorage.setItem('ak_profile', JSON.stringify(p)); } catch (er) {}
+        const deduct = this._deductStockForCart(this.state.cartItems);
+        if (!deduct.ok) {
+          this.showToast('Not enough stock for one or more items — update cart or wait for restock');
+          return;
+        }
         const orderId = 'AAK-' + String(10000 + Math.floor(Math.random() * 90000));
         const items = cartList.map(it => ({ id: it.productId || it.id, name: it.name, qty: it.qty, line: it.lineStr, size: (this.state.cartItems[it.id] || {}).size || null }));
-        const order = { id: orderId, placedAt: Date.now(), items, total: subtotalN, subtotal: cartSubtotalN, memberDiscount: memberDiscountN, payMethod: method, payment: paymentMeta, delivery: p, returnsAccepted: false };
+        const placedAt = Date.now();
+        const order = {
+          id: orderId,
+          placedAt,
+          status: 'pending',
+          statusHistory: [{ status: 'pending', at: placedAt }],
+          items,
+          total: subtotalN,
+          subtotal: cartSubtotalN,
+          memberDiscount: memberDiscountN,
+          payMethod: method,
+          payment: paymentMeta,
+          delivery: p,
+          returnsAccepted: false,
+        };
         const orders = this._readOrders();
         orders.unshift(order);
         this._writeJSON('ak_orders', orders.slice(0, 50));
@@ -3211,6 +3388,7 @@ class Component extends DCLogic {
       trackDisplayId: (this.state.trackOrderId || '').trim().toUpperCase() || '—',
       trackEta,
       trackSteps,
+      trackCancelled,
 
       t,
       langOpen: this.state.langOpen,
