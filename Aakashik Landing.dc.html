@@ -1348,7 +1348,7 @@
               <form onSubmit="{{ placeOrder }}" style="display: flex; flex-direction: column; gap: 12px;">
                 <label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;">Full name</label>
                 <input value="{{ profileName }}" onInput="{{ onProfileName }}" required placeholder="Full name" aria-label="Full name" style="background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;">
-                <p style="font-size: 12px; color: #8A9678; margin: 0;">Provide phone or email (at least one).</p>
+                <p style="font-size: 12px; color: #8A9678; margin: 0;">Provide phone or email (at least one). Address, city, pin and state are required.</p>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                   <div style="flex:1;min-width:120px;"><label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;margin-bottom:6px;">Phone</label>
                   <input value="{{ profilePhone }}" onInput="{{ onProfilePhone }}" placeholder="10-digit mobile" aria-label="Phone" style="width:100%; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none;"></div>
@@ -3110,7 +3110,6 @@ class Component extends DCLogic {
       placeOrder: (e) => {
         if (e && e.preventDefault) e.preventDefault();
         const pin = (this.state.profilePincode || '').trim();
-        if (pin && !/^\d{6}$/.test(pin)) { this.showToast('Enter a valid 6-digit pin code'); return; }
         const p = {
           name: (this.state.profileName || '').trim(),
           phone: (this.state.profilePhone || '').trim(),
@@ -3120,6 +3119,7 @@ class Component extends DCLogic {
           state: (this.state.profileState || '').trim(),
           pincode: pin,
         };
+        if (!p.name) { this.showToast('Enter your full name'); return; }
         if (!p.phone && !p.email) { this.showToast('Enter phone or email for delivery'); return; }
         if (p.phone) {
           const dig = p.phone.replace(/\D/g, '');
@@ -3127,6 +3127,11 @@ class Component extends DCLogic {
           p.phone = dig;
         }
         if (p.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(p.email)) { this.showToast('Enter a valid email format'); return; }
+        if (!p.address) { this.showToast('Enter your delivery address'); return; }
+        if (!p.city) { this.showToast('Enter your city'); return; }
+        if (!pin) { this.showToast('Enter a 6-digit pin code'); return; }
+        if (!/^\d{6}$/.test(pin)) { this.showToast('Enter a valid 6-digit pin code'); return; }
+        if (!p.state) { this.showToast('Select your state / UT'); return; }
         const method = this.state.payMethod || 'cod';
         let paymentMeta = { method, mock: true, status: 'ok' };
         if (method === 'upi') {

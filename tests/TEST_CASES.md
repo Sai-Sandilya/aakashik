@@ -237,6 +237,19 @@ View runs under the repo **Actions** tab → **E2E Tests**.
 
 ---
 
+## Checkout required fields (`tests/ux-checkout-required.spec.js`)
+
+| ID | Focus | Type |
+|----|--------|------|
+| TC-D01 | Empty address/city/pin/state does not place order | − |
+| TC-D02 | Missing state blocks order | − |
+| TC-D03 | Missing pincode blocks order | − |
+| TC-D04 | No phone and no email blocks order | − |
+| TC-D05 | Complete delivery details places order | + |
+| TC-D06 | Helper copy says address fields are required | + |
+
+---
+
 ## Notes
 
 - OTP and reset codes are read from `localStorage` (`ak_pending_otp`, `ak_reset`) — same as the demo UI toasts.
