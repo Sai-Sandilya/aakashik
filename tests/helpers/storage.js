@@ -56,6 +56,23 @@ async function seedEmailUser(page, { email, password, name = 'Test User' }) {
   }, { email, pwHash, name });
 }
 
+/** Seed a verified phone-only user (OTP login; no password). */
+async function seedPhoneUser(page, { phone, name = 'Phone User' }) {
+  await page.evaluate(({ phone, name }) => {
+    const users = JSON.parse(localStorage.getItem('ak_users') || '{}');
+    users[phone] = {
+      name,
+      email: '',
+      phone,
+      verified: true,
+    };
+    localStorage.setItem('ak_users', JSON.stringify(users));
+    localStorage.setItem('ak_profile', JSON.stringify({ name, email: '', phone, verified: true }));
+    localStorage.setItem('ak_logged', '1');
+    localStorage.setItem('ak_persist', '1');
+  }, { phone, name });
+}
+
 /** Read OTP or reset code from localStorage. */
 async function readStoredCode(page, key) {
   return page.evaluate((storageKey) => {
@@ -101,6 +118,7 @@ module.exports = {
   clearAuthStorage,
   hashPassword,
   seedEmailUser,
+  seedPhoneUser,
   readStoredCode,
   isLoggedIn,
   readProfile,

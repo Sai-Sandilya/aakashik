@@ -2989,11 +2989,12 @@ class Component extends DCLogic {
             const users0 = (() => { try { return JSON.parse(localStorage.getItem('ak_users') || '{}'); } catch (er) { return {}; } })();
             if (!users0[_ad]) return this.setState({ authError: 'No account for this phone. Create an account first.' });
           }
-          if (this.state.authMode === 'signup' && _authIsEmail) {
+          if (this.state.authMode === 'signup' && (_authIsEmail || _authIsPhone)) {
             const usersExist = (() => { try { return JSON.parse(localStorage.getItem('ak_users') || '{}'); } catch (er) { return {}; } })();
-            const ek = contact.toLowerCase();
+            const ek = _authIsPhone ? _ad : contact.toLowerCase();
             if (usersExist[ek] && usersExist[ek].verified) {
-              return this.setState({ authError: 'An account already exists for this email. Sign in instead.' });
+              const which = _authIsPhone ? 'phone' : 'email';
+              return this.setState({ authError: 'An account already exists for this ' + which + '. Sign in instead.' });
             }
           }
           const finishOtp = (pwHash) => {
@@ -3055,9 +3056,10 @@ class Component extends DCLogic {
         if (code !== String(pending.code)) return this.setState({ authError: 'Incorrect verification code.' });
         const users = (() => { try { return JSON.parse(localStorage.getItem('ak_users') || '{}'); } catch (er) { return {}; } })();
         const key = _authIsPhone ? _ad : _av.toLowerCase();
-        if (this.state.authMode === 'signup' && _authIsEmail && users[key] && users[key].verified) {
+        if (this.state.authMode === 'signup' && users[key] && users[key].verified) {
           try { localStorage.removeItem('ak_pending_otp'); } catch (er) {}
-          return this.setState({ authError: 'An account already exists for this email. Sign in instead.', authOtp: false, authOtpCode: '' });
+          const which = _authIsPhone ? 'phone' : 'email';
+          return this.setState({ authError: 'An account already exists for this ' + which + '. Sign in instead.', authOtp: false, authOtpCode: '' });
         }
         const stored = users[key] || {};
         const profile = {

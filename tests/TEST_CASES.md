@@ -250,6 +250,18 @@ View runs under the repo **Actions** tab → **E2E Tests**.
 
 ---
 
+## Phone signup overwrite (`tests/ux-phone-signup.spec.js`)
+
+| ID | Focus | Type |
+|----|--------|------|
+| TC-P01 | Auth phone signup blocked when phone already exists (name preserved) | − |
+| TC-P02 | Auth phone signup still works for a new number | + |
+| TC-P03 | Existing phone can still sign in with OTP | + |
+| TC-P04 | Checkout phone signup blocked when phone already exists | − |
+| TC-P05 | Checkout phone signup works for a new number | + |
+
+---
+
 ## Notes
 
 - OTP and reset codes are read from `localStorage` (`ak_pending_otp`, `ak_reset`) — same as the demo UI toasts.
