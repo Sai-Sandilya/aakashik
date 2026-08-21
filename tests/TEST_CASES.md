@@ -283,7 +283,7 @@ Demo owner console (no database yet). Login: `owner@aakashik.local` / `Admin@123
 | TC-AD13 | Sync imports store checkout order | + |
 | TC-AD14 | Sync with no store orders toasts | − |
 | TC-AD15 | Reseed restores mocks, keeps store orders | + |
-| TC-AD16 | Store footer links to owner admin | + |
+| TC-AD16 | Admin opens by direct URL only (no store footer link) | + |
 | TC-AD17 | Filter + status persists after reload | + |
 | TC-AD18 | Duplicate sync does not duplicate IDs | − |
 

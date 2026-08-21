@@ -216,12 +216,12 @@ test.describe('Admin orders — store sync & reseed', () => {
     expect(statuses.store).toBe('store');
   });
 
-  test('TC-AD16 positive: store footer links to owner admin demo', async ({ page }) => {
+  test('TC-AD16 positive: admin page opens by direct URL only (not linked from store footer)', async ({ page }) => {
     await clearAuthStorage(page);
     await page.goto(LANDING_URL);
-    const link = page.getByRole('link', { name: /Owner admin \(demo\)/i });
-    await link.scrollIntoViewIfNeeded();
-    await expect(link).toHaveAttribute('href', /Aakashik%20Admin\.dc\.html/);
+    await expect(page.getByRole('link', { name: /Owner admin/i })).toHaveCount(0);
+    await page.goto(ADMIN_URL);
+    await expect(page.getByRole('heading', { name: 'Admin sign in' })).toBeVisible();
   });
 });
 
