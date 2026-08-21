@@ -5,7 +5,7 @@ const { test, expect } = require('@playwright/test');
 const { clearAuthStorage } = require('./helpers/storage');
 
 const ADMIN_URL = '/Aakashik%20Admin.dc.html';
-const LANDING_URL = '/Aakashik%20Landing.dc.html';
+const LANDING_URL = '/Aakashik%20Landing.dc.html';``
 const ADMIN_EMAIL = 'owner@aakashik.local';
 const ADMIN_PASSWORD = 'Admin@1234';
 
@@ -15,6 +15,7 @@ async function clearAdminStorage(page) {
     localStorage.removeItem('ak_admin_logged');
     localStorage.removeItem('ak_admin_orders');
     localStorage.removeItem('ak_orders');
+    localStorage.removeItem('ak_stock');
   });
 }
 
@@ -22,7 +23,7 @@ async function adminLogin(page) {
   await page.goto(ADMIN_URL);
   await page.getByLabel('Admin email').fill(ADMIN_EMAIL);
   await page.getByLabel('Admin password').fill(ADMIN_PASSWORD);
-  await page.getByRole('button', { name: 'Enter Orders' }).click();
+  await page.getByRole('button', { name: 'Enter Admin' }).click();
   await expect(page.getByRole('heading', { name: 'Orders (mock)' })).toBeVisible({ timeout: 8000 });
 }
 
@@ -35,7 +36,7 @@ test.describe('Admin orders — auth gate', () => {
     await page.goto(ADMIN_URL);
     await page.getByLabel('Admin email').fill(ADMIN_EMAIL);
     await page.getByLabel('Admin password').fill('Wrong@9999');
-    await page.getByRole('button', { name: 'Enter Orders' }).click();
+    await page.getByRole('button', { name: 'Enter Admin' }).click();
     await expect(page.getByText(/Incorrect admin email or password/i)).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Orders (mock)' })).toHaveCount(0);
   });
@@ -67,8 +68,8 @@ test.describe('Admin orders — list, filter, search', () => {
     await expect(page.getByRole('button', { name: /AAK-10005/ })).toBeVisible();
   });
 
-  test('TC-AD05 positive: status filter shows only pending', async ({ page }) => {
-    await page.getByRole('button', { name: 'Pending', exact: true }).click();
+  test('TC-AD05 positive: status filter shows only confirmed', async ({ page }) => {
+    await page.getByRole('button', { name: 'Confirmed', exact: true }).click();
     await expect(page.getByRole('button', { name: /AAK-10001/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /AAK-10002/ })).toHaveCount(0);
     await expect(page.getByText(/Visible:\s*1/)).toBeVisible();
@@ -100,12 +101,14 @@ test.describe('Admin orders — detail & status transitions', () => {
     await expect(page.getByText(/Hyderabad/)).toBeVisible();
   });
 
-  test('TC-AD09 positive: pending can move to packed then shipped then delivered', async ({ page }) => {
+  test('TC-AD09 positive: confirmed can move through full track timeline to delivered', async ({ page }) => {
     await page.getByRole('button', { name: /AAK-10001/ }).click();
     await page.getByRole('button', { name: 'Mark Packed' }).click();
-    await expect(page.getByText(/AAK-10001 → Packed/i)).toBeVisible();
+    await expect(page.getByText(/AAK-10001 → Packed with care/i)).toBeVisible();
     await page.getByRole('button', { name: 'Mark Shipped' }).click();
     await expect(page.getByText(/AAK-10001 → Shipped/i)).toBeVisible();
+    await page.getByRole('button', { name: 'Mark Out for delivery' }).click();
+    await expect(page.getByText(/AAK-10001 → Out for delivery/i)).toBeVisible();
     await page.getByRole('button', { name: 'Mark Delivered' }).click();
     await expect(page.getByText(/AAK-10001 → Delivered/i)).toBeVisible();
 
@@ -114,12 +117,15 @@ test.describe('Admin orders — detail & status transitions', () => {
       return list.find((o) => o.id === 'AAK-10001');
     });
     expect(stored.status).toBe('delivered');
-    expect(stored.statusHistory.map((h) => h.status)).toEqual(['pending', 'packed', 'shipped', 'delivered']);
+    expect(stored.statusHistory.map((h) => h.status)).toEqual([
+      'pending', 'packed', 'shipped', 'out_for_delivery', 'delivered',
+    ]);
   });
 
-  test('TC-AD10 negative: cannot jump pending straight to delivered', async ({ page }) => {
+  test('TC-AD10 negative: cannot jump confirmed straight to delivered', async ({ page }) => {
     await page.getByRole('button', { name: /AAK-10001/ }).click();
     await expect(page.getByRole('button', { name: 'Mark Delivered' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Mark Out for delivery' })).toBeDisabled();
     const stored = await page.evaluate(() => {
       const list = JSON.parse(localStorage.getItem('ak_admin_orders') || '[]');
       return list.find((o) => o.id === 'AAK-10001');
@@ -131,6 +137,7 @@ test.describe('Admin orders — detail & status transitions', () => {
     await page.getByRole('button', { name: /AAK-10004/ }).click();
     await expect(page.getByRole('button', { name: 'Mark Packed' })).toBeDisabled();
     await expect(page.getByRole('button', { name: 'Mark Shipped' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Mark Out for delivery' })).toBeDisabled();
     await expect(page.getByRole('button', { name: 'Mark Delivered' })).toBeDisabled();
     await expect(page.getByRole('button', { name: 'Cancel order' })).toBeDisabled();
   });
@@ -149,7 +156,7 @@ test.describe('Admin orders — store sync & reseed', () => {
     await clearAdminStorage(page);
   });
 
-  test('TC-AD13 positive: sync imports a store checkout order', async ({ page }) => {
+  test('TC-AD13 positive: login auto-pulls a store checkout order', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.evaluate(() => {
       localStorage.setItem('ak_orders', JSON.stringify([{
@@ -172,17 +179,15 @@ test.describe('Admin orders — store sync & reseed', () => {
     });
 
     await adminLogin(page);
-    await page.getByRole('button', { name: 'Sync store orders' }).click();
-    await expect(page.getByText(/Synced 1 store order/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /AAK-42424/ })).toBeVisible();
     await page.getByRole('button', { name: /AAK-42424/ }).click();
     await expect(page.getByText('Store Buyer', { exact: true })).toBeVisible();
     await expect(page.getByText(/Synced from store checkout/i)).toBeVisible();
   });
 
-  test('TC-AD14 negative: sync with no store orders shows toast', async ({ page }) => {
+  test('TC-AD14 negative: pull with no store orders shows toast', async ({ page }) => {
     await adminLogin(page);
-    await page.getByRole('button', { name: 'Sync store orders' }).click();
+    await page.getByRole('button', { name: 'Pull store orders now' }).click();
     await expect(page.getByText(/No store orders found/i)).toBeVisible();
   });
 
@@ -199,7 +204,7 @@ test.describe('Admin orders — store sync & reseed', () => {
       }]));
     });
     await adminLogin(page);
-    await page.getByRole('button', { name: 'Sync store orders' }).click();
+    await expect(page.getByRole('button', { name: /AAK-77777/ })).toBeVisible();
     await page.getByRole('button', { name: /AAK-10001/ }).click();
     await page.getByRole('button', { name: 'Mark Packed' }).click();
     await page.getByRole('button', { name: 'Reseed mocks' }).click();
@@ -232,7 +237,7 @@ test.describe('Admin orders — complex cross-flows', () => {
 
   test('TC-AD17 complex: filter + search + status update persistence after reload', async ({ page }) => {
     await adminLogin(page);
-    await page.getByRole('button', { name: 'Pending', exact: true }).click();
+    await page.getByRole('button', { name: 'Confirmed', exact: true }).click();
     await page.getByRole('button', { name: /AAK-10001/ }).click();
     await page.getByRole('button', { name: 'Mark Packed' }).click();
     await page.reload();
@@ -241,10 +246,10 @@ test.describe('Admin orders — complex cross-flows', () => {
     await expect(page.getByRole('button', { name: /AAK-10001/ })).toBeVisible();
     await page.getByRole('button', { name: /AAK-10001/ }).click();
     await expect(page.getByText(/History/i)).toBeVisible();
-    await expect(page.getByText(/Packed ·/i).first()).toBeVisible();
+    await expect(page.getByText(/Packed with care ·/i).first()).toBeVisible();
   });
 
-  test('TC-AD18 complex: duplicate sync does not create duplicate IDs', async ({ page }) => {
+  test('TC-AD18 complex: duplicate pull does not create duplicate IDs', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.evaluate(() => {
       localStorage.setItem('ak_orders', JSON.stringify([{
@@ -257,13 +262,85 @@ test.describe('Admin orders — complex cross-flows', () => {
       }]));
     });
     await adminLogin(page);
-    await page.getByRole('button', { name: 'Sync store orders' }).click();
-    await page.getByRole('button', { name: 'Sync store orders' }).click();
-    await expect(page.getByText(/already synced/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: /AAK-55555/ })).toBeVisible();
+    await page.getByRole('button', { name: 'Pull store orders now' }).click();
+    await expect(page.getByText(/already up to date/i)).toBeVisible();
     const count = await page.evaluate(() => {
       const list = JSON.parse(localStorage.getItem('ak_admin_orders') || '[]');
       return list.filter((o) => o.id === 'AAK-55555').length;
     });
     expect(count).toBe(1);
+  });
+
+  test('TC-AD19 complex: live pull shows new store order without refresh', async ({ page }) => {
+    await adminLogin(page);
+    await expect(page.getByRole('heading', { name: 'Orders (mock)' })).toBeVisible();
+    await page.evaluate(() => {
+      const list = JSON.parse(localStorage.getItem('ak_orders') || '[]');
+      list.unshift({
+        id: 'AAK-88888',
+        placedAt: Date.now(),
+        total: 349,
+        payMethod: 'cod',
+        items: [{ name: 'Daily Immunity', qty: 1 }],
+        delivery: {
+          name: 'Live Pull Buyer',
+          phone: '9876500666',
+          email: 'live@example.com',
+          address: '9 Live Lane',
+          city: 'Pune',
+          state: 'Maharashtra',
+          pincode: '411001',
+        },
+      });
+      localStorage.setItem('ak_orders', JSON.stringify(list));
+    });
+    await expect(page.getByRole('button', { name: /AAK-88888/ })).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText(/New store order received/i)).toBeVisible();
+  });
+
+  test('TC-AD20 complex: admin status update matches store Track Your Order', async ({ page }) => {
+    await page.goto(LANDING_URL);
+    await page.evaluate(() => {
+      localStorage.setItem('ak_orders', JSON.stringify([{
+        id: 'AAK-88912',
+        placedAt: Date.now(),
+        status: 'pending',
+        statusHistory: [{ status: 'pending', at: Date.now() }],
+        total: 224,
+        payMethod: 'cod',
+        payment: { method: 'cod', mock: true, status: 'ok' },
+        items: [{ name: 'Herbal Sunni Pindi', qty: 1, line: '₹224' }],
+        delivery: {
+          name: 'Demo Google User',
+          phone: '8328584109',
+          email: 'demo.google@aakashik.local',
+          address: 'jdshgfhj',
+          city: 'hgsdfhj',
+          state: 'Andhra Pradesh',
+          pincode: '530016',
+        },
+      }]));
+    });
+    await adminLogin(page);
+    await page.getByRole('button', { name: /AAK-88912/ }).click();
+    await page.getByRole('button', { name: 'Mark Packed' }).click();
+    await expect(page.getByText(/AAK-88912 → Packed with care/i)).toBeVisible();
+
+    const storeStatus = await page.evaluate(() => {
+      const list = JSON.parse(localStorage.getItem('ak_orders') || '[]');
+      return (list.find((o) => o.id === 'AAK-88912') || {}).status;
+    });
+    expect(storeStatus).toBe('packed');
+
+    await page.goto(LANDING_URL);
+    await page.getByRole('button', { name: 'Track now' }).click({ force: true });
+    await page.getByPlaceholder('e.g. AAK-10482').fill('AAK-88912');
+    await page.getByRole('button', { name: 'Track Order' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Track Your Order' });
+    await expect(dialog.getByText('Order Confirmed')).toBeVisible();
+    await expect(dialog.getByText('Packed with care')).toBeVisible();
+    await expect(dialog.getByText('Out for delivery')).toBeVisible();
+    await expect(dialog.getByText('Delivered', { exact: true })).toBeVisible();
   });
 });
