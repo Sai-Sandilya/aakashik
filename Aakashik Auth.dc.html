@@ -525,8 +525,9 @@ class Component extends DCLogic {
       this._t = setTimeout(() => {
         const users = this._readUsers();
         const key = kind.value;
-        if (this.state.mode === 'signup' && kind.kind === 'email' && users[key] && users[key].verified) {
-          this.setState({ loading: false, otp: false, otpCode: '', errorMsg: 'An account already exists for this email. Sign in instead.' });
+        if (this.state.mode === 'signup' && users[key] && users[key].verified) {
+          const which = kind.kind === 'phone' ? 'phone' : 'email';
+          this.setState({ loading: false, otp: false, otpCode: '', errorMsg: 'An account already exists for this ' + which + '. Sign in instead.' });
           try { localStorage.removeItem('ak_pending_otp'); } catch (er) {}
           return;
         }
@@ -569,10 +570,11 @@ class Component extends DCLogic {
           return this.setState({ errorMsg: 'No account for this phone. Create an account first.' });
         }
       }
-      if (this.state.mode === 'signup' && kind.kind === 'email') {
+      if (this.state.mode === 'signup' && (kind.kind === 'email' || kind.kind === 'phone')) {
         const usersExist = this._readUsers();
         if (usersExist[kind.value] && usersExist[kind.value].verified) {
-          return this.setState({ errorMsg: 'An account already exists for this email. Sign in instead.' });
+          const which = kind.kind === 'phone' ? 'phone' : 'email';
+          return this.setState({ errorMsg: 'An account already exists for this ' + which + '. Sign in instead.' });
         }
       }
       const code = String(1000 + Math.floor(Math.random() * 9000));
