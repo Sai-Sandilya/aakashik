@@ -1054,6 +1054,14 @@
                 </sc-for>
               </div>
             </div>
+            <div>
+              <label style="display: block; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A9678; margin-bottom: 9px;">For powder / intake</label>
+              <select value="{{ reminderProduct }}" onChange="{{ onReminderProduct }}" aria-label="Reminder product" style="width: 100%; background: rgba(255,255,255,0.7); border: 1px solid #D7CDB4; color: #2E3D2C; padding: 12px 14px; border-radius: 12px; font-size: 14px; outline: none; font-family: inherit;">
+                <sc-for list="{{ reminderProductOptions }}" as="rp" hint-placeholder-count="8">
+                  <option value="{{ rp.value }}">{{ rp.label }}</option>
+                </sc-for>
+              </select>
+            </div>
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
               <div style="flex: 1; min-width: 130px;">
                 <label style="display: block; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A9678; margin-bottom: 9px;">Contact</label>
@@ -1065,7 +1073,7 @@
               </div>
             </div>
             <button type="submit" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #BE6A45; color: #FBF7EE; border: none; padding: 14px 22px; border-radius: 30px; font-size: 15px; font-weight: 500; box-shadow: 0 12px clamp(24px, 5vw, 90px) -12px rgba(190,106,69,0.7);">
-              Set My Reminder
+              {{ reminderSubmitLabel }}
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             </button>
           </form>
@@ -1076,7 +1084,12 @@
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C8D4B9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
             </span>
             <h3 style="font-family: 'Marcellus', serif; font-weight: 400; font-size: 22px; color: #2E3D2C; margin: 0 0 6px;">You're all set</h3>
-            <p style="font-size: 13.5px; color: #5E6A54; margin: 0;">Reminder saved on this device (demo — nothing is sent yet). Namaste.</p>
+            <p style="font-size: 13.5px; color: #5E6A54; margin: 0 0 8px;">{{ reminderSummary }}</p>
+            <p style="font-size: 12.5px; color: #8A9678; margin: 0 0 16px;">Saved on this device (demo — nothing is sent yet).</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+              <button type="button" onClick="{{ editReminder }}" style="background: #2E3D2C; color: #F1EEDF; border: none; padding: 11px 16px; border-radius: 30px; font-size: 13.5px; font-weight: 500; cursor: pointer;">Edit reminder</button>
+              <button type="button" onClick="{{ addAnotherReminder }}" style="background: transparent; color: #2E3D2C; border: 1px solid #2E3D2C; padding: 11px 16px; border-radius: 30px; font-size: 13.5px; font-weight: 500; cursor: pointer;">Add another reminder</button>
+            </div>
           </div>
         </sc-if>
       </div>
@@ -1884,7 +1897,7 @@ class Component extends DCLogic {
     bottleAngle: 0, peeled: false,
     activeHerb: 'Tulasi',
     activeAroma: 1,
-    reminderChannel: 'whatsapp', reminderSet: false,
+    reminderChannel: 'whatsapp', reminderSet: false, reminderEditing: false, reminderProduct: 'immunity',
     cartItems: {}, cartOpen: false, orderPlaced: false, bump: 0,
     quickView: null, qvSubscribe: false, qvFace: 'front', qvSize: 0,
     legal: null,
@@ -2085,9 +2098,11 @@ class Component extends DCLogic {
     const rem = this._readJSON('ak_reminder', null);
     if (rem && rem.contact) {
       boot.reminderSet = true;
+      boot.reminderEditing = false;
       boot.reminderContact = rem.contact;
       boot.reminderTime = rem.time || '08:00';
       boot.reminderChannel = rem.channel || 'whatsapp';
+      boot.reminderProduct = rem.productId || 'immunity';
     }
     if (Object.keys(boot).length) this.setState(boot);
     this._syncLogin = () => {
@@ -2525,6 +2540,20 @@ class Component extends DCLogic {
       { key: 'whatsapp', label: 'WhatsApp' },
       { key: 'email', label: 'Email' },
     ].map(c => ({ ...c, active: c.key === this.state.reminderChannel, style: chip(c.key === this.state.reminderChannel), onClick: () => this.setState({ reminderChannel: c.key }) }));
+    const reminderProductOptions = PRODUCTS.filter((p) => !p.bundle).map((p) => ({
+      value: p.id,
+      label: p.name + (p.sub ? ' · ' + p.sub : ''),
+    }));
+    const reminderList = (() => {
+      const list = this._readJSON('ak_reminders', []);
+      return Array.isArray(list) ? list : [];
+    })();
+    const reminderCurrent = this._readJSON('ak_reminder', null) || {};
+    const reminderProductMeta = ALL[reminderCurrent.productId || this.state.reminderProduct] || ALL.immunity || {};
+    const reminderChannelLabel = (reminderCurrent.channel || this.state.reminderChannel) === 'email' ? 'Email' : 'WhatsApp';
+    const reminderSummary = reminderCurrent.contact
+      ? ((reminderCurrent.productName || reminderProductMeta.name || 'Ritual') + ' · ' + reminderChannelLabel + ' · ' + reminderCurrent.contact + ' · ' + (reminderCurrent.time || this.state.reminderTime || '08:00') + (reminderList.length > 1 ? ' · ' + reminderList.length + ' saved' : ''))
+      : 'Reminder saved on this device (demo — nothing is sent yet). Namaste.';
 
     // ---- Cart summary ----
     const MEMBER_RATE = 0.10;
@@ -3245,16 +3274,46 @@ class Component extends DCLogic {
       herbs, activeHerbData, webNodes, herbCenter,
 
       channels,
+      reminderProductOptions,
+      reminderProduct: this.state.reminderProduct || 'immunity',
+      onReminderProduct: (e) => this.setState({ reminderProduct: e.target.value }),
       reminderContact: this.state.reminderContact,
       onReminderContact: (e) => this.setState({ reminderContact: e.target.value }),
       reminderTime: this.state.reminderTime,
       onReminderTime: (e) => this.setState({ reminderTime: e.target.value }),
       reminderSet: this.state.reminderSet,
       notReminded: !this.state.reminderSet,
+      reminderSummary,
+      reminderSubmitLabel: this.state.reminderEditing ? 'Update Reminder' : 'Set My Reminder',
+      editReminder: () => {
+        const rem = this._readJSON('ak_reminder', null) || {};
+        this.setState({
+          reminderSet: false,
+          reminderEditing: true,
+          reminderContact: rem.contact || this.state.reminderContact || '',
+          reminderTime: rem.time || this.state.reminderTime || '08:00',
+          reminderChannel: rem.channel || this.state.reminderChannel || 'whatsapp',
+          reminderProduct: rem.productId || this.state.reminderProduct || 'immunity',
+        });
+      },
+      addAnotherReminder: () => {
+        this.setState({
+          reminderSet: false,
+          reminderEditing: false,
+          reminderContact: '',
+          reminderTime: '08:00',
+          reminderChannel: 'whatsapp',
+          reminderProduct: 'immunity',
+        });
+      },
       setReminder: (e) => {
         if (e && e.preventDefault) e.preventDefault();
         const contact = (this.state.reminderContact || '').trim();
         const channel = this.state.reminderChannel || 'whatsapp';
+        const productId = this.state.reminderProduct || 'immunity';
+        const product = ALL[productId] || {};
+        const productName = product.name || productId;
+        const time = this.state.reminderTime || '08:00';
         if (!contact) { this.showToast('Enter phone or email for reminders'); return; }
         const isEmailChannel = channel === 'email';
         if (isEmailChannel) {
@@ -3263,8 +3322,18 @@ class Component extends DCLogic {
           const digits = contact.replace(/\D/g, '');
           if (!/^\d{10}$/.test(digits) || !/^[6-9]/.test(digits)) { this.showToast('Enter a valid 10-digit phone for WhatsApp/SMS reminders'); return; }
         }
-        this._writeJSON('ak_reminder', { contact, time: this.state.reminderTime || '08:00', channel, setAt: Date.now() });
-        this.setState({ reminderSet: true });
+        const entry = { contact, time, channel, productId, productName, setAt: Date.now() };
+        let list = this._readJSON('ak_reminders', []);
+        if (!Array.isArray(list)) list = [];
+        if (this.state.reminderEditing && list.length) {
+          list[list.length - 1] = entry;
+        } else {
+          list.push(entry);
+        }
+        this._writeJSON('ak_reminders', list.slice(-20));
+        this._writeJSON('ak_reminder', entry);
+        this.showToast(this.state.reminderEditing ? 'Reminder updated' : 'Reminder saved');
+        this.setState({ reminderSet: true, reminderEditing: false });
       },
     };
   }
