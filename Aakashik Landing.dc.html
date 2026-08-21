@@ -1466,7 +1466,7 @@
           </div>
           <label style="display: block;">
             <span style="display: block; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A9678; margin-bottom: 7px;">State</span>
-            <select value="{{ profileState }}" onChange="{{ onProfileState }}" style="width: 100%; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none; font-family: inherit;">
+            <select value="{{ profileState }}" onChange="{{ onProfileState }}" aria-label="Profile state or UT" style="width: 100%; background: #F4EEE1; border: 1px solid #E0D7BE; border-radius: 12px; padding: 13px 15px; font-size: 14px; color: #2E3D2C; outline: none; font-family: inherit;">
               <option value="">Select state / UT</option>
               <optgroup label="States">
                 <sc-for list="{{ stateOptions }}" as="st" hint-placeholder-count="28">
