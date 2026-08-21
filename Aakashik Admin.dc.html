@@ -22,6 +22,7 @@
     @media (max-width: 900px) {
       #admin-layout { grid-template-columns: 1fr !important; }
       #admin-detail { position: static !important; }
+      #admin-shell form[aria-label="Add product"] { grid-column: 1 / -1; }
     }
   </style>
 </helmet>
@@ -29,7 +30,7 @@
 <div id="admin-shell" style="font-family: 'Jost', sans-serif; color: #2E3D2C; min-height: 100vh; background: linear-gradient(160deg, #E8E2D4 0%, #F4EEE1 45%, #E7EDE0 100%);">
 
   <div role="status" style="background: #F3E9D8; border-bottom: 1px solid #E0D7BE; color: #5E6A54; font-size: 12.5px; line-height: 1.5; padding: 10px 18px; text-align: center;">
-    Demo admin — orders + inventory in this browser only. Stock updates apply to the store checkout immediately.
+    Demo admin — orders, inventory, and custom products in this browser only. Published products appear on the store.
   </div>
 
   <sc-if value="{{ notLoggedIn }}">
@@ -37,7 +38,7 @@
       <form onSubmit="{{ login }}" style="width: min(420px, 100%); background: #F6F1E4; border: 1px solid #E0D7BE; border-radius: 22px; padding: 28px 24px; box-shadow: 0 30px 60px -36px rgba(46,61,44,0.45); animation: cardIn .45s ease;">
         <p style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #A8894E; margin: 0 0 8px;">Owner console</p>
         <h1 style="font-family: 'Marcellus', serif; font-size: 30px; margin: 0 0 8px; font-weight: 400;">Admin sign in</h1>
-        <p style="font-size: 13.5px; color: #5E6A54; margin: 0 0 18px; line-height: 1.6;">Use the demo owner credentials to review orders and update stock.</p>
+        <p style="font-size: 13.5px; color: #5E6A54; margin: 0 0 18px; line-height: 1.6;">Use the demo owner credentials to manage orders, stock, and products.</p>
         <sc-if value="{{ hasLoginError }}">
           <div style="background: #F8E8E2; border: 1px solid #E8B8A8; color: #8A3E2A; border-radius: 12px; padding: 10px 12px; font-size: 12.5px; margin-bottom: 12px;">{{ loginError }}</div>
         </sc-if>
@@ -61,12 +62,16 @@
       <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
         <button type="button" onClick="{{ showOrdersTab }}" style="{{ ordersTabStyle }}">Orders</button>
         <button type="button" onClick="{{ showInventoryTab }}" style="{{ inventoryTabStyle }}">Inventory</button>
+        <button type="button" onClick="{{ showProductsTab }}" style="{{ productsTabStyle }}">Products</button>
         <sc-if value="{{ isOrdersTab }}">
           <button type="button" onClick="{{ syncStoreOrders }}" style="background:transparent; border:1px solid #2E3D2C; color:#2E3D2C; padding:10px 14px; border-radius:30px; font-size:13px;">Pull store orders now</button>
           <button type="button" onClick="{{ reseedMocks }}" style="background:transparent; border:1px solid #8A9678; color:#5E6A54; padding:10px 14px; border-radius:30px; font-size:13px;">Reseed mocks</button>
         </sc-if>
         <sc-if value="{{ isInventoryTab }}">
           <button type="button" onClick="{{ reseedStock }}" style="background:transparent; border:1px solid #8A9678; color:#5E6A54; padding:10px 14px; border-radius:30px; font-size:13px;">Reseed stock</button>
+        </sc-if>
+        <sc-if value="{{ isProductsTab }}">
+          <button type="button" onClick="{{ resetProductForm }}" style="background:transparent; border:1px solid #8A9678; color:#5E6A54; padding:10px 14px; border-radius:30px; font-size:13px;">Clear form</button>
         </sc-if>
         <button type="button" onClick="{{ logout }}" style="background:#2E3D2C; color:#F1EEDF; border:none; padding:10px 14px; border-radius:30px; font-size:13px;">Log out</button>
       </div>
@@ -197,6 +202,105 @@
         </sc-if>
       </section>
     </sc-if>
+
+    <sc-if value="{{ isProductsTab }}">
+      <div style="padding:18px clamp(16px,4vw,36px) 28px; display:grid; grid-template-columns: minmax(280px, 0.95fr) minmax(300px, 1.05fr); gap:18px; align-items:start;">
+        <form onSubmit="{{ saveProduct }}" aria-label="Add product" style="background:#F6F1E4; border:1px solid #E0D7BE; border-radius:18px; padding:20px;">
+          <h2 style="font-family:'Marcellus', serif; font-size:24px; margin:0 0 6px; font-weight:400;">{{ productFormTitle }}</h2>
+          <p style="margin:0 0 16px; font-size:13px; color:#5E6A54; line-height:1.55;">New products stay in this browser and show on the store when Active.</p>
+          <sc-if value="{{ hasProductError }}">
+            <div style="background:#F8E8E2; border:1px solid #E8B8A8; color:#8A3E2A; border-radius:12px; padding:10px 12px; font-size:12.5px; margin-bottom:12px;">{{ productError }}</div>
+          </sc-if>
+          <label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;margin-bottom:6px;">Product name</label>
+          <input value="{{ pName }}" onInput="{{ onPName }}" required aria-label="Product name" placeholder="e.g. Morning Tulsi Brew" style="width:100%; background:#FBF7EE; border:1px solid #E0D7BE; border-radius:12px; padding:12px 14px; font-size:14px; margin-bottom:12px; outline:none;">
+          <label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;margin-bottom:6px;">Description</label>
+          <textarea value="{{ pDesc }}" onInput="{{ onPDesc }}" required aria-label="Product description" rows="3" placeholder="Short product story for shoppers" style="width:100%; background:#FBF7EE; border:1px solid #E0D7BE; border-radius:12px; padding:12px 14px; font-size:14px; margin-bottom:12px; outline:none; resize:vertical; font-family:inherit;"></textarea>
+          <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+            <div style="flex:1; min-width:120px;">
+              <label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;margin-bottom:6px;">Price (₹)</label>
+              <input value="{{ pPrice }}" onInput="{{ onPPrice }}" required inputmode="numeric" aria-label="Product price" placeholder="349" style="width:100%; background:#FBF7EE; border:1px solid #E0D7BE; border-radius:12px; padding:12px 14px; font-size:14px; outline:none;">
+            </div>
+            <div style="flex:1; min-width:120px;">
+              <label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;margin-bottom:6px;">Discount %</label>
+              <input value="{{ pDiscount }}" onInput="{{ onPDiscount }}" inputmode="numeric" aria-label="Product discount percent" placeholder="0" style="width:100%; background:#FBF7EE; border:1px solid #E0D7BE; border-radius:12px; padding:12px 14px; font-size:14px; outline:none;">
+            </div>
+            <div style="flex:1; min-width:120px;">
+              <label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;margin-bottom:6px;">Stock qty</label>
+              <input value="{{ pStock }}" onInput="{{ onPStock }}" required inputmode="numeric" aria-label="Product stock quantity" placeholder="20" style="width:100%; background:#FBF7EE; border:1px solid #E0D7BE; border-radius:12px; padding:12px 14px; font-size:14px; outline:none;">
+            </div>
+          </div>
+          <label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;margin-bottom:6px;">Category</label>
+          <select value="{{ pConcern }}" onChange="{{ onPConcern }}" aria-label="Product category" style="width:100%; background:#FBF7EE; border:1px solid #E0D7BE; border-radius:12px; padding:12px 14px; font-size:14px; margin-bottom:12px; outline:none;">
+            <option value="Immunity">Immunity</option>
+            <option value="Sugar">Sugar</option>
+            <option value="Respiratory">Respiratory</option>
+            <option value="Digestion">Digestion</option>
+            <option value="Skin &amp; Body">Skin &amp; Body</option>
+            <option value="Spiritual">Spiritual</option>
+          </select>
+          <label style="display:flex; align-items:center; gap:10px; margin-bottom:14px; font-size:14px; color:#5E6A54; cursor:pointer;">
+            <input type="checkbox" checked="{{ pActive }}" onChange="{{ onPActive }}" aria-label="Product active on store">
+            Active on store (uncheck to keep as draft / hidden)
+          </label>
+          <label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;margin-bottom:6px;">Photo</label>
+          <input type="file" accept="image/*" onChange="{{ onPPhoto }}" aria-label="Product photo upload" style="width:100%; margin-bottom:10px; font-size:13px;">
+          <sc-if value="{{ hasPPhoto }}">
+            <div style="margin-bottom:14px;">
+              <img src="{{ pPhoto }}" alt="Product preview" style="max-width:100%; max-height:160px; border-radius:12px; border:1px solid #E0D7BE; object-fit:cover; display:block;">
+              <button type="button" onClick="{{ clearPPhoto }}" style="margin-top:8px; background:transparent; border:1px solid #8A9678; color:#5E6A54; padding:8px 12px; border-radius:30px; font-size:12.5px;">Remove photo</button>
+            </div>
+          </sc-if>
+          <button type="submit" style="width:100%; background:#2E3D2C; color:#F1EEDF; border:none; padding:14px; border-radius:30px; font-size:14.5px; font-weight:500;">{{ productSaveLabel }}</button>
+        </form>
+
+        <section aria-label="Catalog products" style="background:#F6F1E4; border:1px solid #E0D7BE; border-radius:18px; overflow:hidden;">
+          <div style="padding:16px 18px; border-bottom:1px solid #E4DBC8; display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;">
+            <div>
+              <strong style="font-size:15px;">Store catalog</strong>
+              <p style="margin:4px 0 0; font-size:12.5px; color:#8A9678;">Custom: {{ customCount }} · Hidden built-ins: {{ hiddenCount }}</p>
+            </div>
+            <input value="{{ prodSearch }}" onInput="{{ onProdSearch }}" placeholder="Search catalog…" aria-label="Search catalog products" style="flex:1; min-width:160px; max-width:240px; background:#FBF7EE; border:1px solid #E0D7BE; border-radius:12px; padding:10px 12px; font-size:13.5px; outline:none;">
+          </div>
+          <sc-if value="{{ prodListEmpty }}">
+            <div style="padding:28px 20px; text-align:center; color:#5E6A54; font-size:14px;">No catalog rows match.</div>
+          </sc-if>
+          <sc-if value="{{ prodListHasItems }}">
+            <div style="display:flex; flex-direction:column; max-height:640px; overflow:auto;">
+              <sc-for list="{{ productRows }}" as="r" hint-placeholder-count="6">
+                <div data-product-row="{{ r.id }}" style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid #E4DBC8;">
+                  <div style="display:flex; gap:12px; align-items:center; min-width:200px; flex:1;">
+                    <sc-if value="{{ r.hasPhoto }}">
+                      <img src="{{ r.photo }}" alt="" style="width:48px; height:48px; border-radius:10px; object-fit:cover; border:1px solid #E0D7BE;">
+                    </sc-if>
+                    <sc-if value="{{ r.noPhoto }}">
+                      <span style="width:48px; height:48px; border-radius:10px; background:linear-gradient(145deg,#D9BE9C,#A06437); display:inline-block;"></span>
+                    </sc-if>
+                    <div>
+                      <div style="display:flex; gap:8px; align-items:baseline; flex-wrap:wrap;">
+                        <strong style="font-size:14.5px;">{{ r.name }}</strong>
+                        <span style="{{ r.badgeStyle }}">{{ r.badgeLabel }}</span>
+                      </div>
+                      <div style="margin-top:4px; font-size:12px; color:#8A9678;">{{ r.meta }}</div>
+                    </div>
+                  </div>
+                  <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                    <sc-if value="{{ r.canEdit }}">
+                      <button type="button" onClick="{{ r.edit }}" style="background:transparent; border:1px solid #2E3D2C; color:#2E3D2C; padding:8px 12px; border-radius:30px; font-size:12.5px;">Edit</button>
+                    </sc-if>
+                    <sc-if value="{{ r.canToggle }}">
+                      <button type="button" onClick="{{ r.toggle }}" style="background:transparent; border:1px solid #8A9678; color:#5E6A54; padding:8px 12px; border-radius:30px; font-size:12.5px;">{{ r.toggleLabel }}</button>
+                    </sc-if>
+                    <sc-if value="{{ r.canDelete }}">
+                      <button type="button" onClick="{{ r.remove }}" style="background:#8A3E2A; color:#F1EEDF; border:none; padding:8px 12px; border-radius:30px; font-size:12.5px;">Delete</button>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </section>
+      </div>
+    </sc-if>
   </sc-if>
 
   <sc-if value="{{ hasToast }}">
@@ -223,6 +327,19 @@ class Component extends DCLogic {
     stockDrafts: {},
     invSearch: '',
     invFilter: 'all',
+    customProducts: [],
+    hiddenIds: [],
+    prodSearch: '',
+    productError: '',
+    editingId: '',
+    pName: '',
+    pDesc: '',
+    pPrice: '',
+    pDiscount: '0',
+    pStock: '20',
+    pConcern: 'Immunity',
+    pActive: true,
+    pPhoto: '',
   };
 
   componentDidMount() {
@@ -234,7 +351,14 @@ class Component extends DCLogic {
     }
     const pulled = this._mergeStoreOrders(orders);
     const stock = this._ensureStock();
-    this.setState({ loggedIn: logged, orders: pulled.list, stock, stockDrafts: Object.assign({}, stock) });
+    this.setState({
+      loggedIn: logged,
+      orders: pulled.list,
+      stock,
+      stockDrafts: Object.assign({}, stock),
+      customProducts: this._readCustomProducts(),
+      hiddenIds: this._readHiddenIds(),
+    });
     if (logged) this._startLivePull();
     this._onStorage = (e) => {
       if (!this.state.loggedIn) return;
@@ -327,7 +451,7 @@ class Component extends DCLogic {
     this._writeJSON('ak_admin_orders', list);
   }
   _catalog() {
-    return [
+    const builtins = [
       { id: 'sunni', name: 'Herbal Sunni Pindi', kind: 'Product' },
       { id: 'diabetic', name: 'Sugar Balance Support', kind: 'Product' },
       { id: 'immunity', name: 'Daily Immunity', kind: 'Product' },
@@ -338,6 +462,45 @@ class Component extends DCLogic {
       { id: 'kit-glow', name: 'Glow & Cleanse Kit', kind: 'Bundle' },
       { id: 'sample-trio', name: 'Sample Trio', kind: 'Bundle' },
     ];
+    const custom = this._readCustomProducts().map((p) => ({
+      id: p.id,
+      name: p.name || 'Custom product',
+      kind: 'Custom',
+    }));
+    return builtins.concat(custom);
+  }
+  _readCustomProducts() {
+    const list = this._readJSON('ak_custom_products', []);
+    return Array.isArray(list) ? list : [];
+  }
+  _writeCustomProducts(list) {
+    this._writeJSON('ak_custom_products', list);
+  }
+  _readHiddenIds() {
+    const list = this._readJSON('ak_hidden_ids', []);
+    return Array.isArray(list) ? list : [];
+  }
+  _writeHiddenIds(list) {
+    this._writeJSON('ak_hidden_ids', list);
+  }
+  _blankProductForm() {
+    return {
+      editingId: '',
+      productError: '',
+      pName: '',
+      pDesc: '',
+      pPrice: '',
+      pDiscount: '0',
+      pStock: '20',
+      pConcern: 'Immunity',
+      pActive: true,
+      pPhoto: '',
+    };
+  }
+  _salePrice(priceN, discountPct) {
+    const price = Math.max(0, Math.round(Number(priceN) || 0));
+    const disc = Math.min(90, Math.max(0, Math.round(Number(discountPct) || 0)));
+    return Math.max(0, Math.round(price * (100 - disc) / 100));
   }
   _defaultStock() {
     return {
@@ -598,16 +761,24 @@ class Component extends DCLogic {
     return {
       loggedIn: !!this.state.loggedIn,
       notLoggedIn: !this.state.loggedIn,
-      pageTitle: this.state.tab === 'inventory' ? 'Inventory (mock)' : 'Orders (mock)',
-      isOrdersTab: this.state.tab !== 'inventory',
+      pageTitle: this.state.tab === 'inventory' ? 'Inventory (mock)' : (this.state.tab === 'products' ? 'Products (mock)' : 'Orders (mock)'),
+      isOrdersTab: this.state.tab === 'orders' || !this.state.tab,
       isInventoryTab: this.state.tab === 'inventory',
-      ordersTabStyle: 'padding:10px 14px;border-radius:30px;font-size:13px;border:1px solid #2E3D2C;background:' + (this.state.tab !== 'inventory' ? '#2E3D2C' : 'transparent') + ';color:' + (this.state.tab !== 'inventory' ? '#F1EEDF' : '#2E3D2C') + ';cursor:pointer;',
+      isProductsTab: this.state.tab === 'products',
+      ordersTabStyle: 'padding:10px 14px;border-radius:30px;font-size:13px;border:1px solid #2E3D2C;background:' + (this.state.tab === 'orders' || !this.state.tab ? '#2E3D2C' : 'transparent') + ';color:' + (this.state.tab === 'orders' || !this.state.tab ? '#F1EEDF' : '#2E3D2C') + ';cursor:pointer;',
       inventoryTabStyle: 'padding:10px 14px;border-radius:30px;font-size:13px;border:1px solid #2E3D2C;background:' + (this.state.tab === 'inventory' ? '#2E3D2C' : 'transparent') + ';color:' + (this.state.tab === 'inventory' ? '#F1EEDF' : '#2E3D2C') + ';cursor:pointer;',
+      productsTabStyle: 'padding:10px 14px;border-radius:30px;font-size:13px;border:1px solid #2E3D2C;background:' + (this.state.tab === 'products' ? '#2E3D2C' : 'transparent') + ';color:' + (this.state.tab === 'products' ? '#F1EEDF' : '#2E3D2C') + ';cursor:pointer;',
       showOrdersTab: () => this.setState({ tab: 'orders' }),
       showInventoryTab: () => {
         const stock = this._ensureStock();
         this.setState({ tab: 'inventory', stock, stockDrafts: Object.assign({}, stock) });
       },
+      showProductsTab: () => this.setState(Object.assign({
+        tab: 'products',
+        customProducts: this._readCustomProducts(),
+        hiddenIds: this._readHiddenIds(),
+      }, this.state.editingId ? {} : this._blankProductForm())),
+      resetProductForm: () => this.setState(this._blankProductForm()),
       adminEmail: this.state.adminEmail,
       adminPassword: this.state.adminPassword,
       onAdminEmail: (e) => this.setState({ adminEmail: e.target.value, loginError: '' }),
@@ -829,10 +1000,205 @@ class Component extends DCLogic {
       })(),
       reseedStock: () => {
         const seed = this._defaultStock();
+        // Keep custom product stock keys when reseeding defaults
+        const customs = this._readCustomProducts();
+        const current = this._readStock();
+        customs.forEach((p) => {
+          if (p && p.id && current[p.id] !== undefined) seed[p.id] = current[p.id];
+        });
         this._writeStock(seed);
         this.setState({ stock: seed, stockDrafts: Object.assign({}, seed), invFilter: 'all', invSearch: '' });
         this._showToast('Stock levels reseeded');
       },
+      productFormTitle: this.state.editingId ? 'Edit custom product' : 'Add product',
+      productSaveLabel: this.state.editingId ? 'Save changes' : 'Publish product',
+      productError: this.state.productError || '',
+      hasProductError: !!this.state.productError,
+      pName: this.state.pName || '',
+      pDesc: this.state.pDesc || '',
+      pPrice: this.state.pPrice || '',
+      pDiscount: this.state.pDiscount || '0',
+      pStock: this.state.pStock || '20',
+      pConcern: this.state.pConcern || 'Immunity',
+      pActive: !!this.state.pActive,
+      pPhoto: this.state.pPhoto || '',
+      hasPPhoto: !!this.state.pPhoto,
+      onPName: (e) => this.setState({ pName: e.target.value, productError: '' }),
+      onPDesc: (e) => this.setState({ pDesc: e.target.value, productError: '' }),
+      onPPrice: (e) => this.setState({ pPrice: e.target.value, productError: '' }),
+      onPDiscount: (e) => this.setState({ pDiscount: e.target.value, productError: '' }),
+      onPStock: (e) => this.setState({ pStock: e.target.value, productError: '' }),
+      onPConcern: (e) => this.setState({ pConcern: e.target.value }),
+      onPActive: (e) => this.setState({ pActive: !!(e.target && e.target.checked) }),
+      onPPhoto: (e) => {
+        const file = e && e.target && e.target.files && e.target.files[0];
+        if (!file) return;
+        if (!/^image\//.test(file.type || '')) {
+          return this.setState({ productError: 'Please choose an image file.' });
+        }
+        if (file.size > 1.5 * 1024 * 1024) {
+          return this.setState({ productError: 'Photo must be under 1.5 MB for this demo.' });
+        }
+        const reader = new FileReader();
+        reader.onload = () => this.setState({ pPhoto: String(reader.result || ''), productError: '' });
+        reader.onerror = () => this.setState({ productError: 'Could not read that image.' });
+        reader.readAsDataURL(file);
+      },
+      clearPPhoto: () => this.setState({ pPhoto: '' }),
+      saveProduct: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        const name = String(this.state.pName || '').trim();
+        const desc = String(this.state.pDesc || '').trim();
+        const price = Math.round(Number(this.state.pPrice));
+        const discount = Math.round(Number(this.state.pDiscount || 0));
+        const stockQty = Math.floor(Number(this.state.pStock));
+        const concern = String(this.state.pConcern || 'Immunity');
+        if (!name) return this.setState({ productError: 'Enter a product name.' });
+        if (!desc) return this.setState({ productError: 'Enter a product description.' });
+        if (!Number.isFinite(price) || price <= 0) return this.setState({ productError: 'Enter a valid price greater than 0.' });
+        if (!Number.isFinite(discount) || discount < 0 || discount > 90) return this.setState({ productError: 'Discount must be 0–90%.' });
+        if (!Number.isFinite(stockQty) || stockQty < 0) return this.setState({ productError: 'Enter a valid stock quantity.' });
+        const list = this._readCustomProducts().slice();
+        const editingId = this.state.editingId;
+        const sale = this._salePrice(price, discount);
+        const payload = {
+          id: editingId || ('custom-' + Date.now()),
+          name,
+          description: desc,
+          benefit: desc,
+          sub: 'Owner added',
+          concern,
+          element: 'All',
+          priceN: sale,
+          listPriceN: price,
+          discountPct: discount,
+          photo: this.state.pPhoto || '',
+          front: this.state.pPhoto || '',
+          jar: '#D9BE9C',
+          cap: '#A06437',
+          herbs: [],
+          tag: discount > 0 ? (discount + '% off') : 'New',
+          active: this.state.pActive !== false,
+          custom: true,
+          updatedAt: Date.now(),
+        };
+        if (editingId) {
+          const idx = list.findIndex((p) => p.id === editingId);
+          if (idx < 0) return this.setState({ productError: 'Product not found.' });
+          payload.createdAt = list[idx].createdAt || Date.now();
+          list[idx] = payload;
+        } else {
+          payload.createdAt = Date.now();
+          list.unshift(payload);
+        }
+        this._writeCustomProducts(list);
+        this._setStockQty(payload.id, stockQty);
+        const stock = this._readStock();
+        this.setState(Object.assign({
+          customProducts: list,
+          stock,
+          stockDrafts: Object.assign({}, this.state.stockDrafts || {}, stock),
+        }, this._blankProductForm()));
+        this._showToast(editingId ? ('Updated ' + name) : ('Added ' + name + ' to store'));
+      },
+      prodSearch: this.state.prodSearch || '',
+      onProdSearch: (e) => this.setState({ prodSearch: e.target.value }),
+      customCount: String(this._readCustomProducts().length),
+      hiddenCount: String(this._readHiddenIds().length),
+      prodListEmpty: false,
+      prodListHasItems: true,
+      productRows: (() => {
+        const q = String(this.state.prodSearch || '').trim().toLowerCase();
+        const hidden = this._readHiddenIds();
+        const stock = this.state.stock || this._readStock();
+        const builtins = this._catalog().filter((p) => p.kind !== 'Custom').map((p) => {
+          const isHidden = hidden.indexOf(p.id) >= 0;
+          return {
+            id: p.id,
+            name: p.name,
+            photo: '',
+            hasPhoto: false,
+            noPhoto: true,
+            badgeLabel: isHidden ? 'Hidden' : 'Built-in',
+            badgeStyle: isHidden
+              ? 'display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;background:#F8E8E2;color:#8A3E2A;border:1px solid #E8B8A8;'
+              : 'display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;background:#EAF0E1;color:#4E6B3C;border:1px solid #C3D3AE;',
+            meta: p.kind + ' · stock ' + (stock[p.id] || 0) + (isHidden ? ' · not on store' : ' · on store'),
+            canEdit: false,
+            canToggle: true,
+            canDelete: false,
+            toggleLabel: isHidden ? 'Show on store' : 'Hide from store',
+            toggle: () => {
+              let next = this._readHiddenIds().slice();
+              if (isHidden) next = next.filter((id) => id !== p.id);
+              else next.push(p.id);
+              this._writeHiddenIds(next);
+              this.setState({ hiddenIds: next });
+              this._showToast(isHidden ? (p.name + ' shown on store') : (p.name + ' hidden from store'));
+            },
+            edit: () => {},
+            remove: () => {},
+          };
+        });
+        const customs = this._readCustomProducts().map((p) => {
+          const active = p.active !== false;
+          const disc = Number(p.discountPct || 0);
+          return {
+            id: p.id,
+            name: p.name,
+            photo: p.photo || p.front || '',
+            hasPhoto: !!(p.photo || p.front),
+            noPhoto: !(p.photo || p.front),
+            badgeLabel: active ? (disc > 0 ? disc + '% off' : 'Custom') : 'Draft',
+            badgeStyle: active
+              ? 'display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;background:#E7EFF3;color:#3A5A6E;border:1px solid #B7C9D4;'
+              : 'display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;background:#F3E9D8;color:#8A6B2E;border:1px solid #E0D7BE;',
+            meta: (p.concern || '—') + ' · ₹' + (p.priceN || 0) + (p.listPriceN && p.listPriceN !== p.priceN ? (' (was ₹' + p.listPriceN + ')') : '') + ' · stock ' + (stock[p.id] || 0),
+            canEdit: true,
+            canToggle: true,
+            canDelete: true,
+            toggleLabel: active ? 'Hide (draft)' : 'Make active',
+            edit: () => {
+              this.setState({
+                editingId: p.id,
+                pName: p.name || '',
+                pDesc: p.description || p.benefit || '',
+                pPrice: String(p.listPriceN != null ? p.listPriceN : p.priceN || ''),
+                pDiscount: String(p.discountPct || 0),
+                pStock: String(stock[p.id] != null ? stock[p.id] : 0),
+                pConcern: p.concern || 'Immunity',
+                pActive: p.active !== false,
+                pPhoto: p.photo || p.front || '',
+                productError: '',
+                tab: 'products',
+              });
+            },
+            toggle: () => {
+              const list = this._readCustomProducts().map((row) => {
+                if (row.id !== p.id) return row;
+                return Object.assign({}, row, { active: !(row.active !== false) });
+              });
+              this._writeCustomProducts(list);
+              this.setState({ customProducts: list });
+              this._showToast(active ? (p.name + ' set to draft') : (p.name + ' published'));
+            },
+            remove: () => {
+              const list = this._readCustomProducts().filter((row) => row.id !== p.id);
+              this._writeCustomProducts(list);
+              const st = this._readStock();
+              delete st[p.id];
+              this._writeStock(st);
+              const blank = this.state.editingId === p.id ? this._blankProductForm() : {};
+              this.setState(Object.assign({ customProducts: list, stock: st, stockDrafts: Object.assign({}, st) }, blank));
+              this._showToast('Deleted ' + p.name + ' from store');
+            },
+          };
+        });
+        return builtins.concat(customs).filter((r) => {
+          if (!q) return true;
+          return (r.name + ' ' + r.id + ' ' + r.meta).toLowerCase().indexOf(q) >= 0;
+        });
+      })(),
       toast: this.state.toast,
       hasToast: !!this.state.toast,
     };

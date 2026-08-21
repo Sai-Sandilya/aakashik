@@ -313,6 +313,26 @@ Demo owner inventory in `ak_stock`. Low stock ≤ 5. Store checkout deducts unit
 
 ---
 
+## Admin Products mock (`tests/admin-products.spec.js`)
+
+Owner can add custom products (name, description, price, discount %, stock, photo, category, active) stored in `ak_custom_products`. Built-ins can be hidden via `ak_hidden_ids`. Delete removes custom products from the store.
+
+| ID | Focus | Type |
+|----|--------|------|
+| TC-PR01 | Products tab opens with add form | + |
+| TC-PR02 | Publish stores catalog + stock + discount price | + |
+| TC-PR03 | Missing name rejected | − |
+| TC-PR04 | Discount over 90% rejected | − |
+| TC-PR05 | Published product appears in store search | + |
+| TC-PR06 | Draft product stays off store | + |
+| TC-PR07 | Hide/show built-in on store | + |
+| TC-PR08 | Delete custom removes from admin + store | + |
+| TC-PR09 | Edit updates name and discount | + |
+| TC-PR10 | Custom SKU appears in Inventory | + |
+| TC-PR11 | Draft toggle then republish | + |
+
+---
+
 ## Notes
 
 - OTP and reset codes are read from `localStorage` (`ak_pending_otp`, `ak_reset`) — same as the demo UI toasts.

@@ -1936,6 +1936,10 @@ class Component extends DCLogic {
   _readStock() {
     const raw = this._readJSON('ak_stock', null);
     const defaults = this._defaultStock();
+    const customs = this._readCustomProducts();
+    customs.forEach((p) => {
+      if (p && p.id && defaults[p.id] === undefined) defaults[p.id] = 0;
+    });
     if (!raw || typeof raw !== 'object') {
       this._writeJSON('ak_stock', defaults);
       return Object.assign({}, defaults);
@@ -1945,10 +1949,48 @@ class Component extends DCLogic {
       const n = Number(raw[id]);
       next[id] = Number.isFinite(n) && n >= 0 ? Math.floor(n) : defaults[id];
     });
+    Object.keys(raw).forEach((id) => {
+      if (next[id] !== undefined) return;
+      const n = Number(raw[id]);
+      if (Number.isFinite(n) && n >= 0) next[id] = Math.floor(n);
+    });
     return next;
   }
   _writeStock(map) {
     this._writeJSON('ak_stock', map);
+  }
+  _readCustomProducts() {
+    const list = this._readJSON('ak_custom_products', []);
+    return Array.isArray(list) ? list : [];
+  }
+  _readHiddenIds() {
+    const list = this._readJSON('ak_hidden_ids', []);
+    return Array.isArray(list) ? list : [];
+  }
+  _normalizeCustomProduct(p) {
+    if (!p || !p.id) return null;
+    const listPrice = Math.max(0, Math.round(Number(p.listPriceN != null ? p.listPriceN : p.priceN) || 0));
+    const disc = Math.min(90, Math.max(0, Math.round(Number(p.discountPct) || 0)));
+    const sale = Math.max(0, Math.round(listPrice * (100 - disc) / 100));
+    return {
+      id: p.id,
+      name: p.name || 'Custom product',
+      sub: p.sub || 'Owner added',
+      element: p.element || 'All',
+      concern: p.concern || 'Immunity',
+      priceN: sale,
+      listPriceN: listPrice,
+      discountPct: disc,
+      jar: p.jar || '#D9BE9C',
+      cap: p.cap || '#A06437',
+      benefit: p.benefit || p.description || '',
+      herbs: Array.isArray(p.herbs) ? p.herbs : [],
+      tag: p.tag || (disc > 0 ? (disc + '% off') : 'New'),
+      front: p.front || p.photo || '',
+      photo: p.photo || p.front || '',
+      custom: true,
+      active: p.active !== false,
+    };
   }
   _stockOf(id) {
     const stock = this._readStock();
@@ -2467,7 +2509,8 @@ class Component extends DCLogic {
         s: { eye: 'हमारी कहानी', title: 'उद्देश्य से प्रेरित उपचार', sub: 'आकाशिक वेलनेस एक सरल विश्वास से जन्मा: पारंपरिक ज्ञान, सच्ची देखभाल और लोगों को स्वस्थ जीवन जीने में मदद करने की गहरी प्रतिबद्धता के साथ मिलकर प्रकृति में स्वास्थ्य को सहारा देने की शक्ति है।', famEye: 'एक पारिवारिक यात्रा', famTitle: 'अनिश्चितता के समय से, देखभाल का एक मिशन', p1a: 'संस्थापक ', gopi: 'श्री गोपी', p1b: ' — समग्र स्वास्थ्य में गहरी रुचि रखने वाले अनुभवी ज्योतिषी, वास्तु विशेषज्ञ और प्राणिक हीलर — आकाशिक वेलनेस ने हाल के इतिहास के सबसे चुनौतीपूर्ण दौर, 2021 की कोविड-19 महामारी के दौरान अपनी यात्रा शुरू की। प्रकोप के डर और अनिश्चितता को देखकर, वे लोगों की रोग प्रतिरोधक क्षमता और श्वसन स्वास्थ्य को सहारा देने वाला प्राकृतिक हर्बल मिश्रण बनाने के लिए प्रेरित हुए।', p2a: 'यह दृष्टि उनकी पत्नी और सह-संस्थापक ', devi: 'श्रीमती श्यामला देवी', p2b: ' के अटूट समर्थन से साकार हुई। दोनों ने समर्पण के साथ अपने हर्बल मिश्रण सावधानी से तैयार करना शुरू किया — पारंपरिक ज्ञान को समुदाय की सेवा करने की सच्ची इच्छा के साथ जोड़ा।', kaphaTag: 'पहला मिश्रण', kaphaBody: 'श्वसन स्वास्थ्य को सहारा देने के लिए पारंपरिक रूप से जानी जाने वाली सावधानी से चुनी गई जड़ी-बूटियों से विकसित — खांसी, जुकाम, गले की खराश, बुखार और श्वसन असुविधा के लिए प्राकृतिक सहारा प्रदान करने हेतु बनाया गया। जब परिवार प्राकृतिक समाधान खोज रहे थे, कफहर ने कई लोगों का विश्वास अर्जित किया।', navoTag: 'आंत और चयापचय संतुलन', navoBody: 'स्वस्थ आंत कल्याण की नींव है, इस विश्वास में निहित, नवोजस पाचन स्वास्थ्य और चयापचय संतुलन को बढ़ावा देने के लिए बनाया गया। स्वस्थ रक्त शर्करा प्रबंधन के साथ-साथ, यह जोड़ों के आराम और गतिशीलता को भी सहारा देता है।', quote: '"आकाशिक वेलनेस में, हर उत्पाद एक उद्देश्य से शुरू होता है — किसी चलन से नहीं। हम मानते हैं कि सच्चा स्वास्थ्य रोकथाम, संतुलन और शरीर की प्राकृतिक क्षमता को सहारा देने पर केंद्रित है।"', missionTitle: 'हमारा मिशन', missionBody: 'पारंपरिक ज्ञान और वास्तविक जीवन की स्वास्थ्य आवश्यकताओं से प्रेरित विश्वसनीय हर्बल कल्याण मिश्रण बनाना — प्रकृति के माध्यम से निवारक देखभाल और समग्र कल्याण को अपनाने के लिए व्यक्तियों को सशक्त बनाना।', visionTitle: 'हमारी दृष्टि', visionBody: 'पारंपरिक ज्ञान को संरक्षित करके और पीढ़ियों तक स्वस्थ समुदायों को सहारा देने वाले प्राकृतिक मिश्रण प्रदान करके हर्बल कल्याण में एक विश्वसनीय नाम बनना।', valuesTitle: 'हमारे मूल्य', v1t: 'लाभ से पहले उद्देश्य', v1b: 'हर मिश्रण सच्ची कल्याण आवश्यकताओं को पूरा करने और जीवन की गुणवत्ता सुधारने के लिए बनाया जाता है।', v2t: 'परंपरा में निहित', v2b: 'आज की जरूरतों के लिए उत्पाद बनाते हुए हम पीढ़ियों के हर्बल ज्ञान का सम्मान करते हैं।', v3t: 'गुणवत्ता और शुद्धता', v3b: 'सावधानी से चुनी गई सामग्री से तैयार, प्रामाणिकता, निरंतरता और बेजोड़ गुणवत्ता बनाए रखते हुए।', v4t: 'विश्वास बनाने वाली देखभाल', v4b: 'हमारे उत्पादों का उपयोग करने वाले लोगों का विश्वास और कल्याण हमारे हर काम के केंद्र में रहता है।', journeyTitle: 'हमारी यात्रा जारी है', jp1: 'वैश्विक स्वास्थ्य संकट के दौरान लोगों की मदद करने के एक परिवार के हार्दिक प्रयास के रूप में जो शुरू हुआ, वह पारंपरिक हर्बल कल्याण को अधिक सुलभ बनाने के मिशन में विकसित हुआ है। हर मिश्रण के साथ, श्री गोपी और श्रीमती श्यामला देवी उन मूल्यों को बनाए रखते हैं जिन पर आकाशिक वेलनेस की स्थापना हुई।', jp2: 'आकाशिक वेलनेस एक कल्याण ब्रांड से कहीं अधिक है। यह लोगों को अपने स्वास्थ्य को प्राकृतिक रूप से पोषित करने में मदद करने की पारिवारिक प्रतिबद्धता है।', tagline: 'परंपरा में निहित, प्रेम से पोषित, आपके स्वास्थ्य को समर्पित।' } },
     };
     const t = I18N[this.state.lang] || I18N.en;
-    const PRODUCTS = [
+    const hiddenIds = this._readHiddenIds();
+    const BASE_PRODUCTS = [
       { id: 'sunni', name: 'Herbal Sunni Pindi', sub: 'Bath Powder', element: 'Earth', concern: 'Skin & Body', priceN: 249, jar: '#D9BE9C', cap: '#A06437', benefit: 'Gentle herbal cleansing for soft, glowing skin.', herbs: ['Green Gram', 'Turmeric', 'Vetiver'], tag: '100% Natural' },
       { id: 'diabetic', name: 'Sugar Balance Support', sub: 'Kashayam', element: 'Fire', concern: 'Sugar', priceN: 399, jar: '#CFB6A5', cap: '#9A5432', benefit: 'A traditional herbal brew for everyday metabolic wellness rituals (not a medicine).', herbs: ['Bitter Gourd', 'Fenugreek', 'Gymnema'], tag: 'Ayurvedic' },
       { id: 'immunity', name: 'Daily Immunity', sub: 'Kashayam', element: 'Water', concern: 'Immunity', priceN: 349, jar: '#BCC8A2', cap: '#5E7A4C', benefit: 'Everyday defense powered by holy basil and pepper.', herbs: ['Tulsi', 'Pepper', 'Ginger'], tag: '100% Natural' },
@@ -2475,11 +2518,15 @@ class Component extends DCLogic {
       { id: 'ashta', name: 'Ashtagandham', sub: 'Sacred Powder', element: 'Space', concern: 'Spiritual', priceN: 199, jar: '#2E3D2C', cap: '#C0A55E', benefit: 'Eight fragrant herbs for ritual and clearing the space within.', herbs: ['Sandalwood', 'Saffron', 'Cardamom'], tag: '100% Natural' },
       { id: 'navojas', name: 'Navojas', sub: 'Herbal Wellness Powder', element: 'Fire', concern: 'Digestion', priceN: 199, jar: '#C99374', cap: '#93513B', front: 'assets/navojas-front.jpeg', back: 'assets/navojas-back.jpeg', sizes: [{ g: '100g', p: 199 }, { g: '250g', p: 399 }, { g: '500g', p: 599 }], benefit: 'A traditional blend of time-tested herbs for gut comfort and everyday digestive wellness (not a medicine).', herbs: ['Methika', 'Ajwain', 'Krishna Jeeraka', 'Kala Zeera', 'Kalmegh'], tag: 'Ayurvedic' },
     ];
+    const customProducts = this._readCustomProducts()
+      .map((p) => this._normalizeCustomProduct(p))
+      .filter((p) => p && p.active !== false);
+    const PRODUCTS = BASE_PRODUCTS.filter((p) => hiddenIds.indexOf(p.id) < 0).concat(customProducts);
     const BUNDLES = [
       { id: 'kit-immunity', name: 'Immunity Ritual Kit', sub: 'Bundle · Save ₹148 vs singles', element: 'Water', concern: 'Immunity', priceN: 599, jar: '#BCC8A2', cap: '#5E7A4C', benefit: 'Daily Immunity + Kaphahara + Ashtagandham — a complete daily defense ritual.', herbs: ['Daily Immunity', 'Kaphahara', 'Ashtagandham'], tag: 'Best Value', bundle: true },
       { id: 'kit-glow', name: 'Glow & Cleanse Kit', sub: 'Bundle · Save ₹99 vs singles', element: 'Earth', concern: 'Skin & Body', priceN: 349, jar: '#D9BE9C', cap: '#A06437', benefit: 'Sunni Pindi bath powder + Ashtagandham for a grounding cleanse routine.', herbs: ['Sunni Pindi', 'Ashtagandham'], tag: 'Best Value', bundle: true },
       { id: 'sample-trio', name: 'Sample Trio', sub: 'Try before you commit', element: 'All', concern: 'Immunity', priceN: 99, jar: '#E3D6BC', cap: '#A8894E', benefit: 'Three mini sachets of our bestsellers — a low-risk first taste.', herbs: ['Daily Immunity', 'Kaphahara', 'Navojas'], tag: 'Trial Pack', bundle: true },
-    ];
+    ].filter((p) => hiddenIds.indexOf(p.id) < 0);
     const ALL = {}; PRODUCTS.concat(BUNDLES).forEach(p => ALL[p.id] = p);
     const cartLineKey = (id, size) => id + '::' + (size || 'std');
     const _commitAdd = (id, subscribe, size, sizePrice) => { this.flyToCart(); this.playChime(); this.showToast('Added to cart'); this.setState(s => { const c = { ...s.cartItems }; const key = cartLineKey(id, size); const cur = c[key]; const nextSize = size !== undefined && size !== null ? size : (cur ? cur.size : null); const nextPrice = sizePrice !== undefined && sizePrice !== null ? sizePrice : (cur ? cur.sizePrice : null); c[key] = { productId: id, qty: (cur ? cur.qty : 0) + 1, subscribe: subscribe !== undefined ? subscribe : (cur ? cur.subscribe : false), size: nextSize, sizePrice: nextPrice }; try { localStorage.setItem('ak_cart', JSON.stringify(c)); } catch (er) {} return { cartItems: c, cartOpen: true, orderPlaced: false, quickView: null, wishlistOpen: false, bump: (s.bump || 0) + 1 }; }); };
@@ -2525,9 +2572,12 @@ class Component extends DCLogic {
     const decorate = (p) => {
       const stock = this._stockOf(p.id);
       const oos = stock <= 0;
+      const hasDisc = !!(p.discountPct > 0 && p.listPriceN && p.listPriceN > p.priceN);
       return {
         ...p,
         priceStr: p.sizes ? 'from ' + money(p.sizes[0].p) : money(p.priceN),
+        listPriceStr: hasDisc ? money(p.listPriceN) : '',
+        hasDiscount: hasDisc,
         addLabel: oos ? 'Out of stock' : (p.sizes ? 'Choose Size' : 'Add to Cart'),
         wished: !!this.state.wishlist[p.id],
         notWished: !this.state.wishlist[p.id],
@@ -2865,7 +2915,13 @@ class Component extends DCLogic {
     const tintOpacity = (hour >= 19 || hour < 5) ? 0.16 : hour >= 16 ? 0.09 : 0;
     const dayNightStyle = 'position:fixed;inset:0;z-index:40;pointer-events:none;background:radial-gradient(ellipse at 50% 118%, rgba(190,106,69,0.55), transparent 72%);opacity:' + tintOpacity + ';';
     const recentProducts = (this.state.recent || []).map(id => ALL[id]).filter(Boolean).map(decorate);
-    const featuredProducts = ['immunity', 'kaphahara', 'sunni', 'ashta'].map(id => ALL[id]).filter(Boolean).map(decorate);
+    const featuredIds = customProducts.slice(0, 2).map((p) => p.id).concat(['immunity', 'kaphahara', 'sunni', 'ashta']);
+    const seenFeat = {};
+    const featuredProducts = featuredIds.filter((id) => {
+      if (!id || seenFeat[id] || !ALL[id]) return false;
+      seenFeat[id] = true;
+      return true;
+    }).slice(0, 4).map((id) => decorate(ALL[id]));
     const DOSHA_Q = [
       { q: t.dq1 || 'How does your body usually feel?', opts: [
         { label: t.dq1a || 'Light, thin, often cold', d: 'vata', color: '#9DB08E' },
