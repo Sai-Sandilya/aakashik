@@ -262,6 +262,19 @@ View runs under the repo **Actions** tab → **E2E Tests**.
 
 ---
 
+## Ritual reminder edit / add another (`tests/ux-reminder.spec.js`)
+
+| ID | Focus | Type |
+|----|--------|------|
+| TC-RM01 | Edit reminder reopens form with saved values | + |
+| TC-RM02 | Edit updates saved reminder (product + contact) | + |
+| TC-RM03 | Add another shows a fresh form | + |
+| TC-RM04 | Add another saves a second powder reminder | + |
+| TC-RM05 | Invalid WhatsApp contact still blocked after Add another | − |
+| TC-RM06 | Success panel shows Edit and Add another after reload | + |
+
+---
+
 ## Notes
 
 - OTP and reset codes are read from `localStorage` (`ak_pending_otp`, `ak_reset`) — same as the demo UI toasts.

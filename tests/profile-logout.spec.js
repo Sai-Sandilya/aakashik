@@ -59,7 +59,7 @@ test.describe('Landing — profile', () => {
     await page.getByPlaceholder('Address (house, street, area)').fill('12 MG Road');
     await page.getByPlaceholder('City').fill('Hyderabad');
     await page.getByPlaceholder('Pin code').fill('500001');
-    await page.locator('select').selectOption('Telangana');
+    await page.getByLabel('Profile state or UT').selectOption('Telangana');
 
     await page.getByRole('button', { name: 'Save changes' }).click();
 
