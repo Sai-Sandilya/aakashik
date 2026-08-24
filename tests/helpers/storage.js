@@ -15,6 +15,8 @@ const AUTH_KEYS = [
   'ak_admin_logged',
   'ak_admin_orders',
   'ak_stock',
+  'ak_custom_products',
+  'ak_hidden_ids',
   'ak_dosha',
   'ak_lang',
   'ak_recent',
