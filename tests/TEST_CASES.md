@@ -333,6 +333,27 @@ Owner can add custom products (name, description, price, discount %, stock, phot
 
 ---
 
+## REST API (`api/tests/*.test.js`)
+
+Fastify + SQLite backend. Full matrix and manual curl guide: [`api/tests/API_TEST_CASES.md`](../api/tests/API_TEST_CASES.md).
+
+| Suite | IDs | Count |
+|-------|-----|-------|
+| Admin auth | TC-API01–07 | 7 |
+| Products | TC-API10–20 | 11 |
+| Inventory | TC-API30–37 | 8 |
+| Orders | TC-API40–53 | 14 |
+| Integration | TC-API60–65 | 6 |
+
+```bash
+npm run api:test    # from repo root
+cd api && npm test  # from api folder
+```
+
+Demo admin: `owner@aakashik.local` / `Admin@1234` · API base: `http://127.0.0.1:3001`
+
+---
+
 ## Notes
 
 - OTP and reset codes are read from `localStorage` (`ak_pending_otp`, `ak_reset`) — same as the demo UI toasts.
