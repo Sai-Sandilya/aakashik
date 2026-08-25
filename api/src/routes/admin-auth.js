@@ -1,13 +1,11 @@
 import { verifyAdminCredentials, signAdminToken, requireAdmin } from '../services/auth.js';
 import { sendError, ApiError } from '../lib/errors.js';
+import { validateAdminLogin } from '../lib/validation.js';
 
 export default async function adminAuthRoutes(fastify) {
   fastify.post('/login', async (request, reply) => {
     try {
-      const { email, password } = request.body || {};
-      if (!email || !password) {
-        throw new ApiError(400, 'validation_error', 'Email and password are required');
-      }
+      const { email, password } = validateAdminLogin(request.body || {});
       const admin = verifyAdminCredentials(fastify.db, email, password);
       const token = signAdminToken(admin);
       return reply.send({ token, admin: { email: admin.email, name: admin.name } });

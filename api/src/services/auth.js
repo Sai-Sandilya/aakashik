@@ -3,7 +3,8 @@ import { config } from '../config.js';
 import { ApiError } from '../lib/errors.js';
 
 export function verifyAdminCredentials(db, email, password) {
-  const row = db.prepare('SELECT id, email, name, password FROM admin_users WHERE email = ?').get(email);
+  const normalized = String(email || '').trim().toLowerCase();
+  const row = db.prepare('SELECT id, email, name, password FROM admin_users WHERE lower(email) = ?').get(normalized);
   if (!row || row.password !== password) {
     throw new ApiError(401, 'invalid_credentials', 'Incorrect admin email or password');
   }

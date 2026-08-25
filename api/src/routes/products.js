@@ -10,6 +10,7 @@ import {
 } from '../services/products.js';
 import { adminPreHandler } from './admin-guard.js';
 import { sendError, ApiError } from '../lib/errors.js';
+import { validateProductInput } from '../lib/validation.js';
 
 export default async function productRoutes(fastify) {
   fastify.get('/products', async (_request, reply) => {
@@ -29,30 +30,16 @@ export default async function productRoutes(fastify) {
 
   fastify.post('/admin/products', { preHandler: adminPreHandler }, async (request, reply) => {
     try {
-      const body = request.body || {};
-      const name = String(body.name || '').trim();
-      const description = String(body.description || '').trim();
-      const priceN = Math.round(Number(body.priceN ?? body.listPriceN));
-      const discountPct = Math.round(Number(body.discountPct || 0));
-      const stock = Math.floor(Number(body.stock ?? 0));
-
-      if (!name) throw new ApiError(400, 'validation_error', 'Enter a product name');
-      if (!description) throw new ApiError(400, 'validation_error', 'Enter a product description');
-      if (!Number.isFinite(priceN) || priceN <= 0) throw new ApiError(400, 'validation_error', 'Enter a valid price greater than 0');
-      if (!Number.isFinite(discountPct) || discountPct < 0 || discountPct > 90) {
-        throw new ApiError(400, 'validation_error', 'Discount must be 0–90%');
-      }
-      if (!Number.isFinite(stock) || stock < 0) throw new ApiError(400, 'validation_error', 'Enter a valid stock quantity');
-
+      const validated = validateProductInput(request.body || {});
       const product = createCustomProduct(fastify.db, {
-        name,
-        description,
-        listPriceN: priceN,
-        discountPct,
-        stock,
-        concern: body.concern || 'Immunity',
-        photo: body.photo || '',
-        active: body.active !== false,
+        name: validated.name,
+        description: validated.description,
+        listPriceN: validated.listPriceN,
+        discountPct: validated.discountPct ?? 0,
+        stock: validated.stock ?? 0,
+        concern: validated.concern || 'Immunity',
+        photo: validated.photo || '',
+        active: validated.active !== false,
       });
       return reply.code(201).send({ product });
     } catch (err) {
@@ -68,11 +55,12 @@ export default async function productRoutes(fastify) {
         return reply.code(400).send({ error: 'builtin_not_editable', message: 'Built-in products cannot be edited' });
       }
       const body = request.body || {};
-      if (body.discountPct !== undefined) {
-        const d = Math.round(Number(body.discountPct));
-        if (!Number.isFinite(d) || d < 0 || d > 90) {
-          throw new ApiError(400, 'validation_error', 'Discount must be 0–90%');
-        }
+      validateProductInput(body, { partial: true });
+      if (body.name !== undefined && !String(body.name).trim()) {
+        throw new ApiError(400, 'validation_error', 'Enter a product name');
+      }
+      if (body.description !== undefined && !String(body.description).trim()) {
+        throw new ApiError(400, 'validation_error', 'Enter a product description');
       }
       const product = updateCustomProduct(fastify.db, request.params.id, body);
       return reply.send({ product });
