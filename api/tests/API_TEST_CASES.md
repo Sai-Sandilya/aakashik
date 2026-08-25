@@ -91,6 +91,24 @@ npm run api:test
 | TC-API64 | packed → cancelled audit trail | + | 3 history entries |
 | TC-API65 | All admin routes require auth | − | 401 |
 
+### Validation hardening (`validation.test.js`) — see [VALIDATION_PLAN.md](./VALIDATION_PLAN.md)
+
+| ID | Test case | Type | Expected |
+|----|-----------|------|----------|
+| TC-VAL01 | Tampered client total rejected | − | 400 `price_mismatch` |
+| TC-VAL02 | Server uses DB catalog price | + | Correct total |
+| TC-VAL03–05 | Member/subscribe 10% rules | + | Max 10%, no stacking |
+| TC-VAL06 | Valid kaphahara size price | + | ₹399 for 250g |
+| TC-VAL07–09 | Cart qty guards | − | Missing id / zero / >99 |
+| TC-VAL10 | Duplicate lines merged for stock | − | 409 when merged qty > stock |
+| TC-VAL11 | Invalid size price | − | 400 |
+| TC-VAL12–16 | Payment method + UPI/card format | +/− | Match storefront rules |
+| TC-VAL17–21 | Delivery + order id format | − | 400 |
+| TC-VAL24 | Cancel restores stock | + | Inventory back |
+| TC-VAL25 | Cannot cancel delivered | − | 400 |
+| TC-VAL30–32 | Product name/photo/concern limits | − | 400 |
+| TC-VAL40–43 | Admin filter + login validation | − | 400 |
+
 ---
 
 ## Manual API testing (curl)

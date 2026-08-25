@@ -146,7 +146,10 @@ describe('API orders', () => {
     const create = await app.inject({
       method: 'POST',
       url: '/api/orders',
-      payload: sampleOrderPayload({ items: [{ productId: 'ashta', name: 'Ashtagandham', qty: 1, unitPrice: 199 }] }),
+      payload: sampleOrderPayload({
+        items: [{ productId: 'ashta', qty: 1 }],
+        total: 199,
+      }),
     });
     const id = create.json().order.id;
     const patch = await app.inject({

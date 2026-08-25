@@ -1,17 +1,22 @@
 import { listInventory, setStock, adjustStock, reseedStock } from '../services/inventory.js';
 import { adminPreHandler } from './admin-guard.js';
 import { sendError, ApiError } from '../lib/errors.js';
+import { validateInventoryFilter, LIMITS } from '../lib/validation.js';
 
 export default async function inventoryRoutes(fastify) {
   fastify.get('/admin/inventory', { preHandler: adminPreHandler }, async (request, reply) => {
-    const { filter = 'all' } = request.query || {};
-    return reply.send({ inventory: listInventory(fastify.db, { filter }) });
+    try {
+      const filter = validateInventoryFilter(request.query?.filter || 'all');
+      return reply.send({ inventory: listInventory(fastify.db, { filter }) });
+    } catch (err) {
+      return sendError(reply, err);
+    }
   });
 
   fastify.patch('/admin/inventory/:productId', { preHandler: adminPreHandler }, async (request, reply) => {
     try {
       const quantity = Number(request.body?.quantity);
-      if (!Number.isFinite(quantity) || quantity < 0) {
+      if (!Number.isFinite(quantity) || quantity < 0 || quantity > LIMITS.STOCK_MAX) {
         throw new ApiError(400, 'validation_error', 'Enter a valid stock quantity');
       }
       const row = setStock(fastify.db, request.params.productId, quantity);

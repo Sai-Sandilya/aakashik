@@ -337,6 +337,8 @@ Owner can add custom products (name, description, price, discount %, stock, phot
 
 Fastify + SQLite backend. Full matrix and manual curl guide: [`api/tests/API_TEST_CASES.md`](../api/tests/API_TEST_CASES.md).
 
+Validation hardening plan: [`api/tests/VALIDATION_PLAN.md`](../api/tests/VALIDATION_PLAN.md)
+
 | Suite | IDs | Count |
 |-------|-----|-------|
 | Admin auth | TC-API01–07 | 7 |
@@ -344,6 +346,9 @@ Fastify + SQLite backend. Full matrix and manual curl guide: [`api/tests/API_TES
 | Inventory | TC-API30–37 | 8 |
 | Orders | TC-API40–53 | 14 |
 | Integration | TC-API60–65 | 6 |
+| **Validation** | **TC-VAL01–43** | **30** |
+
+**Total API tests: 76**
 
 ```bash
 npm run api:test    # from repo root

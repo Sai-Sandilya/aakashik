@@ -164,7 +164,8 @@ describe('API integration flows', () => {
       method: 'POST',
       url: '/api/orders',
       payload: sampleOrderPayload({
-        items: [{ productId: id, name: 'Lifecycle SKU', qty: 1, unitPrice: 180 }],
+        items: [{ productId: id, name: 'Lifecycle SKU', qty: 1 }],
+        total: 180,
       }),
     });
     assert.equal(blocked.statusCode, 409);

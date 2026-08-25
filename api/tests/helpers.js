@@ -55,7 +55,7 @@ export function sampleDelivery(overrides = {}) {
 
 export function sampleOrderPayload(overrides = {}) {
   return {
-    items: [{ productId: 'immunity', name: 'Daily Immunity', qty: 1, unitPrice: 349 }],
+    items: [{ productId: 'immunity', qty: 1 }],
     delivery: sampleDelivery(),
     payMethod: 'cod',
     total: 349,

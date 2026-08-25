@@ -9,6 +9,7 @@ import orderRoutes from './routes/orders.js';
 export async function buildApp(options = {}) {
   const app = Fastify({
     logger: options.logger ?? false,
+    bodyLimit: options.bodyLimit ?? 3 * 1024 * 1024,
   });
 
   const db = options.db || getDb() || createDb(options.dbOptions);

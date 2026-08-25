@@ -1,7 +1,17 @@
 import { ORDER_STATUSES, STATUS_LABELS, STATUS_TRANSITIONS } from '../lib/constants.js';
 import { withTransaction } from '../db/transaction.js';
 import { ApiError } from '../lib/errors.js';
-import { deductStockForItems } from './inventory.js';
+import {
+  validateDelivery,
+  validateCartItem,
+  validatePayMethod,
+  validatePaymentDetails,
+  validateOrderStatusFilter,
+  validateOrderId,
+  validateStatusUpdate,
+} from '../lib/validation.js';
+import { computeOrderTotals, lineUnitPrice, resolveBasePrice } from '../lib/pricing.js';
+import { getStock } from './inventory.js';
 import { getProductById } from './products.js';
 
 function parseJson(raw, fallback = {}) {
@@ -50,11 +60,12 @@ function mapOrderRow(db, row) {
 }
 
 export function listOrders(db, { status, search } = {}) {
+  const safeStatus = validateOrderStatusFilter(status);
   let sql = 'SELECT * FROM orders WHERE 1=1';
   const params = [];
-  if (status && status !== 'all') {
+  if (safeStatus && safeStatus !== 'all') {
     sql += ' AND status = ?';
-    params.push(status);
+    params.push(safeStatus);
   }
   sql += ' ORDER BY placed_at DESC';
   const rows = db.prepare(sql).all(...params);
@@ -70,12 +81,14 @@ export function listOrders(db, { status, search } = {}) {
 }
 
 export function getOrder(db, id) {
+  validateOrderId(id);
   const row = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
   if (!row) return null;
   return mapOrderRow(db, row);
 }
 
 export function getTrackPayload(db, id) {
+  validateOrderId(id);
   const order = getOrder(db, id);
   if (!order) return null;
   const keys = ['pending', 'packed', 'shipped', 'out_for_delivery', 'delivered'];
@@ -102,30 +115,45 @@ export function getTrackPayload(db, id) {
   };
 }
 
-function validateDelivery(delivery) {
-  const d = delivery || {};
-  const name = String(d.name || '').trim();
-  const phone = String(d.phone || '').replace(/\D/g, '');
-  const email = String(d.email || '').trim();
-  const address = String(d.address || '').trim();
-  const city = String(d.city || '').trim();
-  const state = String(d.state || '').trim();
-  const pincode = String(d.pincode || '').trim();
+function aggregateCartLines(itemsIn) {
+  const map = new Map();
+  itemsIn.forEach((raw, index) => {
+    const line = validateCartItem(raw, index);
+    const key = `${line.productId}::${line.size || 'std'}`;
+    const prev = map.get(key);
+    if (prev) {
+      prev.qty += line.qty;
+      prev.subscribe = prev.subscribe || line.subscribe;
+    } else {
+      map.set(key, { ...line });
+    }
+  });
+  return [...map.values()];
+}
 
-  if (!name) throw new ApiError(400, 'validation_error', 'Enter your full name');
-  if (!phone && !email) throw new ApiError(400, 'validation_error', 'Enter phone or email for delivery');
-  if (phone && (!/^\d{10}$/.test(phone) || !/^[6-9]/.test(phone))) {
-    throw new ApiError(400, 'validation_error', 'Enter a valid 10-digit phone');
+function normalizeOrderLines(db, cartLines, memberPricing) {
+  const priced = [];
+  for (const line of cartLines) {
+    const product = getProductById(db, line.productId);
+    if (!product || !product.active || product.hidden) {
+      throw new ApiError(400, 'invalid_product', `Product not available: ${line.productId}`);
+    }
+    const basePrice = resolveBasePrice(product, line);
+    const unitPrice = lineUnitPrice(basePrice, {
+      subscribe: line.subscribe,
+      memberPricing: memberPricing && !line.subscribe,
+    });
+    priced.push({
+      productId: line.productId,
+      name: product.name,
+      qty: line.qty,
+      basePrice,
+      unitPrice,
+      size: line.size,
+      line: `${product.name}${line.size ? ` (${line.size})` : ''} × ${line.qty} · ₹${unitPrice}`,
+    });
   }
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-    throw new ApiError(400, 'validation_error', 'Enter a valid email format');
-  }
-  if (!address) throw new ApiError(400, 'validation_error', 'Enter your delivery address');
-  if (!city) throw new ApiError(400, 'validation_error', 'Enter your city');
-  if (!/^\d{6}$/.test(pincode)) throw new ApiError(400, 'validation_error', 'Enter a valid 6-digit pin code');
-  if (!state) throw new ApiError(400, 'validation_error', 'Select your state / UT');
-
-  return { name, phone, email, address, city, state, pincode };
+  return priced;
 }
 
 function generateOrderId(db) {
@@ -137,46 +165,52 @@ function generateOrderId(db) {
   return `AAK-${Date.now()}`;
 }
 
+function restoreStockForOrder(db, orderId) {
+  const items = db.prepare(`
+    SELECT product_id AS productId, qty FROM order_items WHERE order_id = ?
+  `).all(orderId);
+  for (const it of items) {
+    db.prepare(`
+      UPDATE inventory SET quantity = quantity + ? WHERE product_id = ?
+    `).run(it.qty, it.productId);
+  }
+}
+
 export function createOrder(db, payload) {
   const itemsIn = Array.isArray(payload.items) ? payload.items : [];
   if (!itemsIn.length) throw new ApiError(400, 'validation_error', 'Cart is empty');
 
   const delivery = validateDelivery(payload.delivery);
-  const payMethod = payload.payMethod || 'cod';
-  const payment = payload.payment || { method: payMethod, mock: true, status: payMethod === 'cod' ? 'cod' : 'authorized' };
+  const payMethod = validatePayMethod(payload.payMethod);
+  const payment = validatePaymentDetails(payMethod, payload.payment || {});
 
-  const normalizedItems = [];
-  let total = 0;
+  const memberPricing = !!(payload.memberPricing || payload.loggedIn);
+  const cartLines = aggregateCartLines(itemsIn);
+  const normalizedItems = normalizeOrderLines(db, cartLines, memberPricing);
+  const totals = computeOrderTotals(normalizedItems);
 
-  for (const raw of itemsIn) {
-    const productId = raw.productId || raw.id;
-    const product = getProductById(db, productId);
-    if (!product || !product.active || product.hidden) {
-      throw new ApiError(400, 'invalid_product', `Product not available: ${productId}`);
+  if (payload.total != null) {
+    const clientTotal = Math.round(Number(payload.total));
+    if (Number.isFinite(clientTotal) && Math.abs(clientTotal - totals.total) > 1) {
+      throw new ApiError(400, 'price_mismatch', 'Order total does not match catalog pricing');
     }
-    const qty = Math.max(1, Math.floor(Number(raw.qty) || 1));
-    const unitPrice = Math.round(Number(raw.unitPrice ?? product.priceN));
-    const lineTotal = unitPrice * qty;
-    total += lineTotal;
-    normalizedItems.push({
-      productId,
-      name: raw.name || product.name,
-      qty,
-      unitPrice,
-      line: raw.line || `${raw.name || product.name} × ${qty} · ₹${unitPrice}`,
-      size: raw.size || null,
-    });
   }
-
-  deductStockForItems(db, normalizedItems);
 
   const orderId = generateOrderId(db);
   const placedAt = Date.now();
-  const subtotal = Math.round(Number(payload.subtotal ?? total));
-  const memberDiscount = Math.round(Number(payload.memberDiscount ?? 0));
-  const finalTotal = Math.round(Number(payload.total ?? total));
 
   withTransaction(db, () => {
+    for (const it of normalizedItems) {
+      const row = db.prepare('SELECT quantity FROM inventory WHERE product_id = ?').get(it.productId);
+      if (!row || row.quantity < it.qty) {
+        throw new ApiError(409, 'insufficient_stock', 'Not enough stock for one or more items');
+      }
+    }
+
+    for (const it of normalizedItems) {
+      db.prepare('UPDATE inventory SET quantity = quantity - ? WHERE product_id = ?').run(it.qty, it.productId);
+    }
+
     db.prepare(`
       INSERT INTO orders (
         id, status, placed_at, total, subtotal, member_discount, pay_method,
@@ -185,9 +219,9 @@ export function createOrder(db, payload) {
     `).run(
       orderId,
       placedAt,
-      finalTotal,
-      subtotal,
-      memberDiscount,
+      totals.total,
+      totals.subtotal,
+      totals.memberDiscount,
       payMethod,
       JSON.stringify(payment),
       JSON.stringify(delivery),
@@ -209,22 +243,27 @@ export function createOrder(db, payload) {
 }
 
 export function updateOrderStatus(db, orderId, nextStatus) {
-  if (!ORDER_STATUSES.includes(nextStatus)) {
-    throw new ApiError(400, 'invalid_status', 'Unknown order status');
-  }
+  validateOrderId(orderId);
+  const status = validateStatusUpdate({ status: nextStatus });
+
   const order = getOrder(db, orderId);
   if (!order) throw new ApiError(404, 'not_found', 'Order not found');
 
   const allowed = STATUS_TRANSITIONS[order.status] || [];
-  if (!allowed.includes(nextStatus)) {
-    throw new ApiError(400, 'invalid_transition', `Cannot move from ${order.status} to ${nextStatus}`);
+  if (!allowed.includes(status)) {
+    throw new ApiError(400, 'invalid_transition', `Cannot move from ${order.status} to ${status}`);
   }
 
   const at = Date.now();
   withTransaction(db, () => {
-    db.prepare('UPDATE orders SET status = ?, updated_at = ? WHERE id = ?').run(nextStatus, at, orderId);
-    db.prepare('INSERT INTO order_status_history (order_id, status, at) VALUES (?, ?, ?)').run(orderId, nextStatus, at);
+    db.prepare('UPDATE orders SET status = ?, updated_at = ? WHERE id = ?').run(status, at, orderId);
+    db.prepare('INSERT INTO order_status_history (order_id, status, at) VALUES (?, ?, ?)').run(orderId, status, at);
+    if (status === 'cancelled' && order.status !== 'delivered') {
+      restoreStockForOrder(db, orderId);
+    }
   });
 
   return getOrder(db, orderId);
 }
+
+export { getStock };
