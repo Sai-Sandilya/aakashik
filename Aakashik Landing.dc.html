@@ -66,7 +66,15 @@
     .catCard:hover .catShop { max-height: 26px; opacity: 1; transform: translateY(0); }
     .catImg { transition: transform .55s cubic-bezier(.22,1,.36,1); }
     .catBadge { transition: transform .34s ease, box-shadow .34s ease; }
-    .catShop { max-height: 0; opacity: 0; transform: translateY(6px); overflow: hidden; transition: max-height .34s ease, opacity .34s ease, transform .34s ease; }
+    .catShop { max-height: 26px; opacity: 1; transform: translateY(0); overflow: hidden; transition: opacity .34s ease, transform .34s ease; }
+    .searchOverlay { animation: sceneFade .28s ease; }
+    .searchCard { transition: transform .32s cubic-bezier(.22,1,.36,1), box-shadow .32s ease, border-color .32s ease; cursor: pointer; }
+    .searchCard:hover { transform: translateY(-8px); box-shadow: 0 26px 44px -24px rgba(46,61,44,0.42); border-color: #C7A75B !important; }
+    .searchCard:hover .searchJar { transform: translateY(-4px) scale(1.03); }
+    .searchJar { transition: transform .38s cubic-bezier(.22,1,.36,1); }
+    .searchChipRow { background: rgba(251,247,238,0.88); border: 1px solid #E7DECB; border-radius: 18px; padding: 16px 18px; }
+    @keyframes searchPop { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .searchCard { animation: searchPop .38s ease both; }
     @keyframes fanIn { 0% { opacity: 0; transform: translateY(10px) scale(0.7); } 100% { opacity: 1; transform: scale(1); } }
     @keyframes modalIn { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
     #ak-mobilenav { display: none; }
@@ -365,6 +373,7 @@
         <div class="catCard" style="border-radius: 18px; overflow: hidden; background: #FBF7EE; border: 1px solid #E7DECB;">
           <div style="position: relative; height: 190px; overflow: hidden;">
             <img class="catImg" src="assets/hero-pouch.png" alt="Natural bath powders" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, rgba(46,61,44,0.28) 100%); pointer-events: none;"></div>
             <span class="catSheen" style="position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,251,240,0.65), transparent); transform: translateX(-140%) skewX(-18deg); pointer-events: none;"></span>
             <span class="catBadge" style="position: absolute; top: 14px; left: 14px; transform: none; font-family: monospace; font-size: 11px; color: #7A6E52; background: rgba(251,247,238,0.9); padding: 5px 11px; border-radius: 30px;">bath powders</span>
           </div>
@@ -380,6 +389,7 @@
         <div class="catCard" style="border-radius: 18px; overflow: hidden; background: #FBF7EE; border: 1px solid #E7DECB;">
           <div style="position: relative; height: 190px; overflow: hidden;">
             <img class="catImg" src="assets/navojas-front.jpeg" alt="Targeted kashayams" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, rgba(46,61,44,0.28) 100%); pointer-events: none;"></div>
             <span class="catSheen" style="position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,251,240,0.65), transparent); transform: translateX(-140%) skewX(-18deg); pointer-events: none;"></span>
             <span class="catBadge" style="position: absolute; top: 14px; left: 14px; transform: none; font-family: monospace; font-size: 11px; color: #6E5849; background: rgba(251,247,238,0.9); padding: 5px 11px; border-radius: 30px;">bp &amp; sugar</span>
           </div>
@@ -395,6 +405,7 @@
         <div class="catCard" style="border-radius: 18px; overflow: hidden; background: #FBF7EE; border: 1px solid #E7DECB;">
           <div style="position: relative; height: 190px; overflow: hidden;">
             <img class="catImg" src="assets/kaphahara-front.png" alt="Daily wellness kashayams" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, rgba(46,61,44,0.28) 100%); pointer-events: none;"></div>
             <span class="catSheen" style="position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,251,240,0.65), transparent); transform: translateX(-140%) skewX(-18deg); pointer-events: none;"></span>
             <span class="catBadge" style="position: absolute; top: 14px; left: 14px; transform: none; font-family: monospace; font-size: 11px; color: #5E6A45; background: rgba(251,247,238,0.9); padding: 5px 11px; border-radius: 30px;">daily immunity</span>
           </div>
@@ -408,8 +419,9 @@
       <!-- cat 4 -->
       <a href="#shop" onClick="{{ filterConcernSpiritual }}" style="text-decoration: none; display: block; cursor: pointer;">
         <div class="catCard" style="border-radius: 18px; overflow: hidden; background: #FBF7EE; border: 1px solid #E7DECB;">
-          <div style="position: relative; height: 190px; overflow: hidden;">
-            <img class="catImg" src="assets/aakashik-logo.jpeg" alt="Spiritual wellness Ashtagandham" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">
+          <div style="position: relative; height: 190px; overflow: hidden; background: linear-gradient(145deg, #2E3D2C, #4E6B3C);">
+            <img class="catImg" src="assets/aakashik-logo.jpeg" alt="Spiritual wellness Ashtagandham" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.92;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(46,61,44,0.08) 0%, rgba(46,61,44,0.45) 100%); pointer-events: none;"></div>
             <span class="catSheen" style="position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,251,240,0.65), transparent); transform: translateX(-140%) skewX(-18deg); pointer-events: none;"></span>
             <span class="catBadge" style="position: absolute; top: 14px; left: 14px; transform: none; font-family: monospace; font-size: 11px; color: #74603F; background: rgba(251,247,238,0.9); padding: 5px 11px; border-radius: 30px;">ashtagandham</span>
           </div>
@@ -1622,24 +1634,37 @@
 
   <!-- ===== SEARCH OVERLAY ===== -->
   <sc-if value="{{ searchOpen }}">
-    <div role="dialog" aria-modal="true" aria-label="Search" style="position: fixed; inset: 0; background: rgba(246,241,228,0.97); z-index: 220; overflow-y: auto; animation: sceneFade .25s ease;">
-      <div style="max-width: 900px; margin: 0 auto; padding: 32px clamp(24px, 5vw, 90px) 60px;">
-        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 24px;">
-          <div style="flex: 1; display: flex; align-items: center; gap: 12px; background: #FBF7EE; border: 1px solid #D7CDB4; border-radius: 40px; padding: 14px 20px;">
+    <div role="dialog" aria-modal="true" aria-label="Search" class="searchOverlay" style="position: fixed; inset: 0; background: radial-gradient(circle at 20% 0%, rgba(199,167,91,0.12), transparent 42%), radial-gradient(circle at 80% 100%, rgba(157,176,142,0.14), transparent 40%), rgba(246,241,228,0.98); z-index: 220; overflow-y: auto; backdrop-filter: blur(6px);">
+      <div style="max-width: 980px; margin: 0 auto; padding: 28px clamp(20px, 5vw, 90px) 64px;">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px;">
+          <div>
+            <span style="font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: #A8894E;">The Apothecary Shelf</span>
+            <h2 style="font-family: 'Marcellus', serif; font-size: clamp(26px, 4vw, 34px); color: #2E3D2C; margin: 6px 0 4px; font-weight: 400;">{{ searchTitle }}</h2>
+            <p style="font-size: 14px; color: #6E7A62; margin: 0; max-width: 520px; line-height: 1.55;">{{ searchSubtitle }}</p>
+          </div>
+          <button onClick="{{ closeSearch }}" aria-label="Close search" style="flex-shrink: 0; background: #FBF7EE; border: 1px solid #D7CDB4; cursor: pointer; font-size: 13px; color: #5E6A54; padding: 10px 16px; border-radius: 999px;">Close ✕</button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px;">
+          <div style="flex: 1; display: flex; align-items: center; gap: 12px; background: #FBF7EE; border: 1px solid #D7CDB4; border-radius: 40px; padding: 14px 20px; box-shadow: 0 14px 28px -22px rgba(46,61,44,0.35);">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8A9678" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             <input value="{{ searchQuery }}" onInput="{{ onSearchInput }}" placeholder="Search blends, herbs, concerns…" style="flex: 1; border: none; background: transparent; outline: none; font-size: 16px; color: #2E3D2C;">
           </div>
-          <button onClick="{{ closeSearch }}" style="background: transparent; border: none; cursor: pointer; font-size: 14px; color: #5E6A54;">Close</button>
+          <sc-if value="{{ hasActiveFilters }}">
+            <button onClick="{{ clearSearchFilters }}" style="background: transparent; border: 1px solid #C2B591; color: #5E6A54; padding: 12px 16px; border-radius: 999px; font-size: 12.5px; cursor: pointer; white-space: nowrap;">Clear filters</button>
+          </sc-if>
         </div>
+
         <sc-if value="{{ hasSuggestions }}">
-          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px;">
-            <span style="font-size: 12px; color: #8A9678; align-self: center;">Suggestions:</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; align-items: center;">
+            <span style="font-size: 12px; color: #8A9678;">Try:</span>
             <sc-for list="{{ suggestions }}" as="s" hint-placeholder-count="3">
               <button onClick="{{ s.onClick }}" style="background: #EAF0E1; color: #4E6B3C; border: none; padding: 7px 14px; border-radius: 30px; font-size: 13px; cursor: pointer;">{{ s.name }}</button>
             </sc-for>
           </div>
         </sc-if>
-        <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 26px;">
+
+        <div class="searchChipRow" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
           <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;"><span style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #A8894E; margin-right: 4px;">Concern</span>
             <sc-for list="{{ concernChips }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for>
           </div>
@@ -1650,25 +1675,66 @@
             <sc-for list="{{ priceChips }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for>
           </div>
         </div>
-        <sc-if value="{{ resultsEmpty }}">
-          <p style="text-align: center; color: #8A9678; font-size: 15px; padding: 40px 0;">No blends match those filters — try widening your search.</p>
-        </sc-if>
+
         <sc-if value="{{ hasResults }}">
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 18px;">
+          <p style="font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: #8A9678; margin: 0 0 16px;">{{ searchResultCount }}</p>
+        </sc-if>
+
+        <sc-if value="{{ resultsEmpty }}">
+          <div style="text-align: center; padding: 48px 20px 32px; background: rgba(251,247,238,0.72); border: 1px dashed #D7CDB4; border-radius: 22px;">
+            <span style="display: inline-flex; width: 56px; height: 56px; border-radius: 50%; background: #EAF0E1; align-items: center; justify-content: center; margin-bottom: 14px;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5E7A4C" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </span>
+            <h3 style="font-family: 'Marcellus', serif; font-size: 22px; color: #2E3D2C; margin: 0 0 8px;">No blends match yet</h3>
+            <p style="color: #8A9678; font-size: 14px; margin: 0 0 18px; line-height: 1.6;">Widen your filters or search by herb — tulsi, turmeric, sandalwood…</p>
+            <button onClick="{{ clearSearchFilters }}" style="background: #2E3D2C; color: #F1EEDF; border: none; padding: 11px 20px; border-radius: 999px; font-size: 13.5px; cursor: pointer;">Show all rituals</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ hasResults }}">
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 20px;">
             <sc-for list="{{ results }}" as="p" hint-placeholder-count="4">
-              <div style="background: #FBF7EE; border: 1px solid #E7DECB; border-radius: 16px; overflow: hidden;">
-                <div style="height: 110px; background: linear-gradient(135deg, {{ p.jar }}, {{ p.cap }}); position: relative;">
-                  <button onClick="{{ p.onWish }}" aria-label="Wishlist" style="position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; border-radius: 50%; background: rgba(255,253,245,0.9); border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+              <div class="searchCard" style="background: #FBF7EE; border: 1px solid #E7DECB; border-radius: 20px; overflow: hidden; animation-delay: {{ p.cardDelay }};">
+                <div style="height: 148px; position: relative; background: {{ p.thumbBg }}; overflow: hidden;">
+                  <sc-if value="{{ p.hasPhoto }}">
+                    <img src="{{ p.photoUrl }}" alt="{{ p.name }}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 14px; filter: drop-shadow(0 16px 20px rgba(46,61,44,0.18));">
+                  </sc-if>
+                  <sc-if value="{{ p.noPhoto }}">
+                    <div class="searchJar" style="position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center;">
+                      <span style="width: 58px; height: 10px; border-radius: 6px 6px 3px 3px; background: linear-gradient(180deg, {{ p.cap }}, rgba(0,0,0,0.12)); margin-bottom: -2px;"></span>
+                      <span style="width: 56px; height: 78px; border-radius: 8px 8px 16px 16px; background: linear-gradient(115deg, {{ p.jar }} 40%, rgba(255,255,255,0.35) 41%, {{ p.jar }} 46%); box-shadow: inset 0 -12px 18px -12px rgba(0,0,0,.28), 0 14px 22px -14px rgba(35,45,25,.45);"></span>
+                    </div>
+                  </sc-if>
+                  <span style="position: absolute; top: 10px; left: 10px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #F1EEDF; background: rgba(46,61,44,0.72); padding: 5px 10px; border-radius: 999px; backdrop-filter: blur(4px);">{{ p.tag }}</span>
+                  <button onClick="{{ p.onWish }}" aria-label="Wishlist" style="position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,253,245,0.94); border: 1px solid rgba(215,205,180,0.8); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; z-index: 2;">
                     <sc-if value="{{ p.wished }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="#BE6A45" stroke="#BE6A45" stroke-width="1.6"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></sc-if>
                     <sc-if value="{{ p.notWished }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8A5A3A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></sc-if>
                   </button>
+                  <sc-if value="{{ p.outOfStock }}">
+                    <span style="position: absolute; bottom: 10px; right: 10px; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: #8A3E2A; background: rgba(248,232,226,0.95); border: 1px solid #E8B8A8; padding: 4px 9px; border-radius: 999px;">Out of stock</span>
+                  </sc-if>
                 </div>
-                <div style="padding: 14px 16px 16px;">
-                  <p style="font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: #A99C7E; margin: 0 0 4px;">{{ p.concern }}</p>
-                  <h4 style="font-family: 'Marcellus', serif; font-size: 17px; font-weight: 400; color: #2E3D2C; margin: 0 0 10px;">{{ p.name }}<span style="font-size: 9px; vertical-align: super; color: #A8894E;">&trade;</span></h4>
-                  <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-family: 'Marcellus', serif; font-size: 17px; color: #2E3D2C;">{{ p.priceStr }}</span>
-                    <button onClick="{{ p.onQuick }}" style="background: transparent; color: #2E3D2C; border: 1px solid #C2B591; padding: 7px 13px; border-radius: 30px; font-size: 12.5px; font-weight: 500; cursor: pointer;">View</button>
+                <div style="padding: 16px 18px 18px;">
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+                    <span style="font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: #A8894E;">{{ p.concern }}</span>
+                    <span style="font-size: 10.5px; color: #8A9678;">· {{ p.element }}</span>
+                  </div>
+                  <h4 style="font-family: 'Marcellus', serif; font-size: 18px; font-weight: 400; color: #2E3D2C; margin: 0 0 4px; line-height: 1.25;">{{ p.name }}<span style="font-size: 9px; vertical-align: super; color: #A8894E;">&trade;</span></h4>
+                  <p style="font-size: 12.5px; color: #7A8570; margin: 0 0 10px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ p.benefit }}</p>
+                  <sc-if value="{{ p.hasHerbs }}">
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
+                      <sc-for list="{{ p.herbChips }}" as="h" hint-placeholder-count="2"><span style="font-size: 11px; color: #5E6A54; background: #F0EBDD; border: 1px solid #E4DBC8; padding: 3px 8px; border-radius: 999px;">{{ h.label }}</span></sc-for>
+                    </div>
+                  </sc-if>
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <div>
+                      <sc-if value="{{ p.hasDiscount }}"><span style="display: block; font-size: 12px; color: #A99C7E; text-decoration: line-through;">{{ p.listPriceStr }}</span></sc-if>
+                      <span style="font-family: 'Marcellus', serif; font-size: 18px; color: #2E3D2C;">{{ p.priceStr }}</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                      <button onClick="{{ p.onQuick }}" style="background: transparent; color: #2E3D2C; border: 1px solid #C2B591; padding: 8px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; cursor: pointer;">View</button>
+                      <button onClick="{{ p.onAdd }}" style="background: #2E3D2C; color: #F1EEDF; border: none; padding: 8px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; cursor: pointer;">{{ p.addLabel }}</button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2569,10 +2635,13 @@ class Component extends DCLogic {
     const toggleLineSub = (id) => this.setState(s => { const c = { ...s.cartItems }; if (c[id]) c[id] = { ...c[id], subscribe: !c[id].subscribe }; try { localStorage.setItem('ak_cart', JSON.stringify(c)); } catch (er) {} return { cartItems: c }; });
     const toggleWish = (id) => { if (!this.state.wishlist[id]) this.heartBurst(); this.setState(s => { const w = { ...s.wishlist }; if (w[id]) delete w[id]; else w[id] = true; try { localStorage.setItem('ak_wishlist', JSON.stringify(w)); } catch (er) {} return { wishlist: w }; }); };
     const openQuickView = (id) => { this.pushRecent(id); this.setState({ quickView: id, qvSubscribe: false, qvFace: 'front', qvSize: 0 }); };
-    const decorate = (p) => {
+    const decorate = (p, idx) => {
       const stock = this._stockOf(p.id);
       const oos = stock <= 0;
       const hasDisc = !!(p.discountPct > 0 && p.listPriceN && p.listPriceN > p.priceN);
+      const photoUrl = p.front || p.photo || '';
+      const hasPhoto = !!photoUrl;
+      const herbChips = (p.herbs || []).slice(0, 2).map((label) => ({ label }));
       return {
         ...p,
         priceStr: p.sizes ? 'from ' + money(p.sizes[0].p) : money(p.priceN),
@@ -2587,6 +2656,13 @@ class Component extends DCLogic {
         outOfStock: oos,
         inStock: !oos,
         stockLeft: String(stock),
+        hasPhoto,
+        noPhoto: !hasPhoto,
+        photoUrl,
+        thumbBg: hasPhoto ? 'linear-gradient(180deg, #F6F1E4 0%, #E8E0CE 100%)' : 'linear-gradient(145deg, ' + p.jar + ' 0%, ' + p.cap + ' 88%)',
+        herbChips,
+        hasHerbs: herbChips.length > 0,
+        cardDelay: ((idx || 0) * 0.05) + 's',
       };
     };
 
@@ -2795,7 +2871,21 @@ class Component extends DCLogic {
       return prices.some((n) => inPrice(n));
     };
     const catalog = PRODUCTS.concat(BUNDLES);
-    const results = catalog.filter(p => (this.state.fConcern === 'all' || p.concern === this.state.fConcern) && (this.state.fElement === 'all' || p.element === this.state.fElement || p.element === 'All') && priceMatches(p) && (!q || (p.name + ' ' + p.sub + ' ' + p.concern + ' ' + p.element + ' ' + (p.herbs || []).join(' ')).toLowerCase().includes(q))).map(decorate);
+    const results = catalog.filter(p => (this.state.fConcern === 'all' || p.concern === this.state.fConcern) && (this.state.fElement === 'all' || p.element === this.state.fElement || p.element === 'All') && priceMatches(p) && (!q || (p.name + ' ' + p.sub + ' ' + p.concern + ' ' + p.element + ' ' + (p.herbs || []).join(' ')).toLowerCase().includes(q))).map((p, idx) => decorate(p, idx));
+    const CONCERN_COPY = {
+      'Skin & Body': { title: 'Bath & body rituals', sub: 'Herbal Sunni Pindi and gentle chemical-free cleansing for soft, glowing skin.' },
+      'Sugar': { title: 'Targeted wellness brews', sub: 'Traditional kashayams for everyday metabolic balance — ritual, not medicine.' },
+      'Immunity': { title: 'Daily defense rituals', sub: 'Tulsi, pepper and time-tested herbs for everyday immunity support.' },
+      'Respiratory': { title: 'Breath & seasonal comfort', sub: 'Kaphahara and blends formulated for respiratory wellness rituals.' },
+      'Digestion': { title: 'Gut comfort rituals', sub: 'Navojas and digestive wellness powders for everyday gut balance.' },
+      'Spiritual': { title: 'Sacred fragrant blends', sub: 'Ashtagandham and ritual powders to clear the space within.' },
+    };
+    const concernCopy = CONCERN_COPY[this.state.fConcern] || null;
+    const searchTitle = concernCopy ? concernCopy.title : (q ? 'Search results' : 'Browse the collection');
+    const searchSubtitle = concernCopy ? concernCopy.sub : (q ? ('Showing blends matching “' + q + '”.') : 'Filter by concern, element, or price — every blend is rooted in Ayurvedic tradition.');
+    const hasActiveFilters = this.state.fConcern !== 'all' || this.state.fElement !== 'all' || this.state.fPrice !== 'all' || !!q;
+    const searchResultCount = results.length + ' ritual' + (results.length === 1 ? '' : 's') + ' found';
+    const clearSearchFilters = () => this.setState({ fConcern: 'all', fElement: 'all', fPrice: 'all', searchQuery: '' });
     const concernChips = CONCERNS.map(c => ({ label: c === 'all' ? 'All' : c, active: this.state.fConcern === c, style: chip(this.state.fConcern === c), onClick: () => this.setState({ fConcern: c }) }));
     const elementChips = ELEMENTS.map(c => ({ label: c === 'all' ? 'All' : c, active: this.state.fElement === c, style: chip(this.state.fElement === c), onClick: () => this.setState({ fElement: c }) }));
     const priceChips = PRICES.map(c => ({ label: c.label, active: this.state.fPrice === c.k, style: chip(this.state.fPrice === c.k), onClick: () => this.setState({ fPrice: c.k }) }));
@@ -3400,6 +3490,11 @@ class Component extends DCLogic {
       openSearch: () => this.setState({ searchOpen: true }),
       closeSearch: () => this.setState({ searchOpen: false }),
       searchOpen: this.state.searchOpen,
+      searchTitle,
+      searchSubtitle,
+      hasActiveFilters,
+      searchResultCount,
+      clearSearchFilters,
       searchQuery: this.state.searchQuery,
       onSearchInput: (e) => this.setState({ searchQuery: e.target.value }),
       concernChips, elementChips, priceChips, results, resultsEmpty: results.length === 0, hasResults: results.length > 0,
