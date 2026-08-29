@@ -8,7 +8,7 @@ const {
   STRONG_PASSWORD,
 } = require('./helpers/storage');
 
-const LANDING_URL = '/Aakashik%20Landing.dc.html';
+const LANDING_URL = '/';
 
 test.describe('Landing — guest vs logged-in UI', () => {
   test.beforeEach(async ({ page }) => {
@@ -111,9 +111,11 @@ test.describe('Landing — logout', () => {
       persist: localStorage.getItem('ak_persist'),
       profile: localStorage.getItem('ak_profile'),
       session: sessionStorage.getItem('ak_logged'),
+      terms: localStorage.getItem('ak_terms_accepted'),
     }));
     expect(cleared.persist).toBeNull();
     expect(cleared.profile).toBeNull();
     expect(cleared.session).toBeNull();
+    expect(cleared.terms).toBeNull();
   });
 });

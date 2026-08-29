@@ -17,8 +17,8 @@ const {
   waitForAuthSuccess,
 } = require('./helpers/auth-ui');
 
-const LANDING_URL = '/Aakashik%20Landing.dc.html';
-const AUTH_URL = '/Aakashik%20Auth.dc.html';
+const LANDING_URL = '/';
+const AUTH_URL = '/login';
 
 test.describe('UX medium — session & profile', () => {
   test.beforeEach(async ({ page }) => {
@@ -304,12 +304,12 @@ test.describe('UX medium — landing UX', () => {
   });
 
   // TC-M28
-  test('auth and landing links are percent-encoded', async ({ page }) => {
+  test('auth and landing links use clean URLs', async ({ page }) => {
     await page.goto(LANDING_URL);
     const href = await page.getByRole('link', { name: 'Sign in' }).getAttribute('href');
-    expect(href).toMatch(/Aakashik%20Auth\.dc\.html/);
+    expect(href).toMatch(/\/login\/?$/);
     await page.goto(AUTH_URL);
-    const back = await page.locator('a[href*="Landing"]').first().getAttribute('href');
-    expect(back).toMatch(/Aakashik%20Landing\.dc\.html/);
+    const back = await page.getByRole('link', { name: 'Back to store' }).getAttribute('href');
+    expect(back).toBe('/');
   });
 });

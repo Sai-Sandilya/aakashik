@@ -22,9 +22,13 @@ const {
   openForgotPassword,
   submitForgotForm,
   signInWithEmail,
+  mockEmailResetApi,
 } = require('./helpers/auth-ui');
 
-const LANDING_URL = '/Aakashik%20Landing.dc.html';
+/** @type {(page: import('@playwright/test').Page, options: { email: string, otp?: string, password?: string }) => Promise<unknown>} */
+const mockReset = mockEmailResetApi;
+
+const LANDING_URL = '/';
 
 test.describe('UX final — Auth honesty & account safety', () => {
   test.beforeEach(async ({ page }) => {
@@ -72,21 +76,27 @@ test.describe('UX final — Auth honesty & account safety', () => {
     expect(users[email].pwHash).toBe(expected);
   });
 
-  test('TC-F04 negative: forgot password rejects unknown email (no orphan account)', async ({ page }) => {
+  test('TC-F04 positive: forgot password does not reveal unknown emails', async ({ page }) => {
+    await page.route('**/api/auth/send-otp', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true, expiresIn: 600 }),
+      });
+    });
     await gotoAuth(page);
     await openForgotPassword(page);
     await fillContact(page, `missing-${Date.now()}@test.com`);
     await submitForgotForm(page);
-    await expect(page.getByText(/No account found for this email/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/If an account exists/i)).toBeVisible({ timeout: 5000 });
     const users = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_users') || '{}'));
     expect(Object.keys(users).length).toBe(0);
-    const reset = await page.evaluate(() => localStorage.getItem('ak_reset'));
-    expect(reset).toBeNull();
   });
 
   test('TC-F05 positive: forgot password still works for existing email', async ({ page }) => {
     const email = `resetok-${Date.now()}@test.com`;
     await seedEmailUser(page, { email, password: STRONG_PASSWORD, name: 'Reset Ok' });
+    await mockReset(page, { email, otp: '4321', password: STRONG_PASSWORD });
     await page.evaluate(() => {
       localStorage.removeItem('ak_logged');
       localStorage.removeItem('ak_persist');
@@ -96,13 +106,14 @@ test.describe('UX final — Auth honesty & account safety', () => {
     await openForgotPassword(page);
     await fillContact(page, email);
     await submitForgotForm(page);
-    await expect(page.getByText(/Demo reset code:/i)).toBeVisible();
-    const code = await readStoredCode(page, 'ak_reset');
-    await page.getByPlaceholder('4-digit code').fill(code);
+    await expect(page.getByText(/If an account exists/i)).toBeVisible();
+    await page.getByPlaceholder('4-digit code').fill('4321');
     await fillPassword(page, 'NewPass@5678');
     await fillConfirmPassword(page, 'NewPass@5678');
     await submitForgotForm(page);
     await expect(page.getByText(/Password updated/i)).toBeVisible({ timeout: 10000 });
+    await page.unroute('**/api/auth/login');
+    await mockReset(page, { email, otp: '4321', password: 'NewPass@5678' });
     await signInWithEmail(page, { email, password: 'NewPass@5678' });
     await waitForAuthSuccess(page);
   });

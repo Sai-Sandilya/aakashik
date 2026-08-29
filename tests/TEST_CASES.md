@@ -359,6 +359,41 @@ Demo admin: `owner@aakashik.local` / `Admin@1234` · API base: `http://127.0.0.1
 
 ---
 
+## Search overlay full automation (`tests/search-overlay.spec.js`)
+
+Every entry point, chip, search path, card action, empty/OOS edge, catalog sync, and multi-step flow for the Apothecary Shelf overlay.
+
+| Range | Focus |
+|-------|--------|
+| TC-SO01–07 | Open/close, Escape, nav entry points |
+| TC-SO08–12 | All category cards + Shop now links |
+| TC-SO13–19 | Every Concern chip |
+| TC-SO20–26 | Every Element chip + All-element bundles |
+| TC-SO27–30 | Every Price chip |
+| TC-SO31–47 | Text search, suggestions, combined filters |
+| TC-SO48–57 | Card UI, photo/jar, View/Add/Wish/OOS/count |
+| TC-SO58–60 | Hidden / custom active / custom draft |
+| TC-SO61–68 | Complex multi-step flows |
+| TC-SO69–72 | Mobile nav + all Shop now links |
+| TC-SO73–79 | Contextual subtitles per concern |
+| TC-SO80–96 | Query edge cases, herbs, Try suggestions |
+| TC-SO97–106 | Filter matrix negatives + triple combos |
+| TC-SO107–118 | Tags, from-price, stock limits, cart drawer, a11y |
+| TC-SO119–128 | Hide/show catalog, custom discount/OOS |
+| TC-SO129–150 | Complex edge flows (mega session, mobile, restock, QV) |
+
+**Total: 150 browser E2E cases**
+
+Also fixed real bugs found by tests:
+- TC-SO58: hiding a built-in jar SKU no longer breaks `renderVals` / Search
+- TC-SO134/135: Quick View now stacks above Search overlay (z-index) so buttons are clickable
+
+```bash
+npx playwright test tests/search-overlay.spec.js --headed
+```
+
+---
+
 ## Notes
 
 - OTP and reset codes are read from `localStorage` (`ak_pending_otp`, `ak_reset`) — same as the demo UI toasts.

@@ -4,8 +4,8 @@
 const { test, expect } = require('@playwright/test');
 const { clearAuthStorage, seedEmailUser } = require('./helpers/storage');
 
-const ADMIN_URL = '/Aakashik%20Admin.dc.html';
-const LANDING_URL = '/Aakashik%20Landing.dc.html';
+const ADMIN_URL = '/Admin';
+const LANDING_URL = '/';
 const ADMIN_EMAIL = 'owner@aakashik.local';
 const ADMIN_PASSWORD = 'Admin@1234';
 const STRONG_PASSWORD = 'Test@1234';

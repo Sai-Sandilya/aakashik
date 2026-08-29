@@ -18,6 +18,9 @@ const {
   waitForAuthSuccess,
   signupWithEmail,
   signInWithEmail,
+  mockEmailOtpApi,
+  mockEmailLoginApi,
+  mockEmailResetApi,
   openForgotPassword,
   submitForgotForm,
 } = require('./helpers/auth-ui');
@@ -80,6 +83,7 @@ test.describe('Auth page — validation', () => {
 test.describe('Auth page — create account', () => {
   test.beforeEach(async ({ page }) => {
     await clearAuthStorage(page);
+    await mockEmailOtpApi(page);
   });
 
   // TC-A05
@@ -89,22 +93,22 @@ test.describe('Auth page — create account', () => {
 
     await signupWithEmail(page, { name, email, password: STRONG_PASSWORD });
 
-    await expect(page.getByText(/Demo verification code/i).first()).toBeVisible();
+    await expect(page.getByText(/Verification code sent to/i).first()).toBeVisible();
 
-    const otp = await readStoredCode(page, 'ak_pending_otp');
-    expect(otp).toMatch(/^\d{4}$/);
-
-    await enterOtpAndVerify(page, otp);
+    await enterOtpAndVerify(page, '1234');
     await waitForAuthSuccess(page);
 
-    await expect(page.getByRole('heading', { name: 'Account created!' })).toBeVisible();
-
+    expect(page.url()).toMatch(/\/(\?|$)/);
     const logged = await page.evaluate(() => localStorage.getItem('ak_logged'));
     expect(logged).toBe('1');
+    const terms = await page.evaluate(() => localStorage.getItem('ak_terms_accepted'));
+    expect(terms).toBe('1');
   });
 
   // TC-A06
   test('phone signup sends OTP without password and completes account creation', async ({ page }) => {
+    await page.unroute('**/api/auth/send-otp');
+    await page.unroute('**/api/auth/verify-signup');
     const phone = `9${String(Date.now()).slice(-9)}`;
     const name = 'Phone Tester';
 
@@ -120,7 +124,7 @@ test.describe('Auth page — create account', () => {
     await enterOtpAndVerify(page, otp);
     await waitForAuthSuccess(page);
 
-    await expect(page.getByRole('heading', { name: 'Account created!' })).toBeVisible();
+    expect(page.url()).toMatch(/\/(\?|$)/);
   });
 });
 
@@ -130,14 +134,16 @@ test.describe('Auth page — sign in', () => {
   test.beforeEach(async ({ page }) => {
     await clearAuthStorage(page);
     await seedEmailUser(page, { email, password: STRONG_PASSWORD, name: 'Login Tester' });
+    await mockEmailLoginApi(page, { email, password: STRONG_PASSWORD, name: 'Login Tester' });
   });
 
   // TC-A07
   test('email sign-in with correct password succeeds', async ({ page }) => {
     await signInWithEmail(page, { email, password: STRONG_PASSWORD });
     await waitForAuthSuccess(page);
-    await expect(page.getByRole('heading', { name: 'Welcome back!' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Enter the store' })).toBeVisible();
+    expect(page.url()).toMatch(/\/(\?|$)/);
+    const terms = await page.evaluate(() => localStorage.getItem('ak_terms_accepted'));
+    expect(terms).toBe('1');
   });
 
   // TC-A08
@@ -167,6 +173,7 @@ test.describe('Auth page — forgot password', () => {
   test.beforeEach(async ({ page }) => {
     await clearAuthStorage(page);
     await seedEmailUser(page, { email, password: oldPassword, name: 'Reset Tester' });
+    await mockEmailResetApi(page, { email, otp: '5678', password: oldPassword });
   });
 
   // TC-A10
@@ -177,12 +184,9 @@ test.describe('Auth page — forgot password', () => {
     await fillContact(page, email);
     await submitForgotForm(page);
 
-    await expect(page.getByText(/Demo reset code:/i).first()).toBeVisible();
+    await expect(page.getByText(/If an account exists/i).first()).toBeVisible();
 
-    const resetCode = await readStoredCode(page, 'ak_reset');
-    expect(resetCode).toMatch(/^\d{4}$/);
-
-    await page.getByPlaceholder('4-digit code').fill(resetCode);
+    await page.getByPlaceholder('4-digit code').fill('5678');
     await fillPassword(page, newPassword);
     await fillConfirmPassword(page, newPassword);
     await submitForgotForm(page);
@@ -197,15 +201,16 @@ test.describe('Auth page — forgot password', () => {
     await fillContact(page, email);
     await submitForgotForm(page);
 
-    const resetCode = await readStoredCode(page, 'ak_reset');
-    await page.getByPlaceholder('4-digit code').fill(resetCode);
+    await page.getByPlaceholder('4-digit code').fill('5678');
     await fillPassword(page, newPassword);
     await fillConfirmPassword(page, newPassword);
     await submitForgotForm(page);
     await expect(page.getByText(/Password updated/i)).toBeVisible({ timeout: 10_000 });
 
+    await page.unroute('**/api/auth/login');
+    await mockEmailResetApi(page, { email, otp: '5678', password: newPassword });
     await signInWithEmail(page, { email, password: newPassword });
     await waitForAuthSuccess(page);
-    await expect(page.getByRole('heading', { name: 'Welcome back!' })).toBeVisible();
+    expect(page.url()).toMatch(/\/(\?|$)/);
   });
 });

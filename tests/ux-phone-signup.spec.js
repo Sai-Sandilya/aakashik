@@ -16,7 +16,7 @@ const {
   waitForAuthSuccess,
 } = require('./helpers/auth-ui');
 
-const LANDING_URL = '/Aakashik%20Landing.dc.html';
+const LANDING_URL = '/';
 
 test.describe('UX phone signup — no overwrite', () => {
   test.beforeEach(async ({ page }) => {

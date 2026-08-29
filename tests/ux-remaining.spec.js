@@ -21,7 +21,7 @@ const {
   signInWithEmail,
 } = require('./helpers/auth-ui');
 
-const LANDING_URL = '/Aakashik%20Landing.dc.html';
+const LANDING_URL = '/';
 
 test.describe('UX remaining — password hashing & demo OTP (1-2, 11-12)', () => {
   test.beforeEach(async ({ page }) => {

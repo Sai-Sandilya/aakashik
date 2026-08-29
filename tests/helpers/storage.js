@@ -22,11 +22,12 @@ const AUTH_KEYS = [
   'ak_recent',
   'ak_lock_until',
   'ak_fail_count',
+  'ak_terms_accepted',
 ];
 
 /** Clear all Aakashik auth-related localStorage keys. */
 async function clearAuthStorage(page) {
-  await page.goto('/Aakashik%20Landing.dc.html');
+  await page.goto('/');
   await page.evaluate((keys) => {
     keys.forEach((k) => localStorage.removeItem(k));
     try { sessionStorage.removeItem('ak_logged'); } catch (e) {}

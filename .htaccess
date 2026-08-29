@@ -1,0 +1,7 @@
+RewriteEngine On
+RewriteRule ^Aakashik%20Landing\.dc\.html$ / [R=301,L,NC]
+RewriteRule ^Aakashik Landing\.dc\.html$ / [R=301,L,NE]
+RewriteRule ^Aakashik%20Auth\.dc\.html$ /login [R=301,L,NC]
+RewriteRule ^Aakashik Auth\.dc\.html$ /login [R=301,L,NE]
+RewriteRule ^Aakashik%20Admin\.dc\.html$ /Admin [R=301,L,NC]
+RewriteRule ^Aakashik Admin\.dc\.html$ /Admin [R=301,L,NE]

@@ -6,8 +6,8 @@ const {
   STRONG_PASSWORD,
 } = require('./helpers/storage');
 
-const LANDING_URL = '/Aakashik%20Landing.dc.html';
-const AUTH_URL = '/Aakashik%20Auth.dc.html';
+const LANDING_URL = '/';
+const AUTH_URL = '/login';
 
 test.describe('UX low — polish & a11y', () => {
   test.beforeEach(async ({ page }) => {

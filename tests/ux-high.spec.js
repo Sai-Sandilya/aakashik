@@ -6,7 +6,7 @@ const {
   STRONG_PASSWORD,
 } = require('./helpers/storage');
 
-const LANDING_URL = '/Aakashik%20Landing.dc.html';
+const LANDING_URL = '/';
 
 /** @param {import('@playwright/test').Page} page */
 function cartButton(page) {
@@ -401,7 +401,7 @@ test.describe('UX high fixes', () => {
   });
 
   test('TC-H31 positive: Auth page promises real 10% member pricing', async ({ page }) => {
-    await page.goto('/Aakashik%20Auth.dc.html');
+    await page.goto('/login');
     await expect(page.getByText(/member pricing \(10% off\)/i).first()).toBeVisible();
   });
 });

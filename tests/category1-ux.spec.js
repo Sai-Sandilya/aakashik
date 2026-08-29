@@ -6,7 +6,7 @@ const {
   STRONG_PASSWORD,
 } = require('./helpers/storage');
 
-const LANDING_URL = '/Aakashik%20Landing.dc.html';
+const LANDING_URL = '/';
 
 /** @param {import('@playwright/test').Page} page */
 function cartButton(page) {
