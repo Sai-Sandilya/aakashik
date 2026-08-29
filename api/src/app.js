@@ -40,6 +40,21 @@ export async function buildApp(options = {}) {
   app.get('/health', async () => ({ ok: true, service: 'aakashik-api', ts: Date.now() }));
   app.get('/api/health', async () => ({ ok: true, service: 'aakashik-api', ts: Date.now() }));
 
+  // Must be set before register() so encapsulated plugins inherit this handler.
+  // Otherwise Fastify's default serializer puts app codes in `code` and
+  // `error: "Unauthorized"`, which breaks clients that read `error`.
+  app.setErrorHandler((err, _request, reply) => {
+    if (app.log?.error) app.log.error(err);
+    const statusCode = Number(err.statusCode) || 500;
+    const code = typeof err.code === 'string' && err.code && !err.code.startsWith('FST_')
+      ? err.code
+      : (statusCode >= 500 ? 'internal_error' : 'request_error');
+    reply.code(statusCode).send({
+      error: code,
+      message: err.message || 'Unexpected server error',
+    });
+  });
+
   await app.register(customerAuthRoutes, { prefix: '/api' });
 
   await app.register(adminAuthRoutes, { prefix: '/api/admin' });
@@ -47,14 +62,6 @@ export async function buildApp(options = {}) {
   await app.register(productRoutes, { prefix: '/api' });
   await app.register(inventoryRoutes, { prefix: '/api' });
   await app.register(orderRoutes, { prefix: '/api' });
-
-  app.setErrorHandler((err, _request, reply) => {
-    app.log.error(err);
-    reply.code(err.statusCode || 500).send({
-      error: err.code || 'internal_error',
-      message: err.message || 'Unexpected server error',
-    });
-  });
 
   app.addHook('onClose', async () => {
     if (options.closeDbOnShutdown !== false && options.db) {

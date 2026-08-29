@@ -825,7 +825,7 @@ class Component extends DCLogic {
         this._authSuccess();
         return;
       }
-      if (data && data.error === 'google_account') {
+      if (data && (data.error === 'google_account' || data.code === 'google_account')) {
         this.setState({
           loading: false,
           errorMsg: '',
