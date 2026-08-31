@@ -7,12 +7,14 @@ import {
   authHeaders,
   adminLoginPayload,
 } from './helpers.js';
+import { isPasswordHash } from '../src/services/password.js';
 
 describe('API health + admin auth', () => {
   let app;
+  let db;
 
   before(async () => {
-    ({ app } = await setupTestApp());
+    ({ app, db } = await setupTestApp());
   });
 
   after(async () => {
@@ -76,5 +78,30 @@ describe('API health + admin auth', () => {
       headers: authHeaders('not.a.valid.jwt'),
     });
     assert.equal(res.statusCode, 401);
+  });
+
+  it('TC-API08 positive: seeded admin password is stored hashed', async () => {
+    const row = db.prepare('SELECT password FROM admin_users WHERE lower(email) = ?').get('owner@aakashik.local');
+    assert.ok(row);
+    assert.ok(isPasswordHash(row.password));
+    assert.notEqual(row.password, 'Admin@1234');
+  });
+
+  it('TC-API09 positive: plaintext admin password migrates to hash on login', async () => {
+    db.prepare('UPDATE admin_users SET password = ? WHERE lower(email) = ?').run('Admin@1234', 'owner@aakashik.local');
+    const first = await app.inject({
+      method: 'POST',
+      url: '/api/admin/login',
+      payload: adminLoginPayload(),
+    });
+    assert.equal(first.statusCode, 200);
+    const row = db.prepare('SELECT password FROM admin_users WHERE lower(email) = ?').get('owner@aakashik.local');
+    assert.ok(isPasswordHash(row.password));
+    const second = await app.inject({
+      method: 'POST',
+      url: '/api/admin/login',
+      payload: adminLoginPayload(),
+    });
+    assert.equal(second.statusCode, 200);
   });
 });
