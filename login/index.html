@@ -894,7 +894,7 @@ class Component extends DCLogic {
         return;
       }
       if (status === 401 || status === 403) {
-        this._failLogin();
+        this._tryLocalEmailLogin(kind.value, this.state.password, this.state.rememberMe);
         return;
       }
       this._tryLocalEmailLogin(kind.value, this.state.password, this.state.rememberMe);

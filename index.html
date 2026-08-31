@@ -2548,8 +2548,8 @@ class Component extends DCLogic {
             try {
               const p = JSON.parse(localStorage.getItem('ak_profile') || '{}');
               if (p && p.demoSocial) return;
-              // Only clear server-backed sessions (Google / API email). Keep local checkout demos.
-              if (!(p && (p.provider === 'google' || p.provider === 'local'))) return;
+              // Expired Google OAuth only — local browser accounts stay signed in without a server cookie.
+              if (!(p && p.provider === 'google')) return;
               const hadLocal = localStorage.getItem('ak_logged') === '1';
               if (!hadLocal) return;
               localStorage.removeItem('ak_logged');
