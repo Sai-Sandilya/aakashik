@@ -77,7 +77,7 @@
     .searchChipRow { background: rgba(251,247,238,0.88); border: 1px solid #E7DECB; border-radius: 18px; padding: 16px 18px; }
     @keyframes searchPop { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
     .searchCard { animation: searchPop .38s ease both; }
-    @keyframes fanIn { 0% { opacity: 0; transform: translateY(10px) scale(0.7); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes herbPanelIn { from { opacity: 0; transform: translateX(-50%) translateY(8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
     @keyframes modalIn { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
     #ak-mobilenav { display: none; }
     @media (max-width: 860px) {
@@ -455,15 +455,20 @@
     </div>
 
     <!-- shelf -->
-    <div style="position: relative; padding: 40px 20px 0;">
-      <div style="display: flex; gap: clamp(24px, 7vw, 130px); justify-content: center; flex-wrap: wrap; align-items: flex-end; padding-bottom: 20px; min-height: 250px; overflow: visible;">
+    <div style="position: relative; padding: 40px 20px 0; overflow: visible;">
+      <div style="display: flex; gap: clamp(24px, 7vw, 130px); justify-content: center; flex-wrap: wrap; align-items: flex-end; padding: 120px 0 20px; min-height: 250px; overflow: visible;">
         <sc-for list="{{ jars }}" as="j" hint-placeholder-count="6">
-          <button onClick="{{ j.onClick }}" onMouseEnter="{{ j.onEnter }}" onMouseLeave="{{ j.onLeave }}" style="position: relative; background: transparent; border: none; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 11px; cursor: pointer; overflow: visible;">
+          <button onClick="{{ j.onClick }}" onMouseEnter="{{ j.onEnter }}" onMouseLeave="{{ j.onLeave }}" style="{{ j.btnStyle }}">
             <sc-if value="{{ j.hovered }}">
-              <div style="position: absolute; left: 0; right: 0; top: 0; height: 0; z-index: 6; pointer-events: none;">
-                <sc-for list="{{ j.herbFan }}" as="hf" hint-placeholder-count="3">
-                  <span style="{{ hf.style }} position: absolute; white-space: nowrap; font-size: 10.5px; color: #4E6B3C; background: rgba(255,253,245,0.96); border: 1px solid #C3D3AE; padding: 4px 10px; border-radius: 30px; box-shadow: 0 6px 14px -8px rgba(46,61,44,0.4);">{{ hf.name }}</span>
-                </sc-for>
+              <div aria-hidden="true" style="position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%); z-index: 12; pointer-events: none; width: max-content; max-width: min(240px, 78vw); animation: herbPanelIn .25s ease both;">
+                <div style="background: rgba(255,253,245,0.98); border: 1px solid #C3D3AE; border-radius: 14px; padding: 10px 12px 8px; box-shadow: 0 14px 32px -12px rgba(46,61,44,0.45);">
+                  <span style="display: block; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: #A8894E; margin-bottom: 7px; text-align: center;">Ingredients</span>
+                  <div style="display: flex; flex-direction: column; gap: 5px; align-items: stretch;">
+                    <sc-for list="{{ j.herbs }}" as="h" hint-placeholder-count="7">
+                      <span style="display: block; font-size: 11px; line-height: 1.35; color: #4E6B3C; background: #EAF0E1; border: 1px solid #D5E2C8; padding: 5px 10px; border-radius: 20px; text-align: center; white-space: nowrap;">{{ h }}</span>
+                    </sc-for>
+                  </div>
+                </div>
               </div>
             </sc-if>
             <div style="{{ j.wrapStyle }} display: flex; flex-direction: column; align-items: center;">
@@ -3068,26 +3073,10 @@ class Component extends DCLogic {
     const safeJarIdx = JARS.length ? Math.min(Math.max(0, this.state.openJar || 0), JARS.length - 1) : 0;
     const jars = JARS.map((j, i) => {
       const active = i === safeJarIdx;
-      const herbList = j.herbs || [];
       const hovered = i === this.state.hoverJar;
-      const herbFan = herbList.map((h, k) => {
-        const n = herbList.length;
-        let style;
-        if (n >= 5) {
-          const rowH = 24;
-          const yOff = k * rowH - ((n - 1) * rowH) / 2;
-          style = 'left:calc(50% + 58px);top:50%;transform:translate(0, calc(-50% + ' + yOff + 'px));animation:fanIn .35s ease both ' + (k * 0.04) + 's;';
-        } else {
-          const t = n <= 1 ? 0.5 : k / (n - 1);
-          const spread = Math.max(96, n * 40);
-          const x = -spread / 2 + t * spread;
-          const y = -28 - Math.sin(Math.PI * t) * 34;
-          style = 'left:50%;top:0;transform:translate(calc(-50% + ' + x + 'px),' + y + 'px);animation:fanIn .35s ease both ' + (k * 0.05) + 's;';
-        }
-        return { name: h, style };
-      });
-      return { ...j, active, herbFan,
+      return { ...j, active,
         hovered,
+        btnStyle: 'position:relative;background:transparent;border:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:11px;cursor:pointer;overflow:visible;z-index:' + (hovered ? 20 : (active ? 10 : 1)) + ';',
         onEnter: () => this.setState({ hoverJar: i }),
         onLeave: () => this.setState({ hoverJar: null }),
         wrapStyle: 'position:relative;transition:transform .5s cubic-bezier(.34,1.4,.6,1), opacity .4s, filter .4s;' + (hovered || active ? 'z-index:8;' : 'z-index:1;') + (active
