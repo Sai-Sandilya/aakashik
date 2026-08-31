@@ -278,8 +278,8 @@ test.describe('UX medium — landing UX', () => {
   // TC-M26
   test('reminder validates email before save', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await page.getByPlaceholder('Email address').scrollIntoViewIfNeeded();
-    await page.getByPlaceholder('Email address').fill('not-an-email');
+    await page.locator('#reminder-contact').scrollIntoViewIfNeeded();
+    await page.locator('#reminder-contact').fill('not-an-email');
     await page.getByRole('button', { name: 'Set My Reminder' }).click();
     await expect(page.getByText(/valid email/i).first()).toBeVisible({ timeout: 5000 });
   });
@@ -292,7 +292,7 @@ test.describe('UX medium — landing UX', () => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Account options' }).click();
     await page.getByRole('button', { name: 'Profile' }).click();
-    await page.getByPlaceholder('Email address').fill(newEmail);
+    await page.getByRole('dialog', { name: 'My Profile' }).getByPlaceholder('Email address').fill(newEmail);
     await page.getByRole('button', { name: 'Save changes' }).click();
     await expect(page.getByText(/Profile updated/i).first()).toBeVisible({ timeout: 5000 });
 

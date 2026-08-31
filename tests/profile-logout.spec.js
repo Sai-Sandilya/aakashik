@@ -54,13 +54,14 @@ test.describe('Landing — profile', () => {
 
     await expect(page.getByRole('heading', { name: 'My Profile' })).toBeVisible();
 
-    await page.getByPlaceholder('Full name').fill('Updated Name');
-    await page.getByPlaceholder('Phone number').fill('9876543210');
-    await page.getByPlaceholder('Email address').fill(email);
-    await page.getByPlaceholder('Address (house, street, area)').fill('12 MG Road');
-    await page.getByPlaceholder('City').fill('Hyderabad');
-    await page.getByPlaceholder('Pin code').fill('500001');
-    await page.locator('select').selectOption('Telangana');
+    const profileDialog = page.getByRole('dialog', { name: 'My Profile' });
+    await profileDialog.getByPlaceholder('Full name').fill('Updated Name');
+    await profileDialog.getByPlaceholder('Phone number').fill('9876543210');
+    await profileDialog.getByPlaceholder('Email address').fill(email);
+    await profileDialog.getByPlaceholder('Address (house, street, area)').fill('12 MG Road');
+    await profileDialog.getByPlaceholder('City').fill('Hyderabad');
+    await profileDialog.getByPlaceholder('Pin code').fill('500001');
+    await profileDialog.locator('select').selectOption('Telangana');
 
     await page.getByRole('button', { name: 'Save changes' }).click();
 
@@ -76,10 +77,11 @@ test.describe('Landing — profile', () => {
     await page.getByRole('button', { name: 'Account options' }).click();
     await page.getByRole('button', { name: 'Profile' }).click();
 
-    await expect(page.getByPlaceholder('Full name')).toHaveValue('Updated Name');
-    await expect(page.getByPlaceholder('Address (house, street, area)')).toHaveValue('12 MG Road');
-    await expect(page.getByPlaceholder('City')).toHaveValue('Hyderabad');
-    await expect(page.getByPlaceholder('Pin code')).toHaveValue('500001');
+    const profileAfterReload = page.getByRole('dialog', { name: 'My Profile' });
+    await expect(profileAfterReload.getByPlaceholder('Full name')).toHaveValue('Updated Name');
+    await expect(profileAfterReload.getByPlaceholder('Address (house, street, area)')).toHaveValue('12 MG Road');
+    await expect(profileAfterReload.getByPlaceholder('City')).toHaveValue('Hyderabad');
+    await expect(profileAfterReload.getByPlaceholder('Pin code')).toHaveValue('500001');
   });
 
   test('TC-P04 positive: save profile keeps provider metadata', async ({ page }) => {
@@ -93,8 +95,9 @@ test.describe('Landing — profile', () => {
     await page.reload();
     await page.getByRole('button', { name: 'Account options' }).click();
     await page.getByRole('button', { name: 'Profile' }).click();
-    await page.getByPlaceholder('Phone number').fill('9876543210');
-    await page.getByPlaceholder('Address (house, street, area)').fill('9 Lake View');
+    const profileDialog = page.getByRole('dialog', { name: 'My Profile' });
+    await profileDialog.getByPlaceholder('Phone number').fill('9876543210');
+    await profileDialog.getByPlaceholder('Address (house, street, area)').fill('9 Lake View');
     await page.getByRole('button', { name: 'Save changes' }).click();
     const profile = await readProfile(page);
     expect(profile.provider).toBe('google');
@@ -107,8 +110,9 @@ test.describe('Landing — profile', () => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Account options' }).click();
     await page.getByRole('button', { name: 'Profile' }).click();
-    await page.getByPlaceholder('Full name').fill('Should Not Persist');
-    await page.getByPlaceholder('City').fill('DiscardCity');
+    const profileDialog = page.getByRole('dialog', { name: 'My Profile' });
+    await profileDialog.getByPlaceholder('Full name').fill('Should Not Persist');
+    await profileDialog.getByPlaceholder('City').fill('DiscardCity');
     await page.getByRole('button', { name: 'Cancel' }).click();
     await expect(page.getByRole('heading', { name: 'My Profile' })).toHaveCount(0);
     const profile = await readProfile(page);
@@ -116,8 +120,9 @@ test.describe('Landing — profile', () => {
     expect(profile.city || '').toBe('');
     await page.getByRole('button', { name: 'Account options' }).click();
     await page.getByRole('button', { name: 'Profile' }).click();
-    await expect(page.getByPlaceholder('Full name')).toHaveValue('Profile Tester');
-    await expect(page.getByPlaceholder('City')).toHaveValue('');
+    const profileAgain = page.getByRole('dialog', { name: 'My Profile' });
+    await expect(profileAgain.getByPlaceholder('Full name')).toHaveValue('Profile Tester');
+    await expect(profileAgain.getByPlaceholder('City')).toHaveValue('');
   });
 });
 
