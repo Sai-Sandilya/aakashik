@@ -7,7 +7,7 @@ import { config } from '../config.js';
 const adminLoginRateLimit = createRateLimit({ windowMs: 60_000, max: 10 });
 
 export default async function adminAuthRoutes(fastify) {
-  const loginHooks = config.isTest ? [] : [adminLoginRateLimit];
+  const loginHooks = (config.isTest || config.isE2e) ? [] : [adminLoginRateLimit];
   fastify.post('/login', { preHandler: loginHooks }, async (request, reply) => {
     try {
       const { email, password } = validateAdminLogin(request.body || {});

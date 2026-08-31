@@ -961,9 +961,16 @@ class Component extends DCLogic {
           if (res.status === 401 || res.status === 403) {
             return this.setState({ loginError: data.message || 'Incorrect admin email or password.' });
           }
+          // Known demo email + wrong password: always show auth error (even if API is down / rate-limited).
+          if (email === this._demoAdminEmail() && pw !== this._demoAdminPassword()) {
+            return this.setState({ loginError: 'Incorrect admin email or password.' });
+          }
           if (this._canDemoMockLogin(email, pw)) return this._finishMockLogin();
           return this.setState({ loginError: data.message || 'Admin API unavailable.' });
         } catch (er) {
+          if (email === this._demoAdminEmail() && pw !== this._demoAdminPassword()) {
+            return this.setState({ loginError: 'Incorrect admin email or password.' });
+          }
           if (this._canDemoMockLogin(email, pw)) return this._finishMockLogin();
           this.setState({ loginError: 'Could not reach admin API. Try again.' });
         }
