@@ -566,15 +566,15 @@ test.describe('UX low — polish & a11y', () => {
   });
 
   // TC-L58
-  test('TC-L58 positive: WhatsApp reminder normalizes phone before save', async ({ page }) => {
+  test('TC-L58 positive: email reminder normalizes address before save', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Set My Reminder' }).scrollIntoViewIfNeeded();
-    await page.locator('#reminder-contact').fill('+91 98765 43210');
+    await page.locator('#reminder-contact').fill('Remind.Me@Example.COM');
     await page.getByRole('button', { name: 'Set My Reminder' }).click();
-    await expect(page.locator('#ak-reminder-panel').getByText("You're all set")).toBeVisible();
+    await expect(page.locator('#ak-reminder-panel').getByText("You're all set")).toBeVisible({ timeout: 10000 });
     const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_reminder') || '{}'));
-    expect(stored.contact).toBe('9876543210');
-    expect(stored.channel).toBe('whatsapp');
+    expect(stored.contact).toBe('remind.me@example.com');
+    expect(stored.channel).toBe('email');
   });
 
   // TC-L59
@@ -589,18 +589,18 @@ test.describe('UX low — polish & a11y', () => {
   });
 
   // TC-L60
-  test('TC-L60 positive: email reminder channel persists valid address', async ({ page }) => {
+  test('TC-L60 positive: email reminder persists after reload', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Set My Reminder' }).scrollIntoViewIfNeeded();
-    await page.getByRole('button', { name: 'Email reminder channel' }).click();
-    await page.locator('#reminder-contact').fill('Remind.Me@Example.COM');
+    const email = `persist-${Date.now()}@test.com`;
+    await page.locator('#reminder-contact').fill(email);
     await page.getByRole('button', { name: 'Set My Reminder' }).click();
-    await expect(page.getByRole('status').filter({ hasText: "You're all set" })).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: "You're all set" })).toBeVisible({ timeout: 10000 });
     const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_reminder') || '{}'));
-    expect(stored.contact).toBe('remind.me@example.com');
+    expect(stored.contact).toBe(email);
     expect(stored.channel).toBe('email');
     await page.reload();
-    await expect(page.getByRole('status').filter({ hasText: /Email · remind\.me@example\.com/i })).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: new RegExp('Email · ' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) })).toBeVisible();
   });
 
   // TC-L61

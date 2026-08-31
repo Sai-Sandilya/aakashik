@@ -73,15 +73,17 @@ test.describe('Category 1 UX fixes', () => {
   });
 
   // TC-C05
-  test('reminder form saves contact and time', async ({ page }) => {
+  test('reminder form saves email and time via API', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Set My Reminder' }).scrollIntoViewIfNeeded();
-    await page.getByPlaceholder('10-digit mobile number').fill('9876543210');
+    const email = `rem-${Date.now()}@test.com`;
+    await page.getByPlaceholder('Email address').fill(email);
     await page.getByRole('button', { name: 'Set My Reminder' }).click();
-    await expect(page.getByText("You're all set")).toBeVisible();
+    await expect(page.getByText("You're all set")).toBeVisible({ timeout: 10000 });
     const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_reminder') || '{}'));
-    expect(stored.contact).toBe('9876543210');
+    expect(stored.contact).toBe(email);
     expect(stored.time).toBeTruthy();
+    expect(stored.channel).toBe('email');
   });
 
   // TC-C06

@@ -214,3 +214,18 @@ export function validateNewsletterEmail(raw) {
   }
   return email;
 }
+
+export function validateReminderTime(raw) {
+  const time = String(raw || '').trim();
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+    throw new ApiError(400, 'validation_error', 'Enter a valid reminder time');
+  }
+  return time;
+}
+
+export function validateReminderSubscribe(body = {}) {
+  const email = validateNewsletterEmail(body.email);
+  const remindTime = validateReminderTime(body.time ?? body.remindTime);
+  const timezone = String(body.timezone || 'Asia/Kolkata').trim() || 'Asia/Kolkata';
+  return { email, remindTime, timezone };
+}

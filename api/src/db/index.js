@@ -135,6 +135,17 @@ CREATE TABLE IF NOT EXISTS newsletter_subscribers (
 );
 
 CREATE INDEX IF NOT EXISTS idx_newsletter_subscribed_at ON newsletter_subscribers(subscribed_at DESC);
+
+CREATE TABLE IF NOT EXISTS ritual_reminders (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  remind_time TEXT NOT NULL,
+  timezone TEXT NOT NULL DEFAULT 'Asia/Kolkata',
+  subscribed_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_ritual_reminders_time ON ritual_reminders(remind_time);
 `;
 
 function seedIfEmpty(db) {

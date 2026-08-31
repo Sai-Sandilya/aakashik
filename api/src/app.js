@@ -9,6 +9,7 @@ import productRoutes from './routes/products.js';
 import inventoryRoutes from './routes/inventory.js';
 import orderRoutes from './routes/orders.js';
 import newsletterRoutes from './routes/newsletter.js';
+import reminderRoutes from './routes/reminders.js';
 import { config } from './config.js';
 
 export async function buildApp(options = {}) {
@@ -64,6 +65,7 @@ export async function buildApp(options = {}) {
   await app.register(inventoryRoutes, { prefix: '/api' });
   await app.register(orderRoutes, { prefix: '/api' });
   await app.register(newsletterRoutes, { prefix: '/api' });
+  await app.register(reminderRoutes, { prefix: '/api' });
 
   app.addHook('onClose', async () => {
     if (options.closeDbOnShutdown !== false && options.db) {
