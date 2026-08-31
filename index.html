@@ -456,9 +456,9 @@
 
     <!-- shelf -->
     <div style="position: relative; padding: 40px 20px 0;">
-      <div style="display: flex; gap: clamp(24px, 7vw, 130px); justify-content: center; flex-wrap: wrap; align-items: flex-end; padding-bottom: 20px; min-height: 250px;">
+      <div style="display: flex; gap: clamp(24px, 7vw, 130px); justify-content: center; flex-wrap: wrap; align-items: flex-end; padding-bottom: 20px; min-height: 250px; overflow: visible;">
         <sc-for list="{{ jars }}" as="j" hint-placeholder-count="6">
-          <button onClick="{{ j.onClick }}" onMouseEnter="{{ j.onEnter }}" onMouseLeave="{{ j.onLeave }}" style="position: relative; background: transparent; border: none; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 11px; cursor: pointer;">
+          <button onClick="{{ j.onClick }}" onMouseEnter="{{ j.onEnter }}" onMouseLeave="{{ j.onLeave }}" style="position: relative; background: transparent; border: none; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 11px; cursor: pointer; overflow: visible;">
             <sc-if value="{{ j.hovered }}">
               <div style="position: absolute; left: 0; right: 0; top: 0; height: 0; z-index: 6; pointer-events: none;">
                 <sc-for list="{{ j.herbFan }}" as="hf" hint-placeholder-count="3">
@@ -1170,7 +1170,7 @@
           <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; font-size: 13.5px; color: #C5CBB4;">
             <li style="display: flex; align-items: center; gap: 10px;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B2B79E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
-              <a href="mailto:care@aakashikwellness.in" style="color: #C5CBB4; text-decoration: none;">care@aakashikwellness.in</a>
+              <a href="mailto:info@aakashikwellness.com" style="color: #C5CBB4; text-decoration: none;">info@aakashikwellness.com</a>
             </li>
             <li style="display: flex; align-items: center; gap: 10px;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B2B79E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
@@ -1942,7 +1942,7 @@
           <p style="margin: 0 0 6px; font-weight: 600; color: #2E3D2C;">7. Governing Law</p>
           <p style="margin: 0 0 14px;">These Terms shall be governed by the applicable laws of India.</p>
           <p style="margin: 0 0 6px; font-weight: 600; color: #2E3D2C;">8. Contact</p>
-          <p style="margin: 0;">Aakashik Wellness · care@aakashikwellness.in · +91 87662 84078</p>
+          <p style="margin: 0;">Aakashik Wellness · info@aakashikwellness.com · +91 87662 84078</p>
         </div>
         <div style="padding: 14px 26px 22px; border-top: 1px solid #E4DBC8; flex-shrink: 0;">
           <p style="font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #A8894E; margin: 0 0 8px;">Full policies</p>
@@ -3069,21 +3069,28 @@ class Component extends DCLogic {
     const jars = JARS.map((j, i) => {
       const active = i === safeJarIdx;
       const herbList = j.herbs || [];
+      const hovered = i === this.state.hoverJar;
       const herbFan = herbList.map((h, k) => {
         const n = herbList.length;
-        const t = n <= 1 ? 0.5 : k / (n - 1);
-        const x = -48 + t * 96;
-        const y = -28 - Math.sin(Math.PI * t) * 36;
-        return {
-          name: h,
-          style: 'left:50%;top:0;transform:translate(calc(-50% + ' + x + 'px),' + y + 'px);animation:fanIn .35s ease both ' + (k * 0.05) + 's;',
-        };
+        let style;
+        if (n >= 5) {
+          const rowH = 24;
+          const yOff = k * rowH - ((n - 1) * rowH) / 2;
+          style = 'left:calc(50% + 58px);top:50%;transform:translate(0, calc(-50% + ' + yOff + 'px));animation:fanIn .35s ease both ' + (k * 0.04) + 's;';
+        } else {
+          const t = n <= 1 ? 0.5 : k / (n - 1);
+          const spread = Math.max(96, n * 40);
+          const x = -spread / 2 + t * spread;
+          const y = -28 - Math.sin(Math.PI * t) * 34;
+          style = 'left:50%;top:0;transform:translate(calc(-50% + ' + x + 'px),' + y + 'px);animation:fanIn .35s ease both ' + (k * 0.05) + 's;';
+        }
+        return { name: h, style };
       });
       return { ...j, active, herbFan,
-        hovered: i === this.state.hoverJar,
+        hovered,
         onEnter: () => this.setState({ hoverJar: i }),
         onLeave: () => this.setState({ hoverJar: null }),
-        wrapStyle: 'position:relative;transition:transform .5s cubic-bezier(.34,1.4,.6,1), opacity .4s, filter .4s;' + (active
+        wrapStyle: 'position:relative;transition:transform .5s cubic-bezier(.34,1.4,.6,1), opacity .4s, filter .4s;' + (hovered || active ? 'z-index:8;' : 'z-index:1;') + (active
           ? 'animation: jarBob 3.4s ease-in-out infinite;z-index:2;'
           : 'transform:translateY(8px) scale(0.9);opacity:0.5;filter:grayscale(0.2);z-index:1;'),
         lidStyle: 'width:104px;height:18px;border-radius:9px 9px 4px 4px;background:linear-gradient(180deg,' + j.cap + ',rgba(0,0,0,0.15) 140%);transform-origin:center bottom;' + (active ? 'animation: lidUncork .8s cubic-bezier(.34,1.56,.64,1) forwards;' : 'transition:transform .4s;transform:none;'),
@@ -3363,7 +3370,7 @@ class Component extends DCLogic {
         { list: ['Opened or used products', 'Partially consumed products', 'Products damaged due to improper storage or handling', 'Products returned due to change of mind', 'Products where the customer simply does not like the taste, smell, texture, or individual experience'] },
         { p: 'Nothing in this policy limits any rights available to consumers under applicable law.' },
         { h: 'For return or refund assistance' },
-        { p: 'Aakashik Wellness · care@aakashikwellness.in · +91 87662 84078' },
+        { p: 'Aakashik Wellness · info@aakashikwellness.com · +91 87662 84078' },
       ] },
       disclaimer: { title: 'Disclaimer', blocks: [
         { p: 'The products offered by Aakashik Wellness are intended for general wellness and wellbeing purposes only. Our products are not intended to diagnose, treat, cure, or prevent any disease, illness, or medical condition and should not be considered a substitute for professional medical advice, diagnosis, or treatment.' },
@@ -3390,7 +3397,7 @@ class Component extends DCLogic {
         { h: '7. Governing Law' },
         { p: 'These Terms shall be governed by the applicable laws of India.' },
         { h: '8. Contact' },
-        { p: 'Aakashik Wellness · care@aakashikwellness.in · +91 87662 84078' },
+        { p: 'Aakashik Wellness · info@aakashikwellness.com · +91 87662 84078' },
       ] },
       privacy: { title: 'Privacy Policy', blocks: [
         { p: 'At Aakashik Wellness, we respect your privacy and are committed to protecting your personal information.' },
@@ -3408,7 +3415,7 @@ class Component extends DCLogic {
         { h: '6. Your Rights' },
         { p: 'You may contact us to request correction, updating, or deletion of your personal information, subject to applicable law.' },
         { h: 'Privacy queries' },
-        { p: 'Aakashik Wellness · care@aakashikwellness.in · +91 87662 84078' },
+        { p: 'Aakashik Wellness · info@aakashikwellness.com · +91 87662 84078' },
       ] },
     };
     const legalKey = this.state.legal;

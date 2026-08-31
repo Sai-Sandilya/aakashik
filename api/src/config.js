@@ -19,5 +19,5 @@ export const config = {
   smtpSecure: process.env.SMTP_SECURE !== 'false',
   smtpUser: process.env.SMTP_USER || '',
   smtpPass: process.env.SMTP_PASS || '',
-  smtpFrom: process.env.SMTP_FROM || 'Aakashik Wellness <care@aakashikwellness.in>',
+  smtpFrom: process.env.SMTP_FROM || 'Aakashik Wellness <info@aakashikwellness.com>',
 };

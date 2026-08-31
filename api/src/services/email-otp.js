@@ -50,7 +50,7 @@ async function deliverOtpEmail({ to, displayName, code, subject, intro }) {
     throw new ApiError(
       503,
       'email_not_configured',
-      'Email verification is not configured yet. Please use Google sign-in or contact care@aakashikwellness.in.',
+      'Email verification is not configured yet. Please use Google sign-in or contact info@aakashikwellness.com.',
     );
   }
 
