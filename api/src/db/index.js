@@ -127,6 +127,14 @@ CREATE TABLE IF NOT EXISTS order_status_history (
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_placed_at ON orders(placed_at DESC);
 CREATE INDEX IF NOT EXISTS idx_products_active ON products(active, hidden);
+
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  subscribed_at INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_newsletter_subscribed_at ON newsletter_subscribers(subscribed_at DESC);
 `;
 
 function seedIfEmpty(db) {

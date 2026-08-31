@@ -18,10 +18,18 @@ module.exports = defineConfig({
     screenshot: 'only-on-failure',
     video: 'off',
   },
-  webServer: {
-    command: 'node scripts/e2e-static-server.js',
-    url: BASE_URL,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      command: 'bash scripts/start-e2e-api.sh',
+      url: 'http://127.0.0.1:3001/api/health',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    {
+      command: 'node scripts/e2e-static-server.js',
+      url: BASE_URL,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+  ],
 });

@@ -60,14 +60,14 @@ test.describe('Category 1 UX fixes', () => {
   });
 
   // TC-C04
-  test('newsletter email is saved to localStorage', async ({ page }) => {
+  test('newsletter email is saved via API', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     const email = `news-${Date.now()}@test.com`;
     await page.locator('footer input[type="email"]').fill(email);
     await page.locator('footer button[type="submit"]').click();
+    await expect(page.getByText(new RegExp('Subscribed · ' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))).toBeVisible({ timeout: 10000 });
     await expect(page.locator('#newsletter-email')).toHaveCount(0);
-    await expect(page.getByText(new RegExp('Saved · ' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))).toBeVisible();
     const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_newsletter') || '{}'));
     expect(stored.email).toBe(email);
   });

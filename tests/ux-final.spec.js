@@ -273,10 +273,10 @@ test.describe('UX final — Landing honesty, layout, a11y', () => {
     await expect(page.getByText(/simulated demo tracking/i)).toBeVisible();
   });
 
-  test('TC-F19 positive: privacy policy describes demo orders / mock payments', async ({ page }) => {
+  test('TC-F19 positive: privacy policy describes newsletter use and mock payments', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Privacy Policy' }).click();
-    await expect(page.getByText(/Save demo orders on this device/i)).toBeVisible();
+    await expect(page.getByText(/Send newsletter updates when you subscribe/i)).toBeVisible();
     await expect(page.getByText(/mock checkout only/i)).toBeVisible();
   });
 

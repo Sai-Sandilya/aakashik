@@ -177,10 +177,11 @@ test.describe('UX remaining — shopper honesty (3–7, 10)', () => {
     await expect(page.getByText(/status matches Admin updates/i)).toBeVisible();
   });
 
-  test('TC-R13 positive: reminder + newsletter are device-only demo', async ({ page }) => {
+  test('TC-R13 positive: reminder is device-only demo; newsletter is live', async ({ page }) => {
     await page.goto(LANDING_URL);
     await expect(page.getByText(/Demo only — preference is saved on this device/i)).toBeVisible();
-    await expect(page.getByText(/Join our newsletter \(demo — this device\)/i)).toBeVisible();
+    await expect(page.getByText(/^Join our newsletter$/i)).toBeVisible();
+    await expect(page.getByText(/Join our newsletter \(demo/i)).not.toBeVisible();
   });
 });
 

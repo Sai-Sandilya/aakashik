@@ -1133,7 +1133,7 @@
             </span>
           </div>
           <p style="font-size: 13.5px; line-height: 1.7; color: #C5CBB4; margin: 0 0 20px; max-width: 300px;">Traditional Ayurvedic care for the modern home — chemical-free bath powders, kashayams and sacred blends.</p>
-          <p style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #B2B79E; margin: 0 0 10px;">Join our newsletter (demo — this device)</p>
+          <p style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #B2B79E; margin: 0 0 10px;">Join our newsletter</p>
           <sc-if value="{{ notSubscribed }}">
             <form onSubmit="{{ subscribe }}" aria-label="Newsletter signup" novalidate style="display: flex; gap: 8px; max-width: 320px;">
               <label for="newsletter-email" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;">Email address</label>
@@ -2548,8 +2548,8 @@ class Component extends DCLogic {
             try {
               const p = JSON.parse(localStorage.getItem('ak_profile') || '{}');
               if (p && p.demoSocial) return;
-              // Only clear server-backed sessions (Google / API email). Keep local checkout demos.
-              if (!(p && (p.provider === 'google' || p.provider === 'local'))) return;
+              // Expired Google OAuth only — local browser accounts stay signed in without a server cookie.
+              if (!(p && p.provider === 'google')) return;
               const hadLocal = localStorage.getItem('ak_logged') === '1';
               if (!hadLocal) return;
               localStorage.removeItem('ak_logged');
@@ -3449,7 +3449,7 @@ class Component extends DCLogic {
         { p: 'When you place an order, contact us, or use our website, we may collect information such as your name, phone number, email address, billing and shipping address, order details, and payment-related information. We may also collect basic website usage information such as IP address, browser type, and browsing activity.' },
         { h: '2. How We Use Your Information' },
         { p: 'We may use your information to:' },
-        { list: ['Save demo orders on this device', 'Show simulated tracking timelines in the browser', 'Respond to enquiries when contact channels are live', 'Improve our products and website', 'Remember newsletter preferences on this device (demo)', 'Comply with legal and regulatory requirements when backend is connected'] },
+        { list: ['Process and deliver your orders', 'Send order and shipping updates', 'Respond to enquiries and support requests', 'Improve our products and website', 'Send newsletter updates when you subscribe', 'Comply with legal and regulatory requirements'] },
         { h: '3. Payment & Third-Party Services' },
         { p: 'This demo uses mock checkout only — no real payment processors or shipping partners are connected yet. When live payments are enabled, card details will be handled by secure third-party providers and we will not store full payment credentials.' },
         { h: '4. Cookies' },
@@ -4227,19 +4227,31 @@ class Component extends DCLogic {
       subscribed: this.state.subscribed,
       notSubscribed: !this.state.subscribed,
       newsletterEmail: this.state.newsletterEmail,
-      newsletterSummary: 'Saved · ' + ((this.state.newsletterEmail || '').trim() || 'this device') + ' (demo)',
+      newsletterSummary: 'Subscribed · ' + ((this.state.newsletterEmail || '').trim() || 'your email'),
       onNewsletterEmail: (e) => this.setState({ newsletterEmail: e.target.value }),
       clearNewsletter: () => {
         try { localStorage.removeItem('ak_newsletter'); } catch (er) {}
-        this.setState({ subscribed: false });
+        this.setState({ subscribed: false, newsletterEmail: '' });
       },
       subscribe: (e) => {
         if (e && e.preventDefault) e.preventDefault();
         const email = (this.state.newsletterEmail || '').trim().toLowerCase();
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { this.showToast('Enter a valid email'); return; }
-        this._writeJSON('ak_newsletter', { email, subscribedAt: Date.now() });
-        this.setState({ subscribed: true, newsletterEmail: email });
-        this.showToast('Newsletter saved on this device');
+        fetch('/api/newsletter/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        })
+          .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+          .then(({ ok, data }) => {
+            if (!ok) throw new Error((data && data.message) || 'Could not subscribe right now');
+            this._writeJSON('ak_newsletter', { email, subscribedAt: Date.now() });
+            this.setState({ subscribed: true, newsletterEmail: email });
+            this.showToast(data.duplicate ? 'You are already subscribed' : 'You are subscribed!');
+          })
+          .catch((err) => {
+            this.showToast(err.message || 'Could not subscribe right now');
+          });
       },
 
       circadian: { greeting: PERIODS[autoKey].greet, autoLabel: PERIODS[autoKey].label },

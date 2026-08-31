@@ -205,3 +205,12 @@ export function validateStatusUpdate(body) {
   if (!ORDER_STATUSES.includes(status)) throw new ApiError(400, 'invalid_status', 'Unknown order status');
   return status;
 }
+
+export function validateNewsletterEmail(raw) {
+  const email = String(raw || '').trim().toLowerCase();
+  if (!email) throw new ApiError(400, 'validation_error', 'Enter a valid email');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+    throw new ApiError(400, 'validation_error', 'Enter a valid email');
+  }
+  return email;
+}
