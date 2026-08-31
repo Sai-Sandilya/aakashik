@@ -254,7 +254,7 @@ test.describe('UX final — Landing honesty, layout, a11y', () => {
 
   test('TC-F16 positive: footer email/phone are clickable links', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await expect(page.locator('footer a[href="mailto:care@aakashikwellness.in"]')).toBeVisible();
+    await expect(page.locator('footer a[href="mailto:info@aakashikwellness.com"]')).toBeVisible();
     await expect(page.locator('footer a[href="tel:+918766284078"]')).toBeVisible();
   });
 
