@@ -1,9 +1,14 @@
 import { verifyAdminCredentials, signAdminToken, requireAdmin } from '../services/auth.js';
 import { sendError, ApiError } from '../lib/errors.js';
 import { validateAdminLogin } from '../lib/validation.js';
+import { createRateLimit } from '../lib/rate-limit.js';
+import { config } from '../config.js';
+
+const adminLoginRateLimit = createRateLimit({ windowMs: 60_000, max: 10 });
 
 export default async function adminAuthRoutes(fastify) {
-  fastify.post('/login', async (request, reply) => {
+  const loginHooks = config.isTest ? [] : [adminLoginRateLimit];
+  fastify.post('/login', { preHandler: loginHooks }, async (request, reply) => {
     try {
       const { email, password } = validateAdminLogin(request.body || {});
       const admin = verifyAdminCredentials(fastify.db, email, password);

@@ -1,10 +1,34 @@
-import { DatabaseSync } from 'node:sqlite';
+import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config } from '../config.js';
 import { BUILTIN_PRODUCTS, DEFAULT_STOCK } from '../lib/constants.js';
 import { withTransaction } from './transaction.js';
+
+const require = createRequire(import.meta.url);
+
+function openDatabase(dbPath) {
+  try {
+    const BetterSqlite = require('better-sqlite3');
+    const db = new BetterSqlite(dbPath);
+    db.pragma('foreign_keys = ON');
+    return db;
+  } catch (err) {
+    console.warn('[aakashik-api] better-sqlite3 unavailable:', err?.message || err);
+  }
+  return null;
+}
+
+let nativeSqlite;
+async function openNativeDatabase(dbPath) {
+  if (!nativeSqlite) {
+    nativeSqlite = await import('node:sqlite');
+  }
+  const db = new nativeSqlite.DatabaseSync(dbPath);
+  db.exec('PRAGMA foreign_keys = ON');
+  return db;
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -17,6 +41,30 @@ CREATE TABLE IF NOT EXISTS admin_users (
   password TEXT NOT NULL,
   name TEXT NOT NULL DEFAULT 'Owner'
 );
+
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL DEFAULT '',
+  phone TEXT NOT NULL DEFAULT '',
+  google_id TEXT UNIQUE,
+  avatar TEXT NOT NULL DEFAULT '',
+  password_hash TEXT NOT NULL DEFAULT '',
+  verified INTEGER NOT NULL DEFAULT 1,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS otp_codes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL,
+  code TEXT NOT NULL,
+  purpose TEXT NOT NULL DEFAULT 'signup',
+  expires_at INTEGER NOT NULL,
+  created_at INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_otp_email_purpose ON otp_codes(lower(email), purpose);
 
 CREATE TABLE IF NOT EXISTS products (
   id TEXT PRIMARY KEY,
@@ -190,19 +238,33 @@ function seedMockOrders(db, now) {
   }
 }
 
-export function createDb(options = {}) {
+function migrateSchema(db) {
+  let userCols = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
+  if (!userCols.includes('password_hash')) {
+    db.exec('ALTER TABLE users ADD COLUMN password_hash TEXT NOT NULL DEFAULT \'\'');
+    userCols = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
+  }
+  if (!userCols.includes('session_version')) {
+    db.exec('ALTER TABLE users ADD COLUMN session_version INTEGER NOT NULL DEFAULT 0');
+  }
+}
+
+export async function createDb(options = {}) {
   const memory = options.memory ?? config.isTest;
   let dbPath = ':memory:';
 
   if (!memory) {
-    const resolved = path.resolve(path.join(__dirname, '..', options.dbPath || config.dbPath));
+    const appRoot = path.resolve(path.join(__dirname, '..', '..'));
+    const resolved = path.resolve(appRoot, options.dbPath || config.dbPath);
     fs.mkdirSync(path.dirname(resolved), { recursive: true });
     dbPath = resolved;
+    console.log('[aakashik-api] db path', dbPath);
   }
 
-  const db = new DatabaseSync(dbPath);
-  db.exec('PRAGMA foreign_keys = ON');
+  const db = openDatabase(dbPath) || await openNativeDatabase(dbPath);
+  if (!db) throw new Error('No SQLite driver available (better-sqlite3 and node:sqlite both failed)');
   db.exec(SCHEMA);
+  migrateSchema(db);
 
   if (options.seed !== false) seedIfEmpty(db);
 
@@ -210,7 +272,12 @@ export function createDb(options = {}) {
 }
 
 export function getDb() {
-  if (!dbInstance) dbInstance = createDb();
+  if (!dbInstance) throw new Error('Database not initialized');
+  return dbInstance;
+}
+
+export async function initDb(options = {}) {
+  if (!dbInstance) dbInstance = await createDb(options);
   return dbInstance;
 }
 
@@ -228,9 +295,9 @@ export function closeDb() {
   }
 }
 
-export function resetDbForTests() {
+export async function resetDbForTests() {
   closeDb();
-  const db = createDb({ memory: true, seed: true });
+  const db = await createDb({ memory: true, seed: true });
   setDb(db);
   return db;
 }

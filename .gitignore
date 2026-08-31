@@ -1,6 +1,14 @@
 node_modules/
 api/node_modules/
 api/data/
+api/src/data/
+*.db
+*.zip
+client_secret_*.json
+*.googleusercontent.com.json
+.env
+api/.env
+api/runtime.env
 .playwright-browsers/
 /test-results/
 /playwright-report/

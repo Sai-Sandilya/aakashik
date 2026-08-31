@@ -11,7 +11,7 @@
     "api:start": "npm start --prefix api",
     "api:dev": "npm run dev --prefix api",
     "api:test": "npm test --prefix api",
-    "postinstall": "playwright install chromium"
+    "postinstall": "playwright install chromium ffmpeg"
   },
   "devDependencies": {
     "@playwright/test": "^1.51.0"

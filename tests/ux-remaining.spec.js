@@ -19,9 +19,10 @@ const {
   enterOtpAndVerify,
   waitForAuthSuccess,
   signInWithEmail,
+  mockEmailLoginApi,
 } = require('./helpers/auth-ui');
 
-const LANDING_URL = '/Aakashik%20Landing.dc.html';
+const LANDING_URL = '/';
 
 test.describe('UX remaining — password hashing & demo OTP (1-2, 11-12)', () => {
   test.beforeEach(async ({ page }) => {
@@ -188,9 +189,10 @@ test.describe('UX remaining — checkout remember, validation, discounts (8–9,
     await clearAuthStorage(page);
   });
 
-  test('TC-R14 positive: checkout Keep me signed in persists session', async ({ page }) => {
+  test('TC-R14 positive: checkout Sign in with Keep me signed in resumes delivery', async ({ page }) => {
     const email = `rem-${Date.now()}@test.com`;
     await seedEmailUser(page, { email, password: STRONG_PASSWORD });
+    await mockEmailLoginApi(page, { email, password: STRONG_PASSWORD, name: 'Remember User' });
     await page.evaluate(() => {
       localStorage.removeItem('ak_logged');
       localStorage.removeItem('ak_persist');
@@ -203,18 +205,23 @@ test.describe('UX remaining — checkout remember, validation, discounts (8–9,
     await page.locator('[data-cart-icon="true"]').click({ force: true });
     await page.getByRole('button', { name: 'Proceed to Checkout' }).evaluate((el) => /** @type {HTMLElement} */ (el).click());
     await expect(page.getByRole('heading', { name: 'Sign in to check out' })).toBeVisible({ timeout: 8000 });
-    await page.getByPlaceholder('10-digit phone or you@example.com').fill(email);
-    await page.locator('input[type="password"]').fill(STRONG_PASSWORD);
+    await page.getByRole('button', { name: 'Sign in' }).click();
+    await page.waitForURL(/\/login/);
+    await fillContact(page, email);
+    await fillPassword(page, STRONG_PASSWORD);
     const remember = page.locator('label').filter({ hasText: 'Keep me signed in' }).locator('input');
     await expect(remember).toBeChecked();
-    await page.getByRole('button', { name: 'Continue' }).click();
+    await submitButton(page, 'Sign In').click();
+    await waitForAuthSuccess(page);
     await expect(page.getByRole('heading', { name: 'Delivery details' })).toBeVisible({ timeout: 10000 });
     const flags = await page.evaluate(() => ({
       persist: localStorage.getItem('ak_persist'),
       logged: localStorage.getItem('ak_logged'),
+      resume: sessionStorage.getItem('ak_checkout_resume'),
     }));
     expect(flags.persist).toBe('1');
     expect(flags.logged).toBe('1');
+    expect(flags.resume).toBeNull();
   });
 
   test('TC-R15 negative: checkout invalid phone is rejected', async ({ page }) => {
@@ -312,7 +319,7 @@ test.describe('UX remaining — a11y, i18n, geo, polish (13, 16–22)', () => {
   test('TC-R20 positive: i18n disclosure mentions cart/checkout stay English', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Language' }).click();
-    await expect(page.getByText(/Partial — cart & checkout stay English/i)).toBeVisible();
+    await expect(page.getByText(/Partial — products, search, cart & checkout stay English/i)).toBeVisible();
   });
 
   test('TC-R21 positive: weather is opt-in, not auto-requested', async ({ page }) => {
@@ -321,7 +328,8 @@ test.describe('UX remaining — a11y, i18n, geo, polish (13, 16–22)', () => {
   });
 
   test('TC-R22 positive: placeholders use example.com', async ({ page }) => {
-    await page.goto(LANDING_URL);
+    const email = `place-${Date.now()}@test.com`;
+    await seedEmailUser(page, { email, password: STRONG_PASSWORD, name: 'Placeholder User' });
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
         'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },

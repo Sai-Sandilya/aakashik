@@ -16,7 +16,7 @@ const {
   waitForAuthSuccess,
 } = require('./helpers/auth-ui');
 
-const LANDING_URL = '/Aakashik%20Landing.dc.html';
+const LANDING_URL = '/';
 
 test.describe('UX phone signup — no overwrite', () => {
   test.beforeEach(async ({ page }) => {
@@ -102,9 +102,10 @@ test.describe('UX phone signup — no overwrite', () => {
     await expect(page.getByRole('heading', { name: 'Sign in to check out' })).toBeVisible({ timeout: 8000 });
 
     await page.getByRole('button', { name: 'Create Account' }).click();
-    await page.getByPlaceholder('Full name').fill('Checkout Attacker');
-    await page.getByPlaceholder('10-digit phone or you@example.com').fill(phone);
-    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.waitForURL(/\/signup/);
+    await page.getByPlaceholder('Enter full name').fill('Checkout Attacker');
+    await fillContact(page, phone);
+    await submitButton(page, 'Create Account').click();
 
     await expect(page.getByText(/An account already exists for this phone/i)).toBeVisible({ timeout: 5000 });
 
@@ -127,14 +128,15 @@ test.describe('UX phone signup — no overwrite', () => {
     await expect(page.getByRole('heading', { name: 'Sign in to check out' })).toBeVisible({ timeout: 8000 });
 
     await page.getByRole('button', { name: 'Create Account' }).click();
-    await page.getByPlaceholder('Full name').fill('Checkout New');
-    await page.getByPlaceholder('10-digit phone or you@example.com').fill(phone);
-    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.waitForURL(/\/signup/);
+    await page.getByPlaceholder('Enter full name').fill('Checkout New');
+    await fillContact(page, phone);
+    await submitButton(page, 'Create Account').click();
 
     const code = await readStoredCode(page, 'ak_pending_otp');
     expect(code).toMatch(/^\d{4}$/);
-    await page.getByPlaceholder('4-digit code').fill(code);
-    await page.getByRole('button', { name: 'Verify & Continue' }).click();
+    await enterOtpAndVerify(page, code);
+    await waitForAuthSuccess(page);
     await expect(page.getByRole('heading', { name: 'Delivery details' })).toBeVisible({ timeout: 10000 });
 
     const users = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_users') || '{}'));

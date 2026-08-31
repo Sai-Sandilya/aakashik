@@ -17,8 +17,8 @@ const {
   waitForAuthSuccess,
 } = require('./helpers/auth-ui');
 
-const LANDING_URL = '/Aakashik%20Landing.dc.html';
-const AUTH_URL = '/Aakashik%20Auth.dc.html';
+const LANDING_URL = '/';
+const AUTH_URL = '/login';
 
 test.describe('UX medium — session & profile', () => {
   test.beforeEach(async ({ page }) => {
@@ -119,9 +119,9 @@ test.describe('UX medium — auth OTP / forgot / social', () => {
   // TC-M16
   test('social buttons are labeled as demo', async ({ page }) => {
     await gotoAuth(page);
-    await expect(page.getByRole('button', { name: /Google \(demo\)/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Google$/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /GitHub \(demo\)/i })).toBeVisible();
-    await expect(page.getByText(/Demo-only/i).first()).toBeVisible();
+    await expect(page.getByText(/Demo auth — accounts stay in this browser only/i).first()).toBeVisible();
   });
 
   // TC-M17
@@ -241,7 +241,7 @@ test.describe('UX medium — landing UX', () => {
   test('language switcher discloses partial translation', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Language' }).click();
-    await expect(page.getByText(/Partial — cart & checkout stay English/i)).toBeVisible();
+    await expect(page.getByText(/Partial — products, search, cart & checkout stay English/i)).toBeVisible();
   });
 
   // TC-M21
@@ -278,8 +278,8 @@ test.describe('UX medium — landing UX', () => {
   // TC-M26
   test('reminder validates phone for WhatsApp channel', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await page.getByPlaceholder('Phone or email').scrollIntoViewIfNeeded();
-    await page.getByPlaceholder('Phone or email').fill('not-a-contact');
+    await page.getByPlaceholder('10-digit mobile number').scrollIntoViewIfNeeded();
+    await page.getByPlaceholder('10-digit mobile number').fill('not-a-contact');
     await page.getByRole('button', { name: 'Set My Reminder' }).click();
     await expect(page.getByText(/valid 10-digit phone/i).first()).toBeVisible({ timeout: 5000 });
   });
@@ -304,12 +304,12 @@ test.describe('UX medium — landing UX', () => {
   });
 
   // TC-M28
-  test('auth and landing links are percent-encoded', async ({ page }) => {
+  test('auth and landing links use clean URLs', async ({ page }) => {
     await page.goto(LANDING_URL);
     const href = await page.getByRole('link', { name: 'Sign in' }).getAttribute('href');
-    expect(href).toMatch(/Aakashik%20Auth\.dc\.html/);
+    expect(href).toMatch(/\/login\/?$/);
     await page.goto(AUTH_URL);
-    const back = await page.locator('a[href*="Landing"]').first().getAttribute('href');
-    expect(back).toMatch(/Aakashik%20Landing\.dc\.html/);
+    const back = await page.getByRole('link', { name: 'Back to store' }).getAttribute('href');
+    expect(back).toBe('/');
   });
 });

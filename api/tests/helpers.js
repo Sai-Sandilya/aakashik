@@ -8,7 +8,7 @@ let db;
 
 export async function setupTestApp() {
   closeDb();
-  db = createDb({ memory: true, seed: true });
+  db = await createDb({ memory: true, seed: true });
   setDb(db);
   app = await buildApp({ db, logger: false, closeDbOnShutdown: false });
   await app.ready();
