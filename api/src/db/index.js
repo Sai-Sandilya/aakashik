@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { config } from '../config.js';
 import { BUILTIN_PRODUCTS, DEFAULT_STOCK } from '../lib/constants.js';
 import { withTransaction } from './transaction.js';
+import { hashPassword, isPasswordHash } from '../services/password.js';
 
 const require = createRequire(import.meta.url);
 
@@ -148,11 +149,12 @@ CREATE TABLE IF NOT EXISTS ritual_reminders (
 CREATE INDEX IF NOT EXISTS idx_ritual_reminders_time ON ritual_reminders(remind_time);
 `;
 
-function seedIfEmpty(db) {
+async function seedIfEmpty(db) {
   const count = db.prepare('SELECT COUNT(*) AS n FROM products').get().n;
   if (count > 0) return;
 
   const now = Date.now();
+  const adminPasswordHash = await hashPassword(config.adminPassword);
   const insertProduct = db.prepare(`
     INSERT INTO products (
       id, name, description, sub, element, concern, price_n, list_price_n, discount_pct,
@@ -183,7 +185,7 @@ function seedIfEmpty(db) {
 
     db.prepare('INSERT INTO admin_users (email, password, name) VALUES (?, ?, ?)').run(
       config.adminEmail,
-      config.adminPassword,
+      adminPasswordHash,
       'Aakashik Owner',
     );
 
@@ -257,6 +259,15 @@ function seedMockOrders(db, now) {
   }
 }
 
+async function migratePlaintextAdminPassword(db) {
+  if (config.isTest) return;
+  const row = db.prepare('SELECT id, password FROM admin_users WHERE lower(email) = ?').get(String(config.adminEmail || '').trim().toLowerCase());
+  if (!row || isPasswordHash(row.password)) return;
+  if (row.password !== config.adminPassword) return;
+  const hashed = await hashPassword(config.adminPassword);
+  db.prepare('UPDATE admin_users SET password = ? WHERE id = ?').run(hashed, row.id);
+}
+
 function migrateSchema(db) {
   let userCols = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
   if (!userCols.includes('password_hash')) {
@@ -285,7 +296,8 @@ export async function createDb(options = {}) {
   db.exec(SCHEMA);
   migrateSchema(db);
 
-  if (options.seed !== false) seedIfEmpty(db);
+  if (options.seed !== false) await seedIfEmpty(db);
+  await migratePlaintextAdminPassword(db);
 
   return db;
 }

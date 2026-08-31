@@ -7,11 +7,11 @@ import { config } from '../config.js';
 const adminLoginRateLimit = createRateLimit({ windowMs: 60_000, max: 10 });
 
 export default async function adminAuthRoutes(fastify) {
-  const loginHooks = config.isTest ? [] : [adminLoginRateLimit];
+  const loginHooks = (config.isTest || config.isE2e) ? [] : [adminLoginRateLimit];
   fastify.post('/login', { preHandler: loginHooks }, async (request, reply) => {
     try {
       const { email, password } = validateAdminLogin(request.body || {});
-      const admin = verifyAdminCredentials(fastify.db, email, password);
+      const admin = await verifyAdminCredentials(fastify.db, email, password);
       const token = signAdminToken(admin);
       return reply.send({ token, admin: { email: admin.email, name: admin.name } });
     } catch (err) {

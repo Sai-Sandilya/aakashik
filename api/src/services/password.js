@@ -20,3 +20,11 @@ export async function verifyPassword(password, stored) {
   if (expected.length !== derived.length) return false;
   return crypto.timingSafeEqual(expected, derived);
 }
+
+/** scrypt hash format: 32-char hex salt + ':' + 128-char hex digest */
+export function isPasswordHash(stored) {
+  const raw = String(stored || '');
+  const sep = raw.indexOf(':');
+  if (sep !== 32) return false;
+  return /^[0-9a-f]{32}:[0-9a-f]{128}$/i.test(raw);
+}

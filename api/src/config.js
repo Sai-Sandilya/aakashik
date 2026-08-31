@@ -6,6 +6,8 @@ export const config = {
   adminPassword: process.env.ADMIN_PASSWORD || 'Admin@1234',
   dbPath: process.env.DB_PATH || 'data/aakashik.db',
   isTest: process.env.NODE_ENV === 'test',
+  /** Playwright / local E2E — skip login rate limits so suites can authenticate repeatedly. */
+  isE2e: process.env.AAKASHIK_E2E === '1' || process.env.E2E === '1',
   frontendUrl: process.env.FRONTEND_URL || 'http://127.0.0.1:8080',
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',

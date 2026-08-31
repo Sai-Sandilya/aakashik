@@ -38,16 +38,18 @@
       <form onSubmit="{{ login }}" style="width: min(420px, 100%); background: #F6F1E4; border: 1px solid #E0D7BE; border-radius: 22px; padding: 28px 24px; box-shadow: 0 30px 60px -36px rgba(46,61,44,0.45); animation: cardIn .45s ease;">
         <p style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #A8894E; margin: 0 0 8px;">Owner console</p>
         <h1 style="font-family: 'Marcellus', serif; font-size: 30px; margin: 0 0 8px; font-weight: 400;">Admin sign in</h1>
-        <p style="font-size: 13.5px; color: #5E6A54; margin: 0 0 18px; line-height: 1.6;">Use the demo owner credentials to manage orders, stock, and products.</p>
+        <p style="font-size: 13.5px; color: #5E6A54; margin: 0 0 18px; line-height: 1.6;">{{ loginIntro }}</p>
         <sc-if value="{{ hasLoginError }}">
           <div style="background: #F8E8E2; border: 1px solid #E8B8A8; color: #8A3E2A; border-radius: 12px; padding: 10px 12px; font-size: 12.5px; margin-bottom: 12px;">{{ loginError }}</div>
         </sc-if>
         <label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;margin-bottom:6px;">Email</label>
-        <input value="{{ adminEmail }}" onInput="{{ onAdminEmail }}" placeholder="owner@aakashik.local" aria-label="Admin email" style="width:100%; background:#F4EEE1; border:1px solid #E0D7BE; border-radius:12px; padding:13px 15px; font-size:14px; margin-bottom:12px; outline:none;">
+        <input value="{{ adminEmail }}" onInput="{{ onAdminEmail }}" placeholder="you@example.com" aria-label="Admin email" style="width:100%; background:#F4EEE1; border:1px solid #E0D7BE; border-radius:12px; padding:13px 15px; font-size:14px; margin-bottom:12px; outline:none;">
         <label style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8A9678;margin-bottom:6px;">Password</label>
         <input type="password" value="{{ adminPassword }}" onInput="{{ onAdminPassword }}" placeholder="Password" aria-label="Admin password" style="width:100%; background:#F4EEE1; border:1px solid #E0D7BE; border-radius:12px; padding:13px 15px; font-size:14px; margin-bottom:16px; outline:none;">
         <button type="submit" style="width:100%; background:#2E3D2C; color:#F1EEDF; border:none; padding:14px; border-radius:30px; font-size:14.5px; font-weight:500;">Enter Admin</button>
-        <p style="font-size:12px; color:#8A9678; margin:14px 0 0; line-height:1.55;">Demo login: <strong>owner@aakashik.local</strong> / <strong>Admin@1234</strong></p>
+        <sc-if value="{{ showDemoCredentials }}">
+          <p style="font-size:12px; color:#8A9678; margin:14px 0 0; line-height:1.55;">Local dev only: <strong>owner@aakashik.local</strong> / <strong>Admin@1234</strong></p>
+        </sc-if>
         <a href="/" style="display:inline-block; margin-top:14px; font-size:13px; color:#B65E38; text-decoration:none;">← Back to store</a>
       </form>
     </div>
@@ -463,11 +465,18 @@ class Component extends DCLogic {
     try { return sessionStorage.getItem('ak_admin_token') || ''; } catch (er) { return ''; }
   }
 
+  _isLocalDevHost() {
+    try {
+      const h = window.location.hostname;
+      return h === 'localhost' || h === '127.0.0.1';
+    } catch (er) { return false; }
+  }
   _demoAdminEmail() { return 'owner@aakashik.local'; }
   _demoAdminPassword() { return 'Admin@1234'; }
   _demoMockToken() { return 'ak-demo-mock-session'; }
   _isDemoMockToken() { return this._adminToken() === this._demoMockToken(); }
   _canDemoMockLogin(email, pw) {
+    if (!this._isLocalDevHost()) return false;
     return email === this._demoAdminEmail() && pw === this._demoAdminPassword();
   }
   _finishMockLogin() {
@@ -891,6 +900,10 @@ class Component extends DCLogic {
     return {
       loggedIn: !!this.state.loggedIn,
       notLoggedIn: !this.state.loggedIn,
+      loginIntro: this._isLocalDevHost()
+        ? 'Sign in with your owner credentials to manage orders, stock, and products.'
+        : 'Sign in with your owner email and password. Admin access requires the live server.',
+      showDemoCredentials: this._isLocalDevHost(),
       pageTitle: this.state.tab === 'inventory' ? 'Inventory (mock)' : (this.state.tab === 'products' ? 'Products (mock)' : (this.state.tab === 'customers' ? 'Customers' : 'Orders (mock)')),
       isOrdersTab: this.state.tab === 'orders' || !this.state.tab,
       isInventoryTab: this.state.tab === 'inventory',
@@ -948,6 +961,7 @@ class Component extends DCLogic {
           if (res.status === 401 || res.status === 403) {
             return this.setState({ loginError: data.message || 'Incorrect admin email or password.' });
           }
+          // Known demo email + wrong password: always show auth error (even if API is down / rate-limited).
           if (email === this._demoAdminEmail() && pw !== this._demoAdminPassword()) {
             return this.setState({ loginError: 'Incorrect admin email or password.' });
           }

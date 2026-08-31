@@ -5,7 +5,7 @@ const { test, expect } = require('@playwright/test');
 const { clearAuthStorage } = require('./helpers/storage');
 
 const ADMIN_URL = '/Admin';
-const LANDING_URL = '/';``
+const LANDING_URL = '/';
 const ADMIN_EMAIL = 'owner@aakashik.local';
 const ADMIN_PASSWORD = 'Admin@1234';
 
@@ -37,7 +37,7 @@ test.describe('Admin orders — auth gate', () => {
     await page.getByLabel('Admin email').fill(ADMIN_EMAIL);
     await page.getByLabel('Admin password').fill('Wrong@9999');
     await page.getByRole('button', { name: 'Enter Admin' }).click();
-    await expect(page.getByText(/Incorrect admin email or password/i)).toBeVisible();
+    await expect(page.getByText(/Incorrect admin email or password/i)).toBeVisible({ timeout: 10000 });
     await expect(page.getByRole('heading', { name: 'Orders (mock)' })).toHaveCount(0);
   });
 
