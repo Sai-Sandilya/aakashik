@@ -44,9 +44,9 @@ async function hashPassword(page, password) {
 }
 
 /** Seed a verified email user directly in localStorage (skips OTP). Stores pwHash only. */
-async function seedEmailUser(page, { email, password, name = 'Test User' }) {
+async function seedEmailUser(page, { email, password, name = 'Test User', acceptTerms = true } = {}) {
   const pwHash = await hashPassword(page, password);
-  await page.evaluate(({ email, pwHash, name }) => {
+  await page.evaluate(({ email, pwHash, name, acceptTerms }) => {
     const users = {};
     users[email] = {
       name,
@@ -59,12 +59,14 @@ async function seedEmailUser(page, { email, password, name = 'Test User' }) {
     localStorage.setItem('ak_profile', JSON.stringify({ name, email, phone: '', verified: true }));
     localStorage.setItem('ak_logged', '1');
     localStorage.setItem('ak_persist', '1');
-  }, { email, pwHash, name });
+    if (acceptTerms) localStorage.setItem('ak_terms_accepted', '1');
+    else localStorage.removeItem('ak_terms_accepted');
+  }, { email, pwHash, name, acceptTerms });
 }
 
 /** Seed a verified phone-only user (OTP login; no password). */
-async function seedPhoneUser(page, { phone, name = 'Phone User' }) {
-  await page.evaluate(({ phone, name }) => {
+async function seedPhoneUser(page, { phone, name = 'Phone User', acceptTerms = true } = {}) {
+  await page.evaluate(({ phone, name, acceptTerms }) => {
     const users = JSON.parse(localStorage.getItem('ak_users') || '{}');
     users[phone] = {
       name,
@@ -76,7 +78,9 @@ async function seedPhoneUser(page, { phone, name = 'Phone User' }) {
     localStorage.setItem('ak_profile', JSON.stringify({ name, email: '', phone, verified: true }));
     localStorage.setItem('ak_logged', '1');
     localStorage.setItem('ak_persist', '1');
-  }, { phone, name });
+    if (acceptTerms) localStorage.setItem('ak_terms_accepted', '1');
+    else localStorage.removeItem('ak_terms_accepted');
+  }, { phone, name, acceptTerms });
 }
 
 /** Read OTP or reset code from localStorage. */

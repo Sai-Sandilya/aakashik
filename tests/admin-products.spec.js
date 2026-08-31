@@ -8,6 +8,13 @@ const LANDING_URL = '/';
 const ADMIN_EMAIL = 'owner@aakashik.local';
 const ADMIN_PASSWORD = 'Admin@1234';
 
+async function seedAdminSession(page) {
+  await page.evaluate(() => {
+    sessionStorage.setItem('ak_admin_token', 'ak-demo-mock-session');
+    localStorage.setItem('ak_admin_logged', '1');
+  });
+}
+
 async function clearProductStorage(page) {
   await page.goto(LANDING_URL);
   await page.evaluate(() => {
@@ -198,8 +205,8 @@ test.describe('Admin products — store visibility', () => {
       const stock = JSON.parse(localStorage.getItem('ak_stock') || '{}');
       stock['custom-del-1'] = 5;
       localStorage.setItem('ak_stock', JSON.stringify(stock));
-      localStorage.setItem('ak_admin_logged', '1');
     });
+    await seedAdminSession(page);
     await page.goto(ADMIN_URL);
     await openProducts(page);
     await expect(page.locator('[data-product-row="custom-del-1"]')).toBeVisible();
@@ -243,8 +250,8 @@ test.describe('Admin products — edit & inventory link', () => {
         'kit-immunity': 15, 'kit-glow': 15, 'sample-trio': 50, 'custom-edit-1': 9,
       };
       localStorage.setItem('ak_stock', JSON.stringify(stock));
-      localStorage.setItem('ak_admin_logged', '1');
     });
+    await seedAdminSession(page);
     await page.goto(ADMIN_URL);
     await openProducts(page);
     await page.locator('[data-product-row="custom-edit-1"]').getByRole('button', { name: 'Edit' }).click();
@@ -286,8 +293,8 @@ test.describe('Admin products — edit & inventory link', () => {
         active: true,
         custom: true,
       }]));
-      localStorage.setItem('ak_admin_logged', '1');
     });
+    await seedAdminSession(page);
     await page.goto(ADMIN_URL);
     await openProducts(page);
     await page.locator('[data-product-row="custom-tog-1"]').getByRole('button', { name: 'Hide (draft)' }).click();

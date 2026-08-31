@@ -42,6 +42,7 @@ test.describe('Order History UX', () => {
       password: STRONG_PASSWORD,
       name: 'Order User',
     });
+    await page.evaluate(() => localStorage.setItem('ak_terms_accepted', '1'));
   });
 
   test('TC-OH01 positive: Order History opens from account menu', async ({ page }) => {
@@ -86,6 +87,16 @@ test.describe('Order History UX', () => {
     await page.getByRole('button', { name: 'Account options' }).click();
     await page.getByRole('button', { name: 'Order History' }).click();
     await expect(page.getByText(/No orders yet/i)).toBeVisible();
+  });
+
+  test('TC-OH04b positive: empty Order History Browse products opens search', async ({ page }) => {
+    await page.goto(LANDING_URL);
+    await page.getByRole('button', { name: 'Account options' }).click();
+    await page.getByRole('button', { name: 'Order History' }).click();
+    await page.getByRole('button', { name: 'Browse products' }).click();
+    await expect(page.getByRole('heading', { name: 'Order History' })).toHaveCount(0);
+    await expect(page.getByRole('dialog', { name: 'Search' })).toBeVisible({ timeout: 8000 });
+    await expect(page.getByRole('dialog', { name: 'Search' }).getByText('Browse the collection')).toBeVisible();
   });
 
   test('TC-OH05 negative: Profile no longer shows Recent orders section', async ({ page }) => {

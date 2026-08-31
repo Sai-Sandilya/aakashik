@@ -119,9 +119,9 @@ test.describe('UX medium — auth OTP / forgot / social', () => {
   // TC-M16
   test('social buttons are labeled as demo', async ({ page }) => {
     await gotoAuth(page);
-    await expect(page.getByRole('button', { name: /Google \(demo\)/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Google$/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /GitHub \(demo\)/i })).toBeVisible();
-    await expect(page.getByText(/Demo-only/i).first()).toBeVisible();
+    await expect(page.getByText(/Demo auth — accounts stay in this browser only/i).first()).toBeVisible();
   });
 
   // TC-M17
@@ -241,7 +241,7 @@ test.describe('UX medium — landing UX', () => {
   test('language switcher discloses partial translation', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Language' }).click();
-    await expect(page.getByText(/Partial — cart & checkout stay English/i)).toBeVisible();
+    await expect(page.getByText(/Partial — products, search, cart & checkout stay English/i)).toBeVisible();
   });
 
   // TC-M21
@@ -278,8 +278,8 @@ test.describe('UX medium — landing UX', () => {
   // TC-M26
   test('reminder validates phone for WhatsApp channel', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await page.getByPlaceholder('Phone or email').scrollIntoViewIfNeeded();
-    await page.getByPlaceholder('Phone or email').fill('not-a-contact');
+    await page.getByPlaceholder('10-digit mobile number').scrollIntoViewIfNeeded();
+    await page.getByPlaceholder('10-digit mobile number').fill('not-a-contact');
     await page.getByRole('button', { name: 'Set My Reminder' }).click();
     await expect(page.getByText(/valid 10-digit phone/i).first()).toBeVisible({ timeout: 5000 });
   });

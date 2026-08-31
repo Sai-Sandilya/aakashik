@@ -105,9 +105,10 @@ test.describe('UX high fixes', () => {
     await openDeliveryCheckout(page);
     await fillDeliveryBasics(page);
     await page.getByRole('button', { name: 'Place Order' }).evaluate((el) => /** @type {HTMLElement} */ (el).click());
-    const success = page.locator('div').filter({ has: page.getByRole('heading', { name: 'Order Placed!' }) });
+    const success = page.getByRole('dialog', { name: 'Your Cart' });
     await expect(page.getByRole('heading', { name: 'Order Placed!' })).toBeVisible({ timeout: 8000 });
-    await expect(success.getByText('All sales are final. We do not accept returns on placed orders.')).toBeVisible();
+    await expect(success.getByText(/Sales are final after order/i).first()).toBeVisible();
+    await expect(success.getByText(/damaged, defective, or incorrect/i).first()).toBeVisible();
     await expect(success.getByRole('button', { name: /Request return|Start return|Return item/i })).toHaveCount(0);
   });
 
@@ -253,7 +254,7 @@ test.describe('UX high fixes', () => {
   test('TC-H17 positive: valid card mock payment places order', async ({ page }) => {
     await openDeliveryCheckout(page);
     await fillDeliveryBasics(page);
-    await page.getByRole('button', { name: 'Card' }).click();
+    await page.getByRole('button', { name: 'Card', exact: true }).click();
     await page.getByPlaceholder('Card number (16 digits)').fill('4111111111111111');
     await page.getByPlaceholder('MM/YY').fill('12/30');
     await page.getByPlaceholder('CVV').fill('123');
@@ -269,7 +270,7 @@ test.describe('UX high fixes', () => {
   test('TC-H18 negative: short card number is rejected', async ({ page }) => {
     await openDeliveryCheckout(page);
     await fillDeliveryBasics(page);
-    await page.getByRole('button', { name: 'Card' }).click();
+    await page.getByRole('button', { name: 'Card', exact: true }).click();
     await page.getByPlaceholder('Card number (16 digits)').fill('41111111');
     await page.getByPlaceholder('MM/YY').fill('12/30');
     await page.getByPlaceholder('CVV').fill('123');
@@ -281,7 +282,7 @@ test.describe('UX high fixes', () => {
   test('TC-H19 negative: bad card expiry is rejected', async ({ page }) => {
     await openDeliveryCheckout(page);
     await fillDeliveryBasics(page);
-    await page.getByRole('button', { name: 'Card' }).click();
+    await page.getByRole('button', { name: 'Card', exact: true }).click();
     await page.getByPlaceholder('Card number (16 digits)').fill('4111111111111111');
     await page.getByPlaceholder('MM/YY').fill('13/30');
     await page.getByPlaceholder('CVV').fill('123');
@@ -370,11 +371,11 @@ test.describe('UX high fixes', () => {
   // --- 9 Wishlist view ---
   test('TC-H27 positive: wishlist drawer lists saved item', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await page.locator('[aria-label="Wishlist"]').first().click();
+    await page.locator('[aria-label="Add to Wishlist"]').first().click();
     await wishlistButton(page).click();
     await expect(page.getByRole('heading', { name: 'Wishlist' })).toBeVisible();
     await expect(page.getByText(/Your wishlist is empty/i)).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Remove' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Wishlist' }).getByRole('button', { name: 'Remove', exact: true })).toBeVisible();
   });
 
   test('TC-H28 positive: remove from wishlist empties the drawer', async ({ page }) => {
@@ -382,7 +383,7 @@ test.describe('UX high fixes', () => {
     await page.evaluate(() => localStorage.setItem('ak_wishlist', JSON.stringify({ immunity: true })));
     await page.reload();
     await wishlistButton(page).click();
-    await page.getByRole('button', { name: 'Remove' }).click();
+    await page.getByRole('dialog', { name: 'Wishlist' }).getByRole('button', { name: 'Remove', exact: true }).click();
     await expect(page.getByText(/Your wishlist is empty/i)).toBeVisible();
     const wish = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_wishlist') || '{}'));
     expect(Object.keys(wish).length).toBe(0);
@@ -396,7 +397,33 @@ test.describe('UX high fixes', () => {
 
   test('TC-H30 positive: wishlist badge count updates', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await page.locator('[aria-label="Wishlist"]').first().click();
+    await page.locator('[aria-label="Add to Wishlist"]').first().click();
+    await expect(wishlistButton(page).getByText('1')).toBeVisible();
+  });
+
+  test('TC-H30b positive: Quick View from wishlist closes the drawer', async ({ page }) => {
+    await page.goto(LANDING_URL);
+    await page.evaluate(() => localStorage.setItem('ak_wishlist', JSON.stringify({ immunity: true })));
+    await page.reload();
+    await wishlistButton(page).click();
+    const wishDialog = page.getByRole('dialog', { name: 'Wishlist' });
+    await expect(wishDialog).toBeVisible();
+    await wishDialog.getByRole('button', { name: 'Quick View' }).click();
+    await expect(page.getByRole('dialog', { name: 'Product quick view' })).toBeVisible({ timeout: 8000 });
+    await expect(page.getByRole('dialog', { name: 'Wishlist' })).toHaveCount(0);
+  });
+
+  test('TC-H30c positive: stale wishlist IDs are pruned from storage', async ({ page }) => {
+    await page.goto(LANDING_URL);
+    await page.evaluate(() => localStorage.setItem('ak_wishlist', JSON.stringify({
+      immunity: true,
+      'gone-product': true,
+    })));
+    await page.reload();
+    await expect.poll(async () => page.evaluate(() => {
+      const w = JSON.parse(localStorage.getItem('ak_wishlist') || '{}');
+      return { hasGone: !!w['gone-product'], hasImm: !!w.immunity, keys: Object.keys(w).sort().join(',') };
+    }), { timeout: 8000 }).toEqual({ hasGone: false, hasImm: true, keys: 'immunity' });
     await expect(wishlistButton(page).getByText('1')).toBeVisible();
   });
 

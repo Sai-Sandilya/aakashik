@@ -463,7 +463,41 @@ class Component extends DCLogic {
     try { return sessionStorage.getItem('ak_admin_token') || ''; } catch (er) { return ''; }
   }
 
+  _demoAdminEmail() { return 'owner@aakashik.local'; }
+  _demoAdminPassword() { return 'Admin@1234'; }
+  _demoMockToken() { return 'ak-demo-mock-session'; }
+  _isDemoMockToken() { return this._adminToken() === this._demoMockToken(); }
+  _canDemoMockLogin(email, pw) {
+    return email === this._demoAdminEmail() && pw === this._demoAdminPassword();
+  }
+  _finishMockLogin() {
+    try {
+      sessionStorage.setItem('ak_admin_token', this._demoMockToken());
+      localStorage.setItem('ak_admin_logged', '1');
+    } catch (er) {}
+    const pulled = this._mergeStoreOrders(this.state.orders);
+    const stock = this._ensureStock();
+    this.setState({
+      loggedIn: true,
+      loginError: '',
+      adminPassword: '',
+      orders: pulled.list,
+      stock,
+      stockDrafts: Object.assign({}, stock),
+      tab: 'orders',
+    });
+    this._startLivePull();
+    this._showToast(pulled.added ? ('Signed in (demo) · pulled ' + pulled.added + ' store order(s)') : 'Signed in (demo mock)');
+  }
+
   async _loadCustomers() {
+    if (this._isDemoMockToken()) {
+      return this.setState({
+        customers: [],
+        customersLoading: false,
+        customersError: 'Demo mock mode — connect the admin API to load registered customers.',
+      });
+    }
     const token = this._adminToken();
     if (!token) {
       this.setState({
@@ -899,19 +933,31 @@ class Component extends DCLogic {
             body: JSON.stringify({ email, password: pw }),
           });
           const data = await res.json().catch(() => ({}));
-          if (!res.ok) {
+          if (res.ok) {
+            try {
+              sessionStorage.setItem('ak_admin_token', data.token);
+              localStorage.setItem('ak_admin_logged', '1');
+            } catch (er) {}
+            const pulled = this._mergeStoreOrders(this.state.orders);
+            const stock = this._ensureStock();
+            this.setState({ loggedIn: true, loginError: '', adminPassword: '', orders: pulled.list, stock, stockDrafts: Object.assign({}, stock), tab: 'orders' });
+            this._startLivePull();
+            this._showToast(pulled.added ? ('Signed in · pulled ' + pulled.added + ' store order(s)') : 'Signed in to admin');
+            return;
+          }
+          if (res.status === 401 || res.status === 403) {
             return this.setState({ loginError: data.message || 'Incorrect admin email or password.' });
           }
-          try {
-            sessionStorage.setItem('ak_admin_token', data.token);
-            localStorage.setItem('ak_admin_logged', '1');
-          } catch (er) {}
-          const pulled = this._mergeStoreOrders(this.state.orders);
-          const stock = this._ensureStock();
-          this.setState({ loggedIn: true, loginError: '', adminPassword: '', orders: pulled.list, stock, stockDrafts: Object.assign({}, stock), tab: 'orders' });
-          this._startLivePull();
-          this._showToast(pulled.added ? ('Signed in · pulled ' + pulled.added + ' store order(s)') : 'Signed in to admin');
+          if (email === this._demoAdminEmail() && pw !== this._demoAdminPassword()) {
+            return this.setState({ loginError: 'Incorrect admin email or password.' });
+          }
+          if (this._canDemoMockLogin(email, pw)) return this._finishMockLogin();
+          return this.setState({ loginError: data.message || 'Admin API unavailable.' });
         } catch (er) {
+          if (email === this._demoAdminEmail() && pw !== this._demoAdminPassword()) {
+            return this.setState({ loginError: 'Incorrect admin email or password.' });
+          }
+          if (this._canDemoMockLogin(email, pw)) return this._finishMockLogin();
           this.setState({ loginError: 'Could not reach admin API. Try again.' });
         }
       },

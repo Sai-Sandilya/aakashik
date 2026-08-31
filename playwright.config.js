@@ -13,12 +13,13 @@ module.exports = defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: BASE_URL,
+    ...(process.env.CI ? {} : { channel: 'chrome' }),
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    video: 'off',
   },
   webServer: {
-    command: `python3 -m http.server ${PORT}`,
+    command: 'node scripts/e2e-static-server.js',
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

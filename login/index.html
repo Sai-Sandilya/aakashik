@@ -93,7 +93,7 @@
   </div>
 
   <div role="status" style="position: absolute; top: 18px; left: 50%; transform: translateX(-50%); z-index: 4; max-width: min(520px, 92vw); background: #F3E9D8; border: 1px solid #E0D7BE; color: #5E6A54; font-size: 12px; line-height: 1.45; padding: 8px 14px; border-radius: 12px; text-align: center;">
-    Email signup, sign-in, and password reset use your secure Aakashik account. Google sign-in is supported. Phone OTP is demo-only (shown on screen, not SMS).
+    Demo auth — accounts stay in this browser only unless you use email/Google with the live server. Phone OTP is demo-only (shown on screen, not SMS).
   </div>
   <!-- back to store -->
   <a href="/" style="position: absolute; top: 22px; left: 24px; z-index: 3; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 13px; letter-spacing: 0.04em; color: #5E6A54;">
@@ -527,7 +527,7 @@ class Component extends DCLogic {
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({ email, password, rememberMe: !!rememberMe }),
-    }).then((r) => r.json().then((data) => ({ ok: r.ok, data })));
+    }).then((r) => r.json().then((data) => ({ ok: r.ok, status: r.status, data })));
   }
   _sendPasswordResetOtp(email) {
     return fetch('/api/auth/send-otp', {
@@ -659,6 +659,63 @@ class Component extends DCLogic {
     try { localStorage.setItem('ak_fail_count', String(failCount)); } catch (e) {}
     this.setState({ failCount, errorMsg: 'Incorrect email or password', loading: false });
   }
+  _startLocalEmailSignupOtp(contact) {
+    const kind = this._contactKind(contact);
+    const code = String(1000 + Math.floor(Math.random() * 9000));
+    const finish = (pwHash) => {
+      try {
+        const payload = { contact: kind.value, code, expiresAt: Date.now() + 10 * 60 * 1000, mode: this.state.mode };
+        if (this.state.mode === 'signup') {
+          payload.name = (this.state.fullName || '').trim();
+          if (kind.kind === 'email' && pwHash) payload.pwHash = pwHash;
+        }
+        localStorage.setItem('ak_pending_otp', JSON.stringify(payload));
+      } catch (er) {}
+      this.setState({
+        loading: false,
+        otp: true,
+        emailOtpServer: false,
+        otpCode: '',
+        errorMsg: '',
+        infoMsg: 'Demo verification code: ' + code + ' (shown on screen — not emailed). Expires in 10 minutes.',
+      });
+    };
+    if (this.state.mode === 'signup' && kind.kind === 'email' && this.state.password) {
+      return this._hashPassword(this.state.password).then(finish);
+    }
+    finish('');
+    return Promise.resolve();
+  }
+  _tryLocalEmailLogin(email, password, rememberMe) {
+    const users = this._readUsers();
+    const user = users[email];
+    if (!user || !user.verified) {
+      this._failLogin();
+      return Promise.resolve();
+    }
+    return this._passwordMatches(user, password).then(({ ok, hash, migrate }) => {
+      if (!ok) {
+        this._failLogin();
+        return;
+      }
+      if (migrate) {
+        user.pwHash = hash;
+        delete user.password;
+        users[email] = user;
+        this._writeUsers(users);
+      }
+      const profile = {
+        name: user.name || '',
+        email: user.email || email,
+        phone: user.phone || '',
+        verified: true,
+        provider: 'local',
+      };
+      try { localStorage.removeItem('ak_lock_until'); localStorage.removeItem('ak_fail_count'); } catch (er) {}
+      this._setSession(profile, rememberMe);
+      this._authSuccess();
+    });
+  }
 
   submit = (e) => {
     if (e && e.preventDefault) e.preventDefault();
@@ -767,14 +824,17 @@ class Component extends DCLogic {
         }
       }
       if (this.state.mode === 'signup' && kind.kind === 'email') {
+        const usersExist = this._readUsers();
+        if (usersExist[kind.value] && usersExist[kind.value].verified) {
+          return this.setState({ errorMsg: 'An account already exists for this email. Sign in instead.' });
+        }
         this.setState({ loading: true, errorMsg: '', infoMsg: '' });
         this._sendEmailOtp(kind.value, (this.state.fullName || '').trim()).then(({ ok: sent, data: sendData }) => {
           if (!sent) {
-            const msg = (sendData && sendData.error === 'account_exists')
-              ? 'An account already exists for this email. Sign in instead.'
-              : ((sendData && sendData.message) || 'Could not send verification code.');
-            this.setState({ loading: false, errorMsg: msg });
-            return;
+            if (sendData && sendData.error === 'account_exists') {
+              return this.setState({ loading: false, errorMsg: 'An account already exists for this email. Sign in instead.' });
+            }
+            return this._startLocalEmailSignupOtp(kind.value);
           }
           this._clearLocalUser(kind.value);
           try {
@@ -794,7 +854,7 @@ class Component extends DCLogic {
             errorMsg: '',
             infoMsg: 'Verification code sent to ' + kind.value + '. Check your inbox and spam folder. Expires in 10 minutes.',
           });
-        }).catch(() => this.setState({ loading: false, errorMsg: 'Could not send verification code. Check your connection.' }));
+        }).catch(() => this._startLocalEmailSignupOtp(kind.value));
         return;
       }
       const code = String(1000 + Math.floor(Math.random() * 9000));
@@ -813,9 +873,9 @@ class Component extends DCLogic {
       return;
     }
 
-    // Email sign-in — server account only
+    // Email sign-in — server first, local demo fallback when API is unavailable
     this.setState({ loading: true, errorMsg: '', infoMsg: '' });
-    this._loginWithEmail(kind.value, this.state.password, this.state.rememberMe).then(({ ok, data }) => {
+    this._loginWithEmail(kind.value, this.state.password, this.state.rememberMe).then(({ ok, status, data }) => {
       if (ok && data && data.user) {
         const u = data.user;
         const profile = { name: u.name || '', email: u.email || kind.value, phone: u.phone || '', verified: true, provider: 'local' };
@@ -833,9 +893,13 @@ class Component extends DCLogic {
         });
         return;
       }
-      this._failLogin();
+      if (status === 401 || status === 403) {
+        this._failLogin();
+        return;
+      }
+      this._tryLocalEmailLogin(kind.value, this.state.password, this.state.rememberMe);
     }).catch(() => {
-      this.setState({ loading: false, errorMsg: 'Could not sign in. Check your connection and try again.' });
+      this._tryLocalEmailLogin(kind.value, this.state.password, this.state.rememberMe);
     });
   };
 

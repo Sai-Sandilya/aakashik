@@ -5,6 +5,7 @@ const {
   seedEmailUser,
   STRONG_PASSWORD,
 } = require('./helpers/storage');
+const { mockEmailLoginApi } = require('./helpers/auth-ui');
 
 const LANDING_URL = '/';
 
@@ -51,7 +52,7 @@ test.describe('Category 1 UX fixes', () => {
   // TC-C03
   test('wishlist persists after reload', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await page.locator('[aria-label="Wishlist"]').first().click();
+    await page.locator('[aria-label="Add to Wishlist"]').first().click();
     await page.waitForFunction(() => Object.keys(JSON.parse(localStorage.getItem('ak_wishlist') || '{}')).length > 0);
     await page.reload();
     const wished = await page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('ak_wishlist') || '{}')).length);
@@ -65,7 +66,8 @@ test.describe('Category 1 UX fixes', () => {
     const email = `news-${Date.now()}@test.com`;
     await page.locator('footer input[type="email"]').fill(email);
     await page.locator('footer button[type="submit"]').click();
-    await expect(page.getByText(/Saved on this device \(demo\)/i)).toBeVisible();
+    await expect(page.locator('#newsletter-email')).toHaveCount(0);
+    await expect(page.getByText(new RegExp('Saved · ' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))).toBeVisible();
     const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_newsletter') || '{}'));
     expect(stored.email).toBe(email);
   });
@@ -74,7 +76,7 @@ test.describe('Category 1 UX fixes', () => {
   test('reminder form saves contact and time', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Set My Reminder' }).scrollIntoViewIfNeeded();
-    await page.getByPlaceholder('Phone or email').fill('9876543210');
+    await page.getByPlaceholder('10-digit mobile number').fill('9876543210');
     await page.getByRole('button', { name: 'Set My Reminder' }).click();
     await expect(page.getByText("You're all set")).toBeVisible();
     const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_reminder') || '{}'));
@@ -127,7 +129,7 @@ test.describe('Category 1 UX fixes', () => {
   });
 
   // TC-C09
-  test('checkout auth locks after repeated failed logins', async ({ page }) => {
+  test('checkout auth redirects to login lockout after repeated failed logins', async ({ page }) => {
     const email = `lock-${Date.now()}@test.com`;
     await page.goto(LANDING_URL);
     await page.evaluate(({ email, password, name }) => {
@@ -137,19 +139,23 @@ test.describe('Category 1 UX fixes', () => {
       localStorage.setItem('ak_users', JSON.stringify(users));
       localStorage.setItem('ak_cart', JSON.stringify({ immunity: { qty: 1, subscribe: false, size: null, sizePrice: null } }));
     }, { email, password: STRONG_PASSWORD, name: 'Lock User' });
+    await mockEmailLoginApi(page, { email, password: STRONG_PASSWORD, name: 'Lock User' });
     await page.reload();
     await cartButton(page).click();
     await page.getByRole('button', { name: 'Proceed to Checkout' }).click();
+    await expect(page.getByRole('heading', { name: 'Sign in to check out' })).toBeVisible({ timeout: 8000 });
+    await page.getByRole('button', { name: 'Sign in' }).click();
+    await page.waitForURL(/\/login/);
 
     for (let i = 0; i < 4; i++) {
       await page.getByPlaceholder('10-digit phone or you@example.com').fill(email);
-      await page.locator('input[type="password"]').fill('Wrong@9999');
-      await page.getByRole('button', { name: 'Continue' }).click();
+      await page.locator('#auth-form input[type="password"]').first().fill('Wrong@9999');
+      await page.locator('#auth-form form button[type="submit"]').filter({ hasText: 'Sign In' }).click();
       await expect(page.getByText('Incorrect email or password')).toBeVisible({ timeout: 8000 });
     }
     await page.getByPlaceholder('10-digit phone or you@example.com').fill(email);
-    await page.locator('input[type="password"]').fill('Wrong@9999');
-    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.locator('#auth-form input[type="password"]').first().fill('Wrong@9999');
+    await page.locator('#auth-form form button[type="submit"]').filter({ hasText: 'Sign In' }).click();
     await expect(page.getByText(/temporarily locked|Try again in \d+ minute/i).first()).toBeVisible({ timeout: 8000 });
   });
 

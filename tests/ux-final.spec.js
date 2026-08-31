@@ -41,7 +41,7 @@ test.describe('UX final — Auth honesty & account safety', () => {
     await fillContact(page, '9876500111');
     await expect(page.getByText(/Demo OTP shown on screen — not sent by SMS/i)).toBeVisible();
     await fillContact(page, `demo-${Date.now()}@test.com`);
-    await expect(page.getByText(/Demo verification code shown on screen — not emailed/i)).toBeVisible();
+    await expect(page.getByText(/verification code will be emailed/i)).toBeVisible();
   });
 
   test('TC-F02 negative: Auth static copy no longer claims we will send OTP', async ({ page }) => {
@@ -60,6 +60,7 @@ test.describe('UX final — Auth honesty & account safety', () => {
     await fillPassword(page, STRONG_PASSWORD);
     await fillConfirmPassword(page, STRONG_PASSWORD);
     await submitButton(page, 'Create Account').click();
+    await expect(page.getByPlaceholder('4-digit code')).toBeVisible({ timeout: 8000 });
     const code = await readStoredCode(page, 'ak_pending_otp');
     expect(code).toMatch(/^\d{4}$/);
     await page.getByPlaceholder('4-digit code').fill(code);
@@ -141,10 +142,10 @@ test.describe('UX final — Auth honesty & account safety', () => {
 
   test('TC-F07 positive: demo Google social writes ak_users entry', async ({ page }) => {
     await gotoAuth(page);
-    await page.getByRole('button', { name: /Google \(demo\)/i }).click();
+    await page.getByRole('button', { name: /GitHub \(demo\)/i }).click();
     await waitForAuthSuccess(page);
     const users = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_users') || '{}'));
-    expect(users['demo.google@aakashik.local']).toBeTruthy();
+    expect(users['demo.github@aakashik.local']).toBeTruthy();
   });
 });
 
@@ -194,6 +195,13 @@ test.describe('UX final — Landing honesty, layout, a11y', () => {
   test('TC-F13 positive: checkout signup blocks existing email', async ({ page }) => {
     const email = `chkexist-${Date.now()}@test.com`;
     await seedEmailUser(page, { email, password: STRONG_PASSWORD, name: 'Exist' });
+    await page.route('**/api/auth/send-otp', async (route) => {
+      await route.fulfill({
+        status: 409,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'account_exists', message: 'An account already exists for this email. Sign in instead.' }),
+      });
+    });
     await page.evaluate(() => {
       localStorage.removeItem('ak_logged');
       localStorage.removeItem('ak_persist');
@@ -206,11 +214,12 @@ test.describe('UX final — Landing honesty, layout, a11y', () => {
     await page.locator('[data-cart-icon="true"]').click({ force: true });
     await page.getByRole('button', { name: 'Proceed to Checkout' }).evaluate((el) => /** @type {HTMLElement} */ (el).click());
     await page.getByRole('button', { name: 'Create Account' }).click();
-    await page.getByPlaceholder('Full name').fill('Takeover');
-    await page.getByPlaceholder('10-digit phone or you@example.com').fill(email);
-    await page.locator('input[type="password"]').first().fill('Takeover@9999');
-    await page.locator('input[type="password"]').nth(1).fill('Takeover@9999');
-    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.waitForURL(/\/signup/);
+    await page.getByPlaceholder('Enter full name').fill('Takeover');
+    await fillContact(page, email);
+    await fillPassword(page, 'Takeover@9999');
+    await fillConfirmPassword(page, 'Takeover@9999');
+    await submitButton(page, 'Create Account').click();
     await expect(page.getByText(/An account already exists for this email/i)).toBeVisible({ timeout: 5000 });
   });
 

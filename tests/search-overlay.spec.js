@@ -104,11 +104,15 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(dialog.getByRole('heading', { name: 'Bath & body rituals' })).toBeVisible();
   });
 
-  test('TC-SO06 positive: nav Kashayams opens Immunity shelf', async ({ page }) => {
+  test('TC-SO06 positive: nav Kashayams opens full kashayam shelf', async ({ page }) => {
     await page.getByRole('navigation').getByRole('link', { name: 'Kashayams' }).click();
     const dialog = searchDialog(page);
     await expect(dialog).toBeVisible({ timeout: 8000 });
-    await expect(dialog.getByRole('heading', { name: 'Daily defense rituals' })).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: 'Ayurvedic kashayams' })).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: 'Daily Immunity' })).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: 'Sugar Balance Support' })).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: 'Kaphahara' })).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: 'Navojas' })).toBeVisible();
   });
 
   test('TC-SO07 positive: nav Spiritual opens sacred blends shelf', async ({ page }) => {
@@ -478,7 +482,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
 
   test('TC-SO55 positive: wishlist heart from search card persists', async ({ page }) => {
     const dialog = await openCategory(page, 'Natural Bath Powders');
-    await productCard(dialog, 'Herbal Sunni Pindi').getByRole('button', { name: 'Wishlist' }).click();
+    await productCard(dialog, 'Herbal Sunni Pindi').getByRole('button', { name: /Add to Wishlist|Remove from Wishlist/ }).click();
     await page.waitForFunction(() => Object.keys(JSON.parse(localStorage.getItem('ak_wishlist') || '{}')).length > 0);
     const wished = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_wishlist') || '{}'));
     expect(wished.sunni || wished['sunni']).toBeTruthy();
@@ -613,7 +617,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await chipRow(dialog, 1).getByRole('button', { name: 'Earth' }).click();
     await expect(dialog.getByRole('heading', { name: 'No blends match yet' })).toBeVisible();
     await dialog.getByRole('button', { name: 'Show all rituals' }).click();
-    await productCard(dialog, 'Ashtagandham').getByRole('button', { name: 'Wishlist' }).click();
+    await productCard(dialog, 'Ashtagandham').getByRole('button', { name: /Add to Wishlist|Remove from Wishlist/ }).click();
     await productCard(dialog, 'Immunity Ritual Kit').getByRole('button', { name: 'Add to Cart' }).click();
     await expect(page.getByText(/Added to cart/i)).toBeVisible({ timeout: 8000 });
     const state = await page.evaluate(() => ({
@@ -989,7 +993,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
 
   test('TC-SO110 positive: wishlist toggle off removes product from storage', async ({ page }) => {
     const dialog = await openCategory(page, 'Natural Bath Powders');
-    const heart = productCard(dialog, 'Herbal Sunni Pindi').getByRole('button', { name: 'Wishlist' });
+    const heart = productCard(dialog, 'Herbal Sunni Pindi').getByRole('button', { name: /Add to Wishlist|Remove from Wishlist/ });
     await heart.click();
     await page.waitForFunction(() => JSON.parse(localStorage.getItem('ak_wishlist') || '{}').sunni);
     await heart.click();
@@ -1312,8 +1316,8 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
 
   test('TC-SO136 complex: wishlist two products then verify count badge', async ({ page }) => {
     const dialog = await openSearch(page);
-    await productCard(dialog, 'Daily Immunity').getByRole('button', { name: 'Wishlist' }).click();
-    await productCard(dialog, 'Navojas').getByRole('button', { name: 'Wishlist' }).click();
+    await productCard(dialog, 'Daily Immunity').getByRole('button', { name: /Add to Wishlist|Remove from Wishlist/ }).click();
+    await productCard(dialog, 'Navojas').getByRole('button', { name: /Add to Wishlist|Remove from Wishlist/ }).click();
     await page.waitForFunction(() => Object.keys(JSON.parse(localStorage.getItem('ak_wishlist') || '{}')).length >= 2);
     const count = await page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('ak_wishlist') || '{}')).length);
     expect(count).toBeGreaterThanOrEqual(2);
@@ -1415,7 +1419,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await chipRow(dialog, 2).getByRole('button', { name: 'Under ₹300' }).click();
     const card = productCard(dialog, 'Ashtagandham');
     await card.getByRole('button', { name: 'Add to Cart' }).click();
-    await card.getByRole('button', { name: 'Wishlist' }).click();
+    await card.getByRole('button', { name: /Add to Wishlist|Remove from Wishlist/ }).click();
     const state = await page.evaluate(() => ({
       cart: JSON.parse(localStorage.getItem('ak_cart') || '{}'),
       wish: JSON.parse(localStorage.getItem('ak_wishlist') || '{}'),
@@ -1474,7 +1478,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await dialog.getByRole('button', { name: 'Clear filters' }).click();
     await chipRow(dialog, 0).getByRole('button', { name: 'Skin & Body' }).click();
     const card = productCard(dialog, 'Herbal Sunni Pindi');
-    await card.getByRole('button', { name: 'Wishlist' }).click();
+    await card.getByRole('button', { name: /Add to Wishlist|Remove from Wishlist/ }).click();
     await card.getByRole('button', { name: 'View' }).click();
     await expect(page.getByRole('dialog', { name: /quick view/i })).toBeVisible({ timeout: 8000 });
     await page.keyboard.press('Escape');

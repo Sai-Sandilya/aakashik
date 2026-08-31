@@ -33,6 +33,7 @@ test.describe('Landing — profile', () => {
       password: STRONG_PASSWORD,
       name: 'Profile Tester',
     });
+    await page.evaluate(() => localStorage.setItem('ak_terms_accepted', '1'));
   });
 
   // TC-P01
@@ -80,6 +81,44 @@ test.describe('Landing — profile', () => {
     await expect(page.getByPlaceholder('City')).toHaveValue('Hyderabad');
     await expect(page.getByPlaceholder('Pin code')).toHaveValue('500001');
   });
+
+  test('TC-P04 positive: save profile keeps provider metadata', async ({ page }) => {
+    await page.goto(LANDING_URL);
+    await page.evaluate(() => {
+      const p = JSON.parse(localStorage.getItem('ak_profile') || '{}');
+      p.provider = 'google';
+      p.verified = true;
+      localStorage.setItem('ak_profile', JSON.stringify(p));
+    });
+    await page.reload();
+    await page.getByRole('button', { name: 'Account options' }).click();
+    await page.getByRole('button', { name: 'Profile' }).click();
+    await page.getByPlaceholder('Phone number').fill('9876543210');
+    await page.getByPlaceholder('Address (house, street, area)').fill('9 Lake View');
+    await page.getByRole('button', { name: 'Save changes' }).click();
+    const profile = await readProfile(page);
+    expect(profile.provider).toBe('google');
+    expect(profile.verified).toBe(true);
+    expect(profile.phone).toBe('9876543210');
+    expect(profile.address).toBe('9 Lake View');
+  });
+
+  test('TC-P05 positive: cancel discards unsaved profile edits', async ({ page }) => {
+    await page.goto(LANDING_URL);
+    await page.getByRole('button', { name: 'Account options' }).click();
+    await page.getByRole('button', { name: 'Profile' }).click();
+    await page.getByPlaceholder('Full name').fill('Should Not Persist');
+    await page.getByPlaceholder('City').fill('DiscardCity');
+    await page.getByRole('button', { name: 'Cancel' }).click();
+    await expect(page.getByRole('heading', { name: 'My Profile' })).toHaveCount(0);
+    const profile = await readProfile(page);
+    expect(profile.name).toBe('Profile Tester');
+    expect(profile.city || '').toBe('');
+    await page.getByRole('button', { name: 'Account options' }).click();
+    await page.getByRole('button', { name: 'Profile' }).click();
+    await expect(page.getByPlaceholder('Full name')).toHaveValue('Profile Tester');
+    await expect(page.getByPlaceholder('City')).toHaveValue('');
+  });
 });
 
 test.describe('Landing — logout', () => {
@@ -92,6 +131,7 @@ test.describe('Landing — logout', () => {
       password: STRONG_PASSWORD,
       name: 'Logout Tester',
     });
+    await page.evaluate(() => localStorage.setItem('ak_terms_accepted', '1'));
   });
 
   // TC-L01
