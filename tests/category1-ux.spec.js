@@ -73,15 +73,17 @@ test.describe('Category 1 UX fixes', () => {
   });
 
   // TC-C05
-  test('reminder form saves contact and time', async ({ page }) => {
+  test('reminder form saves email and time via API', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Set My Reminder' }).scrollIntoViewIfNeeded();
-    await page.getByPlaceholder('10-digit mobile number').fill('9876543210');
+    const email = `rem-${Date.now()}@test.com`;
+    await page.locator('#reminder-contact').fill(email);
     await page.getByRole('button', { name: 'Set My Reminder' }).click();
-    await expect(page.getByText("You're all set")).toBeVisible();
+    await expect(page.getByText("You're all set")).toBeVisible({ timeout: 10000 });
     const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_reminder') || '{}'));
-    expect(stored.contact).toBe('9876543210');
+    expect(stored.contact).toBe(email);
     expect(stored.time).toBeTruthy();
+    expect(stored.channel).toBe('email');
   });
 
   // TC-C06
@@ -91,9 +93,10 @@ test.describe('Category 1 UX fixes', () => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Account options' }).click();
     await page.getByRole('button', { name: 'Profile' }).click();
-    await page.getByPlaceholder('Full name').fill('No Contact User');
-    await page.getByPlaceholder('Phone number').fill('');
-    await page.getByPlaceholder('Email address').fill('');
+    const profile = page.getByRole('dialog', { name: 'My Profile' });
+    await profile.getByPlaceholder('Full name').fill('No Contact User');
+    await profile.getByPlaceholder('Phone number').fill('');
+    await profile.getByPlaceholder('Email address').fill('');
     await page.getByRole('button', { name: 'Save changes' }).click();
     await expect(page.getByText('Enter at least a phone number or email')).toBeVisible({ timeout: 8000 });
   });

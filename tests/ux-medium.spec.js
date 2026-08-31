@@ -276,12 +276,12 @@ test.describe('UX medium — landing UX', () => {
   });
 
   // TC-M26
-  test('reminder validates phone for WhatsApp channel', async ({ page }) => {
+  test('reminder validates email before save', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await page.getByPlaceholder('10-digit mobile number').scrollIntoViewIfNeeded();
-    await page.getByPlaceholder('10-digit mobile number').fill('not-a-contact');
+    await page.locator('#reminder-contact').scrollIntoViewIfNeeded();
+    await page.locator('#reminder-contact').fill('not-an-email');
     await page.getByRole('button', { name: 'Set My Reminder' }).click();
-    await expect(page.getByText(/valid 10-digit phone/i).first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/valid email/i).first()).toBeVisible({ timeout: 5000 });
   });
 
   // TC-M27
@@ -292,7 +292,7 @@ test.describe('UX medium — landing UX', () => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Account options' }).click();
     await page.getByRole('button', { name: 'Profile' }).click();
-    await page.getByPlaceholder('Email address').fill(newEmail);
+    await page.getByRole('dialog', { name: 'My Profile' }).getByPlaceholder('Email address').fill(newEmail);
     await page.getByRole('button', { name: 'Save changes' }).click();
     await expect(page.getByText(/Profile updated/i).first()).toBeVisible({ timeout: 5000 });
 

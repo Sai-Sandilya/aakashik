@@ -1074,24 +1074,16 @@
           Gentle ritual reminders
         </span>
         <h2 id="reminder-section-title" style="font-family: 'Marcellus', serif; font-weight: 400; font-size: clamp(28px, 3.6vw, 40px); line-height: 1.12; color: #2E3D2C; margin: 14px 0 12px;">Ritual Reminders, Gently Delivered</h2>
-        <p style="font-size: 15px; line-height: 1.7; color: #5E6A54; margin: 0; max-width: 440px;">Demo only — preference is saved on this device. No real WhatsApp/SMS/email is sent yet.</p>
+        <p style="font-size: 15px; line-height: 1.7; color: #5E6A54; margin: 0; max-width: 440px;">Get a gentle daily nudge by email at the time you choose — Ayurvedic ritual reminders, delivered with care.</p>
       </div>
 
       <div id="ak-reminder-panel" role="region" aria-labelledby="reminder-section-title" style="flex: 1 1 320px; min-width: 300px;">
         <sc-if value="{{ notReminded }}">
-          <form onSubmit="{{ setReminder }}" novalidate style="display: flex; flex-direction: column; gap: 16px;">
-            <div>
-              <span id="reminder-channel-label" style="display: block; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A9678; margin-bottom: 9px;">Remind me on</span>
-              <div role="group" aria-labelledby="reminder-channel-label" style="display: flex; gap: 8px;">
-                <sc-for list="{{ channels }}" as="c" hint-placeholder-count="2">
-                  <button type="button" onClick="{{ c.onClick }}" aria-pressed="{{ c.ariaPressed }}" aria-label="{{ c.ariaLabel }}" style="{{ c.style }}">{{ c.label }}</button>
-                </sc-for>
-              </div>
-            </div>
+          <form onSubmit="{{ setReminder }}" aria-label="Email ritual reminder signup" novalidate style="display: flex; flex-direction: column; gap: 16px;">
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
               <div style="flex: 1; min-width: 130px;">
-                <label for="reminder-contact" style="display: block; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A9678; margin-bottom: 9px;">Contact</label>
-                <input id="reminder-contact" type="{{ reminderInputType }}" inputmode="{{ reminderInputMode }}" autocomplete="{{ reminderAutocomplete }}" value="{{ reminderContact }}" onInput="{{ onReminderContact }}" required placeholder="{{ reminderPlaceholder }}" style="width: 100%; background: rgba(255,255,255,0.7); border: 1px solid #D7CDB4; color: #2E3D2C; padding: 12px 14px; border-radius: 12px; font-size: 14px; outline: none;">
+                <label for="reminder-contact" style="display: block; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A9678; margin-bottom: 9px;">Email</label>
+                <input id="reminder-contact" type="email" inputmode="email" autocomplete="email" value="{{ reminderContact }}" onInput="{{ onReminderContact }}" required placeholder="Your email for daily reminders" style="width: 100%; background: rgba(255,255,255,0.7); border: 1px solid #D7CDB4; color: #2E3D2C; padding: 12px 14px; border-radius: 12px; font-size: 14px; outline: none;">
               </div>
               <div style="min-width: 110px;">
                 <label for="reminder-time" style="display: block; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A9678; margin-bottom: 9px;">Time</label>
@@ -1111,7 +1103,7 @@
             </span>
             <h3 style="font-family: 'Marcellus', serif; font-weight: 400; font-size: 22px; color: #2E3D2C; margin: 0 0 6px;">You're all set</h3>
             <p style="font-size: 13.5px; color: #5E6A54; margin: 0 0 8px;">{{ reminderSummary }}</p>
-            <p style="font-size: 12.5px; color: #8A9678; margin: 0 0 16px;">Saved on this device (demo — nothing is sent yet).</p>
+            <p style="font-size: 12.5px; color: #8A9678; margin: 0 0 16px;">We'll email you a confirmation now. Daily reminders at your chosen time are coming soon.</p>
             <button type="button" onClick="{{ clearReminder }}" style="background: transparent; color: #2E3D2C; border: 1px solid #C2B591; padding: 10px 18px; border-radius: 30px; font-size: 13px; font-weight: 500; cursor: pointer;">Change reminder</button>
           </div>
         </sc-if>
@@ -2002,7 +1994,7 @@ class Component extends DCLogic {
     bottleAngle: 0, peeled: false,
     activeHerb: 'Tulasi',
     activeAroma: 1,
-    reminderChannel: 'whatsapp', reminderSet: false,
+    reminderSet: false,
     cartItems: {}, cartOpen: false, orderPlaced: false, bump: 0,
     quickView: null, qvSubscribe: false, qvFace: 'front', qvSize: 0,
     legal: null,
@@ -2457,22 +2449,11 @@ class Component extends DCLogic {
     }
     const rem = this._readJSON('ak_reminder', null);
     if (rem && rem.contact) {
-      const channel = rem.channel === 'email' ? 'email' : 'whatsapp';
-      const raw = String(rem.contact).trim();
-      let contact = '';
-      let valid = false;
-      if (channel === 'email') {
-        contact = raw.toLowerCase();
-        valid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(contact);
-      } else {
-        contact = this._normalizePhone(raw);
-        valid = this._isValidPhone(contact);
-      }
-      if (valid) {
+      const contact = String(rem.contact).trim().toLowerCase();
+      if (/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(contact)) {
         boot.reminderSet = true;
         boot.reminderContact = contact;
         boot.reminderTime = rem.time || '08:00';
-        boot.reminderChannel = channel;
       }
     }
     try { if (localStorage.getItem('ak_sound') === '1') boot.soundOn = true; } catch (e) {}
@@ -2543,26 +2524,7 @@ class Component extends DCLogic {
           return r.json();
         })
         .then((data) => {
-          if (!data) return;
-          if (!data.loggedIn || !data.user) {
-            try {
-              const p = JSON.parse(localStorage.getItem('ak_profile') || '{}');
-              if (p && p.demoSocial) return;
-              // Expired Google OAuth only — local browser accounts stay signed in without a server cookie.
-              if (!(p && p.provider === 'google')) return;
-              const hadLocal = localStorage.getItem('ak_logged') === '1';
-              if (!hadLocal) return;
-              localStorage.removeItem('ak_logged');
-              localStorage.removeItem('ak_persist');
-              localStorage.removeItem('ak_profile');
-              try { sessionStorage.removeItem('ak_logged'); } catch (er) {}
-            } catch (e) {}
-            this.setState({
-              loggedIn: false, accountMenuOpen: false, profileOpen: false, ordersOpen: false, termsOpen: false, termsChecked: false,
-              profileName: '', profilePhone: '', profileEmail: '', profileAddress: '', profileCity: '', profileState: '', profilePincode: '',
-            });
-            return;
-          }
+          if (!data || !data.loggedIn || !data.user) return;
           const u = data.user;
           const profile = {
             name: u.name || '',
@@ -3221,19 +3183,6 @@ class Component extends DCLogic {
         nodeStyle: 'opacity:0;animation:nodePop .5s cubic-bezier(.34,1.5,.6,1) forwards ' + nd + 's;' };
     });
     const herbCenter = { xPct: (HW.cx / 460 * 100), yPct: (HW.cy / 320 * 100), cx: HW.cx, cy: HW.cy };
-
-    // ---- Reminders ----
-    const channels = [
-      { key: 'whatsapp', label: 'WhatsApp' },
-      { key: 'email', label: 'Email' },
-    ].map(c => ({
-      ...c,
-      active: c.key === this.state.reminderChannel,
-      ariaPressed: c.key === this.state.reminderChannel,
-      ariaLabel: c.label + ' reminder channel',
-      style: chip(c.key === this.state.reminderChannel),
-      onClick: () => this.setState({ reminderChannel: c.key }),
-    }));
 
     // ---- Cart summary ----
     const MEMBER_RATE = 0.10;
@@ -4268,45 +4217,45 @@ class Component extends DCLogic {
 
       herbs, activeHerbData, webNodes, herbCenter,
 
-      channels,
       reminderContact: this.state.reminderContact,
       onReminderContact: (e) => this.setState({ reminderContact: e.target.value }),
       reminderTime: this.state.reminderTime,
       onReminderTime: (e) => this.setState({ reminderTime: e.target.value }),
-      reminderPlaceholder: (this.state.reminderChannel === 'email') ? 'Email address' : '10-digit mobile number',
-      reminderInputType: this.state.reminderChannel === 'email' ? 'email' : 'tel',
-      reminderInputMode: this.state.reminderChannel === 'email' ? 'email' : 'numeric',
-      reminderAutocomplete: this.state.reminderChannel === 'email' ? 'email' : 'tel',
       reminderSet: this.state.reminderSet,
       notReminded: !this.state.reminderSet,
       reminderSummary: (() => {
-        const ch = this.state.reminderChannel === 'email' ? 'Email' : 'WhatsApp';
         const contact = (this.state.reminderContact || '').trim() || '—';
         const time = this.state.reminderTime || '08:00';
-        return ch + ' · ' + contact + ' · ' + time;
+        return 'Email · ' + contact + ' · ' + time;
       })(),
       clearReminder: () => {
         try { localStorage.removeItem('ak_reminder'); } catch (er) {}
-        this.setState({ reminderSet: false });
+        this.setState({ reminderSet: false, reminderContact: '' });
       },
       setReminder: (e) => {
         if (e && e.preventDefault) e.preventDefault();
-        const raw = (this.state.reminderContact || '').trim();
-        const channel = this.state.reminderChannel || 'whatsapp';
-        if (!raw) { this.showToast('Enter phone or email for reminders'); return; }
-        const isEmailChannel = channel === 'email';
-        let contact = '';
-        if (isEmailChannel) {
-          contact = raw.toLowerCase();
-          if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(contact)) { this.showToast('Enter a valid email for email reminders'); return; }
-        } else {
-          contact = this._normalizePhone(raw);
-          if (!this._isValidPhone(contact)) { this.showToast('Enter a valid 10-digit phone for WhatsApp reminders'); return; }
+        const contact = (this.state.reminderContact || '').trim().toLowerCase();
+        if (!contact) { this.showToast('Enter your email for reminders'); return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(contact)) {
+          this.showToast('Enter a valid email for reminders');
+          return;
         }
         const time = this.state.reminderTime || '08:00';
-        this._writeJSON('ak_reminder', { contact, time, channel, setAt: Date.now() });
-        this.setState({ reminderSet: true, reminderContact: contact, reminderTime: time, reminderChannel: channel });
-        this.showToast('Reminder saved on this device');
+        fetch('/api/reminders/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: contact, time }),
+        })
+          .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+          .then(({ ok, data }) => {
+            if (!ok) throw new Error((data && data.message) || 'Could not save reminder right now');
+            this._writeJSON('ak_reminder', { contact, time, channel: 'email', setAt: Date.now() });
+            this.setState({ reminderSet: true, reminderContact: contact, reminderTime: time });
+            this.showToast(data.duplicate ? 'Reminder updated' : 'Reminder saved — check your email');
+          })
+          .catch((err) => {
+            this.showToast(err.message || 'Could not save reminder right now');
+          });
       },
     };
   }
