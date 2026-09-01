@@ -188,75 +188,27 @@ async function seedIfEmpty(db) {
       adminPasswordHash,
       'Aakashik Owner',
     );
-
-    seedMockOrders(db, now);
   });
 }
 
-function seedMockOrders(db, now) {
-  const mocks = [
-    {
-      id: 'AAK-10001', status: 'pending', placedAt: now - 3600000, total: 539, payMethod: 'cod',
-      customer: { name: 'Ananya Rao', phone: '9876501001', email: 'ananya@example.com' },
-      delivery: { address: '12 Lake View', city: 'Hyderabad', state: 'Telangana', pincode: '500001' },
-      items: [{ productId: 'immunity', name: 'Daily Immunity', qty: 1, unitPrice: 349 }, { productId: 'ashta', name: 'Ashtagandham', qty: 1, unitPrice: 199 }],
-      history: [{ status: 'pending', at: now - 3600000 }],
-    },
-    {
-      id: 'AAK-10002', status: 'packed', placedAt: now - 86400000, total: 399, payMethod: 'upi',
-      customer: { name: 'Rohit Mehta', phone: '9876501002', email: 'rohit@example.com' },
-      delivery: { address: '88 Palm Grove', city: 'Pune', state: 'Maharashtra', pincode: '411001' },
-      items: [{ productId: 'navojas', name: 'Navojas 250g', qty: 1, unitPrice: 399 }],
-      history: [{ status: 'pending', at: now - 86400000 }, { status: 'packed', at: now - 80000000 }],
-    },
-    {
-      id: 'AAK-10003', status: 'delivered', placedAt: now - 5 * 86400000, total: 599, payMethod: 'card',
-      customer: { name: 'Kabir Singh', phone: '9876501004', email: 'kabir@example.com' },
-      delivery: { address: '21 Ring Road', city: 'Delhi', state: 'Delhi', pincode: '110001' },
-      items: [{ productId: 'kit-immunity', name: 'Immunity Ritual Kit', qty: 1, unitPrice: 599 }],
-      history: [
-        { status: 'pending', at: now - 5 * 86400000 },
-        { status: 'packed', at: now - 4.5 * 86400000 },
-        { status: 'shipped', at: now - 4 * 86400000 },
-        { status: 'out_for_delivery', at: now - 3.5 * 86400000 },
-        { status: 'delivered', at: now - 3 * 86400000 },
-      ],
-    },
-  ];
-
-  const insertOrder = db.prepare(`
-    INSERT INTO orders (id, status, placed_at, total, subtotal, member_discount, pay_method, payment_json, delivery_json, source, created_at, updated_at)
-    VALUES (@id, @status, @placedAt, @total, @total, 0, @payMethod, @paymentJson, @deliveryJson, 'mock', @placedAt, @placedAt)
-  `);
-  const insertItem = db.prepare(`
-    INSERT INTO order_items (order_id, product_id, name, qty, unit_price, line_text, size)
-    VALUES (@orderId, @productId, @name, @qty, @unitPrice, @lineText, NULL)
-  `);
-  const insertHist = db.prepare('INSERT INTO order_status_history (order_id, status, at) VALUES (?, ?, ?)');
-
-  for (const m of mocks) {
-    const delivery = { ...m.delivery, ...m.customer };
-    insertOrder.run({
-      id: m.id,
-      status: m.status,
-      placedAt: m.placedAt,
-      total: m.total,
-      payMethod: m.payMethod,
-      paymentJson: JSON.stringify({ method: m.payMethod, mock: true, status: m.payMethod === 'cod' ? 'cod' : 'paid' }),
-      deliveryJson: JSON.stringify(delivery),
-    });
-    for (const it of m.items) {
-      insertItem.run({
-        orderId: m.id,
-        productId: it.productId,
-        name: it.name,
-        qty: it.qty,
-        unitPrice: it.unitPrice,
-        lineText: `${it.name} × ${it.qty} · ₹${it.unitPrice}`,
-      });
+/** Wipe mutable commerce data and restore default stock (E2E only). */
+export function resetE2eFixtures(db) {
+  withTransaction(db, () => {
+    db.exec(`
+      DELETE FROM order_status_history;
+      DELETE FROM order_items;
+      DELETE FROM orders;
+      DELETE FROM inventory WHERE product_id IN (SELECT id FROM products WHERE is_builtin = 0);
+      DELETE FROM products WHERE is_builtin = 0;
+    `);
+    for (const [id, qty] of Object.entries(DEFAULT_STOCK)) {
+      db.prepare(`
+        INSERT INTO inventory (product_id, quantity) VALUES (?, ?)
+        ON CONFLICT(product_id) DO UPDATE SET quantity = excluded.quantity
+      `).run(id, qty);
     }
-    for (const h of m.history) insertHist.run(m.id, h.status, h.at);
-  }
+  });
+  return { ok: true };
 }
 
 async function migratePlaintextAdminPassword(db) {

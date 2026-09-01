@@ -2,6 +2,7 @@
  * Admin custom products — add / hide / delete syncs to the store catalog.
  */
 const { test, expect } = require('@playwright/test');
+const { resetE2eApi } = require('./helpers/e2e-api');
 
 const ADMIN_URL = '/Admin';
 const LANDING_URL = '/';
@@ -15,7 +16,8 @@ async function seedAdminSession(page) {
   });
 }
 
-async function clearProductStorage(page) {
+async function clearProductStorage(page, request) {
+  if (request) await resetE2eApi(request);
   await page.goto(LANDING_URL);
   await page.evaluate(() => {
     localStorage.removeItem('ak_admin_logged');
@@ -25,6 +27,7 @@ async function clearProductStorage(page) {
     localStorage.removeItem('ak_custom_products');
     localStorage.removeItem('ak_hidden_ids');
     localStorage.removeItem('ak_cart');
+    try { sessionStorage.removeItem('ak_admin_token'); } catch (er) {}
   });
 }
 
@@ -33,12 +36,13 @@ async function adminLogin(page) {
   await page.getByLabel('Admin email').fill(ADMIN_EMAIL);
   await page.getByLabel('Admin password').fill(ADMIN_PASSWORD);
   await page.getByRole('button', { name: 'Enter Admin' }).click();
-  await expect(page.getByRole('heading', { name: 'Orders (mock)' })).toBeVisible({ timeout: 8000 });
+  await expect(page.getByRole('heading', { name: 'Orders' })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('button', { name: 'Log out' })).toBeVisible({ timeout: 15000 });
 }
 
 async function openProducts(page) {
   await page.getByRole('button', { name: 'Products', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Products (mock)' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
 }
 
 async function fillProductForm(page, {
@@ -58,8 +62,8 @@ async function fillProductForm(page, {
 }
 
 test.describe('Admin products — add & publish', () => {
-  test.beforeEach(async ({ page }) => {
-    await clearProductStorage(page);
+  test.beforeEach(async ({ page, request }) => {
+    await clearProductStorage(page, request);
   });
 
   test('TC-PR01 positive: Products tab opens with add form', async ({ page }) => {
@@ -109,8 +113,8 @@ test.describe('Admin products — add & publish', () => {
 });
 
 test.describe('Admin products — store visibility', () => {
-  test.beforeEach(async ({ page }) => {
-    await clearProductStorage(page);
+  test.beforeEach(async ({ page, request }) => {
+    await clearProductStorage(page, request);
   });
 
   test('TC-PR05 positive: published product appears on store search', async ({ page }) => {
@@ -226,8 +230,8 @@ test.describe('Admin products — store visibility', () => {
 });
 
 test.describe('Admin products — edit & inventory link', () => {
-  test.beforeEach(async ({ page }) => {
-    await clearProductStorage(page);
+  test.beforeEach(async ({ page, request }) => {
+    await clearProductStorage(page, request);
   });
 
   test('TC-PR09 positive: edit updates name and discount', async ({ page }) => {
@@ -273,7 +277,7 @@ test.describe('Admin products — edit & inventory link', () => {
     await page.getByRole('button', { name: 'Publish product' }).click();
     await expect(page.getByText(/Added Inventory Linked Oil to store/i)).toBeVisible();
     await page.getByRole('button', { name: 'Inventory', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Inventory (mock)' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Inventory' })).toBeVisible();
     await expect(page.getByText('Inventory Linked Oil', { exact: true })).toBeVisible();
     await expect(page.getByText(/SKUs:\s*10/)).toBeVisible();
   });

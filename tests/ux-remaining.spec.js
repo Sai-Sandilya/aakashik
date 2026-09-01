@@ -146,7 +146,7 @@ test.describe('UX remaining — shopper honesty (3–7, 10)', () => {
     await expect(page.getByText('Diabetic Care')).toHaveCount(0);
   });
 
-  test('TC-R11 positive: order confirm is local/demo only', async ({ page }) => {
+  test('TC-R11 positive: order confirm reflects server or local save', async ({ page }) => {
     const email = `ord-${Date.now()}@test.com`;
     await seedEmailUser(page, { email, password: STRONG_PASSWORD });
     await page.evaluate(() => {
@@ -165,7 +165,7 @@ test.describe('UX remaining — shopper honesty (3–7, 10)', () => {
     await form.getByPlaceholder('6-digit pin').fill('500001');
     await form.locator('select').selectOption({ label: 'Telangana' });
     await page.getByRole('button', { name: 'Place Order' }).evaluate((el) => /** @type {HTMLElement} */ (el).click());
-    await expect(page.getByText(/order saved on this device \(demo\)/i)).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText(/confirmed on our system|saved on this device \(demo\)/i)).toBeVisible({ timeout: 8000 });
     await expect(page.getByText(/confirmation is on its way/i)).toHaveCount(0);
   });
 

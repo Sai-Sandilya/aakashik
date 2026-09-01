@@ -30,7 +30,7 @@
 <div id="admin-shell" style="font-family: 'Jost', sans-serif; color: #2E3D2C; min-height: 100vh; background: linear-gradient(160deg, #E8E2D4 0%, #F4EEE1 45%, #E7EDE0 100%);">
 
   <div role="status" style="background: #F3E9D8; border-bottom: 1px solid #E0D7BE; color: #5E6A54; font-size: 12.5px; line-height: 1.5; padding: 10px 18px; text-align: center;">
-    Demo admin — orders, inventory, and custom products in this browser only. Published products appear on the store.
+    Owner console — orders, inventory, and products sync with the live server when signed in.
   </div>
 
   <sc-if value="{{ notLoggedIn }}">
@@ -68,7 +68,6 @@
         <button type="button" onClick="{{ showCustomersTab }}" style="{{ customersTabStyle }}">Customers</button>
         <sc-if value="{{ isOrdersTab }}">
           <button type="button" onClick="{{ syncStoreOrders }}" style="background:transparent; border:1px solid #2E3D2C; color:#2E3D2C; padding:10px 14px; border-radius:30px; font-size:13px;">Pull store orders now</button>
-          <button type="button" onClick="{{ reseedMocks }}" style="background:transparent; border:1px solid #8A9678; color:#5E6A54; padding:10px 14px; border-radius:30px; font-size:13px;">Reseed mocks</button>
         </sc-if>
         <sc-if value="{{ isInventoryTab }}">
           <button type="button" onClick="{{ reseedStock }}" style="background:transparent; border:1px solid #8A9678; color:#5E6A54; padding:10px 14px; border-radius:30px; font-size:13px;">Reseed stock</button>
@@ -102,7 +101,7 @@
     <div id="admin-layout" style="display:grid; grid-template-columns: 1.1fr 0.9fr; gap:18px; padding:0 clamp(16px,4vw,36px) 36px; align-items:start;">
       <section aria-label="Orders list" style="background:#F6F1E4; border:1px solid #E0D7BE; border-radius:18px; overflow:hidden;">
         <sc-if value="{{ listEmpty }}">
-          <div style="padding:28px 20px; text-align:center; color:#5E6A54; font-size:14px; line-height:1.6;">No orders match this filter. Try All, or Sync store orders / Reseed mocks.</div>
+          <div style="padding:28px 20px; text-align:center; color:#5E6A54; font-size:14px; line-height:1.6;">No orders match this filter. Try All, or Pull store orders now.</div>
         </sc-if>
         <sc-if value="{{ listHasItems }}">
           <div style="display:flex; flex-direction:column;">
@@ -401,10 +400,6 @@ class Component extends DCLogic {
       try { localStorage.removeItem('ak_admin_logged'); } catch (er) {}
     }
     let orders = this._readOrders();
-    if (!orders.length) {
-      orders = this._seedMocks();
-      this._writeOrders(orders);
-    }
     const pulled = this._mergeStoreOrders(orders);
     const stock = this._ensureStock();
     this.setState({
@@ -415,7 +410,10 @@ class Component extends DCLogic {
       customProducts: this._readCustomProducts(),
       hiddenIds: this._readHiddenIds(),
     });
-    if (logged) this._startLivePull();
+    if (logged) {
+      this._startLivePull();
+      this._hydrateAdminFromApi();
+    }
     this._onStorage = (e) => {
       if (!this.state.loggedIn) return;
       if (e && e.key === 'ak_stock') {
@@ -544,6 +542,256 @@ class Component extends DCLogic {
     }
   }
 
+  _canUseAdminApi() {
+    const token = this._adminToken();
+    return !!(token && !this._isDemoMockToken());
+  }
+
+  async _adminFetch(path, opts) {
+    const token = this._adminToken();
+    if (!token || this._isDemoMockToken()) {
+      return { ok: false, status: 0, data: {}, skipped: true };
+    }
+    const headers = Object.assign({ 'Content-Type': 'application/json' }, (opts && opts.headers) || {});
+    headers.Authorization = 'Bearer ' + token;
+    const res = await fetch(path, Object.assign({}, opts || {}, { headers }));
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      try {
+        sessionStorage.removeItem('ak_admin_token');
+        localStorage.removeItem('ak_admin_logged');
+      } catch (er) {}
+      this.setState({ loggedIn: false, customers: [], customersError: 'Session expired. Sign in again.' });
+      this._stopLivePull();
+    }
+    return { ok: res.ok, status: res.status, data };
+  }
+
+  _mapApiOrderToAdmin(apiOrder) {
+    if (!apiOrder || !apiOrder.id) return null;
+    return {
+      id: apiOrder.id,
+      source: apiOrder.source || 'store',
+      status: apiOrder.status || 'pending',
+      placedAt: apiOrder.placedAt,
+      total: apiOrder.total,
+      subtotal: apiOrder.subtotal,
+      memberDiscount: apiOrder.memberDiscount,
+      payMethod: apiOrder.payMethod,
+      payment: apiOrder.payment,
+      paymentStatus: apiOrder.paymentStatus || (apiOrder.payment && apiOrder.payment.status) || '',
+      customer: apiOrder.customer || {},
+      delivery: apiOrder.delivery || {},
+      items: Array.isArray(apiOrder.items) ? apiOrder.items : [],
+      statusHistory: Array.isArray(apiOrder.statusHistory) ? apiOrder.statusHistory : [],
+      serverSynced: true,
+    };
+  }
+
+  _inventoryToStockMap(rows) {
+    const stock = Object.assign({}, this._defaultStock());
+    (Array.isArray(rows) ? rows : []).forEach((row) => {
+      if (!row || !row.productId) return;
+      const n = Number(row.quantity);
+      stock[row.productId] = Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
+    });
+    return stock;
+  }
+
+  _mapApiProductToLocal(p) {
+    if (!p || !p.id) return null;
+    const sale = p.priceN != null ? p.priceN : this._salePrice(p.listPriceN, p.discountPct);
+    return {
+      id: p.id,
+      name: p.name,
+      description: p.description || '',
+      benefit: p.description || '',
+      sub: p.sub || 'Owner added',
+      concern: p.concern || 'Immunity',
+      element: p.element || 'All',
+      priceN: sale,
+      listPriceN: p.listPriceN != null ? p.listPriceN : sale,
+      discountPct: p.discountPct || 0,
+      photo: p.photo || '',
+      front: p.photo || '',
+      jar: '#D9BE9C',
+      cap: '#A06437',
+      herbs: [],
+      tag: (p.discountPct > 0) ? (p.discountPct + '% off') : 'New',
+      active: p.active !== false,
+      custom: !!(p.custom || !p.isBuiltin),
+      isBuiltin: !!p.isBuiltin,
+      hidden: !!p.hidden,
+      stock: p.stock,
+      createdAt: p.createdAt || Date.now(),
+      updatedAt: p.updatedAt || Date.now(),
+      serverSynced: true,
+    };
+  }
+
+  async _loadOrdersFromApi() {
+    if (!this._canUseAdminApi()) return null;
+    try {
+      const { ok, data } = await this._adminFetch('/api/admin/orders');
+      if (!ok || !Array.isArray(data.orders)) return null;
+      const mapped = data.orders.map((o) => this._mapApiOrderToAdmin(o)).filter(Boolean);
+      const local = this._readOrders();
+      const byId = {};
+      local.forEach((o) => { if (o && o.id) byId[o.id] = o; });
+      mapped.forEach((o) => { byId[o.id] = o; });
+      const merged = Object.keys(byId).map((id) => byId[id])
+        .sort((a, b) => (b.placedAt || 0) - (a.placedAt || 0));
+      this._writeOrders(merged);
+      const pulled = this._mergeStoreOrders(merged);
+      this.setState({ orders: pulled.list });
+      return pulled.list;
+    } catch (er) {
+      return null;
+    }
+  }
+
+  async _updateOrderStatusApi(orderId, nextStatus) {
+    const applyLocal = () => {
+      const list = this._readOrders().map((o) => {
+        if (o.id !== orderId) return o;
+        const hist = Array.isArray(o.statusHistory) ? o.statusHistory.slice() : [];
+        hist.push({ status: nextStatus, at: Date.now() });
+        return Object.assign({}, o, { status: nextStatus, statusHistory: hist });
+      });
+      const updated = list.find((o) => o.id === orderId);
+      this._writeOrders(list);
+      if (updated) this._pushStatusToStore(updated.id, updated.status, updated.statusHistory);
+      this.setState({ orders: list, statusError: '' });
+      this._showToast(orderId + ' → ' + this._statusLabel(nextStatus));
+      return true;
+    };
+
+    if (!this._canUseAdminApi()) return applyLocal();
+    try {
+      const { ok, status, data } = await this._adminFetch('/api/admin/orders/' + encodeURIComponent(orderId) + '/status', {
+        method: 'PATCH',
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      if (ok && data.order) {
+        const mapped = this._mapApiOrderToAdmin(data.order);
+        const list = this._readOrders().map((o) => (o.id === orderId ? mapped : o));
+        if (!list.some((o) => o.id === orderId)) list.unshift(mapped);
+        this._writeOrders(list);
+        this._pushStatusToStore(mapped.id, mapped.status, mapped.statusHistory);
+        this.setState({ orders: list, statusError: '' });
+        this._showToast(orderId + ' → ' + this._statusLabel(nextStatus));
+        return true;
+      }
+      if (status === 400 || status === 409 || status === 422) {
+        this.setState({ statusError: data.message || 'Could not update status' });
+        return false;
+      }
+      return applyLocal();
+    } catch (er) {
+      return applyLocal();
+    }
+  }
+
+  async _loadInventoryFromApi() {
+    if (!this._canUseAdminApi()) return null;
+    try {
+      const { ok, data } = await this._adminFetch('/api/admin/inventory?filter=all');
+      if (!ok || !Array.isArray(data.inventory)) return null;
+      const stock = this._inventoryToStockMap(data.inventory);
+      this._writeStock(stock);
+      this.setState({ stock, stockDrafts: Object.assign({}, stock) });
+      return stock;
+    } catch (er) {
+      return null;
+    }
+  }
+
+  async _persistStockQty(id, qty) {
+    const n = Math.max(0, Math.floor(Number(qty) || 0));
+    if (this._canUseAdminApi()) {
+      try {
+        const { ok, status, data } = await this._adminFetch('/api/admin/inventory/' + encodeURIComponent(id), {
+          method: 'PATCH',
+          body: JSON.stringify({ quantity: n }),
+        });
+        if (ok && data.inventory) {
+          return this._setStockQty(id, data.inventory.quantity);
+        }
+        if (status === 400 || status === 404 || status === 422) {
+          this._showToast(data.message || 'Could not update stock');
+          return this._readStock()[id] || 0;
+        }
+      } catch (er) { /* fall through to local */ }
+    }
+    return this._setStockQty(id, n);
+  }
+
+  async _reseedStockApi() {
+    const applyLocal = () => {
+      const seed = this._defaultStock();
+      const customs = this._readCustomProducts();
+      const current = this._readStock();
+      customs.forEach((p) => {
+        if (p && p.id && current[p.id] !== undefined) seed[p.id] = current[p.id];
+      });
+      this._writeStock(seed);
+      this.setState({ stock: seed, stockDrafts: Object.assign({}, seed), invFilter: 'all', invSearch: '' });
+      this._showToast('Stock levels reseeded');
+    };
+    if (!this._canUseAdminApi()) return applyLocal();
+    try {
+      const { ok, data } = await this._adminFetch('/api/admin/inventory/reseed', { method: 'POST', body: '{}' });
+      if (ok && Array.isArray(data.inventory)) {
+        const stock = this._inventoryToStockMap(data.inventory);
+        this._writeStock(stock);
+        this.setState({ stock, stockDrafts: Object.assign({}, stock), invFilter: 'all', invSearch: '' });
+        this._showToast('Stock levels reseeded');
+        return;
+      }
+    } catch (er) { /* fall through */ }
+    applyLocal();
+  }
+
+  async _loadProductsFromApi() {
+    if (!this._canUseAdminApi()) return null;
+    try {
+      const { ok, data } = await this._adminFetch('/api/admin/products');
+      if (!ok || !Array.isArray(data.products)) return null;
+      const customs = [];
+      const hidden = [];
+      const stock = Object.assign({}, this._readStock());
+      data.products.forEach((raw) => {
+        const p = this._mapApiProductToLocal(raw);
+        if (!p) return;
+        if (p.stock != null) stock[p.id] = Math.max(0, Math.floor(Number(p.stock) || 0));
+        if (p.isBuiltin || !p.custom) {
+          if (p.hidden) hidden.push(p.id);
+        } else {
+          customs.push(p);
+        }
+      });
+      this._writeCustomProducts(customs);
+      this._writeHiddenIds(hidden);
+      this._writeStock(stock);
+      this.setState({
+        customProducts: customs,
+        hiddenIds: hidden,
+        stock,
+        stockDrafts: Object.assign({}, this.state.stockDrafts || {}, stock),
+      });
+      return { customs, hidden, stock };
+    } catch (er) {
+      return null;
+    }
+  }
+
+  async _hydrateAdminFromApi() {
+    if (!this._canUseAdminApi()) return;
+    await this._loadOrdersFromApi();
+    await this._loadInventoryFromApi();
+    await this._loadProductsFromApi();
+  }
+
   /** Merge store `ak_orders` into admin list. Returns { list, added }. */
   _mergeStoreOrders(baseList) {
     let list = Array.isArray(baseList) ? baseList.slice() : this._readOrders();
@@ -563,17 +811,24 @@ class Component extends DCLogic {
 
   _livePull(opts) {
     const quiet = !!(opts && opts.quiet);
-    const result = this._mergeStoreOrders(this.state.orders);
-    if (result.added) {
-      this.setState({ orders: result.list });
-      if (!quiet) this._showToast('Pulled ' + result.added + ' store order(s)');
-      else this._showToast('New store order received');
-    } else if (!quiet) {
-      const store = this._readJSON('ak_orders', []);
-      if (!Array.isArray(store) || !store.length) this._showToast('No store orders found in this browser');
-      else this._showToast('Store orders already up to date');
+    const finishLocal = () => {
+      const result = this._mergeStoreOrders(this.state.orders);
+      if (result.added) {
+        this.setState({ orders: result.list });
+        if (!quiet) this._showToast('Pulled ' + result.added + ' store order(s)');
+        else this._showToast('New store order received');
+      } else if (!quiet) {
+        const store = this._readJSON('ak_orders', []);
+        if (!Array.isArray(store) || !store.length) this._showToast('No store orders found in this browser');
+        else this._showToast('Store orders already up to date');
+      }
+      return result;
+    };
+    if (this._canUseAdminApi() && !quiet) {
+      this._loadOrdersFromApi().then(() => finishLocal());
+      return { list: this.state.orders, added: 0 };
     }
-    return result;
+    return finishLocal();
   }
 
   _readJSON(key, fb) {
@@ -663,6 +918,11 @@ class Component extends DCLogic {
       const n = Number(raw[id]);
       next[id] = Number.isFinite(n) && n >= 0 ? Math.floor(n) : defaults[id];
     });
+    Object.keys(raw).forEach((id) => {
+      if (next[id] !== undefined) return;
+      const n = Number(raw[id]);
+      if (Number.isFinite(n) && n >= 0) next[id] = Math.floor(n);
+    });
     return next;
   }
   _writeStock(map) {
@@ -722,92 +982,6 @@ class Component extends DCLogic {
     };
     const c = colors[s] || colors.pending;
     return 'display:inline-block;padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:500;background:' + c.bg + ';color:' + c.fg + ';border:1px solid ' + c.bd + ';';
-  }
-  _seedMocks() {
-    const now = Date.now();
-    return [
-      {
-        id: 'AAK-10001',
-        source: 'mock',
-        status: 'pending',
-        placedAt: now - 3600 * 1000,
-        total: 539,
-        payMethod: 'cod',
-        paymentStatus: 'cod',
-        customer: { name: 'Ananya Rao', phone: '9876501001', email: 'ananya@example.com' },
-        delivery: { address: '12 Lake View', city: 'Hyderabad', state: 'Telangana', pincode: '500001' },
-        items: [{ name: 'Daily Immunity', qty: 1, line: 'Daily Immunity × 1 · ₹349' }, { name: 'Ashtagandham', qty: 1, line: 'Ashtagandham × 1 · ₹199' }],
-        statusHistory: [{ status: 'pending', at: now - 3600 * 1000 }],
-      },
-      {
-        id: 'AAK-10002',
-        source: 'mock',
-        status: 'packed',
-        placedAt: now - 86400 * 1000,
-        total: 399,
-        payMethod: 'upi',
-        paymentStatus: 'paid',
-        customer: { name: 'Rohit Mehta', phone: '9876501002', email: 'rohit@example.com' },
-        delivery: { address: '88 Palm Grove', city: 'Pune', state: 'Maharashtra', pincode: '411001' },
-        items: [{ name: 'Navojas 250g', qty: 1, line: 'Navojas 250g × 1 · ₹399' }],
-        statusHistory: [
-          { status: 'pending', at: now - 86400 * 1000 },
-          { status: 'packed', at: now - 80000 * 1000 },
-        ],
-      },
-      {
-        id: 'AAK-10003',
-        source: 'mock',
-        status: 'shipped',
-        placedAt: now - 2 * 86400 * 1000,
-        total: 599,
-        payMethod: 'card',
-        paymentStatus: 'paid',
-        customer: { name: 'Sneha Iyer', phone: '9876501003', email: 'sneha@example.com' },
-        delivery: { address: '5 Temple Road', city: 'Chennai', state: 'Tamil Nadu', pincode: '600001' },
-        items: [{ name: 'Immunity Ritual Kit', qty: 1, line: 'Immunity Ritual Kit × 1 · ₹599' }],
-        statusHistory: [
-          { status: 'pending', at: now - 2 * 86400 * 1000 },
-          { status: 'packed', at: now - 1.5 * 86400 * 1000 },
-          { status: 'shipped', at: now - 1 * 86400 * 1000 },
-        ],
-      },
-      {
-        id: 'AAK-10004',
-        source: 'mock',
-        status: 'delivered',
-        placedAt: now - 5 * 86400 * 1000,
-        total: 249,
-        payMethod: 'cod',
-        paymentStatus: 'cod',
-        customer: { name: 'Kabir Singh', phone: '9876501004', email: 'kabir@example.com' },
-        delivery: { address: '21 Ring Road', city: 'Delhi', state: 'Delhi', pincode: '110001' },
-        items: [{ name: 'Herbal Sunni Pindi', qty: 1, line: 'Herbal Sunni Pindi × 1 · ₹249' }],
-        statusHistory: [
-          { status: 'pending', at: now - 5 * 86400 * 1000 },
-          { status: 'packed', at: now - 4.5 * 86400 * 1000 },
-          { status: 'shipped', at: now - 4 * 86400 * 1000 },
-          { status: 'out_for_delivery', at: now - 3.5 * 86400 * 1000 },
-          { status: 'delivered', at: now - 3 * 86400 * 1000 },
-        ],
-      },
-      {
-        id: 'AAK-10005',
-        source: 'mock',
-        status: 'cancelled',
-        placedAt: now - 3 * 86400 * 1000,
-        total: 199,
-        payMethod: 'upi',
-        paymentStatus: 'failed',
-        customer: { name: 'Meera Joshi', phone: '9876501005', email: 'meera@example.com' },
-        delivery: { address: '9 River Lane', city: 'Ahmedabad', state: 'Gujarat', pincode: '380001' },
-        items: [{ name: 'Ashtagandham', qty: 1, line: 'Ashtagandham × 1 · ₹199' }],
-        statusHistory: [
-          { status: 'pending', at: now - 3 * 86400 * 1000 },
-          { status: 'cancelled', at: now - 2.8 * 86400 * 1000 },
-        ],
-      },
-    ];
   }
   _allowedNext(status) {
     if (status === 'pending') return ['packed', 'cancelled'];
@@ -904,7 +1078,7 @@ class Component extends DCLogic {
         ? 'Sign in with your owner credentials to manage orders, stock, and products.'
         : 'Sign in with your owner email and password. Admin access requires the live server.',
       showDemoCredentials: this._isLocalDevHost(),
-      pageTitle: this.state.tab === 'inventory' ? 'Inventory (mock)' : (this.state.tab === 'products' ? 'Products (mock)' : (this.state.tab === 'customers' ? 'Customers' : 'Orders (mock)')),
+      pageTitle: this.state.tab === 'inventory' ? 'Inventory' : (this.state.tab === 'products' ? 'Products' : (this.state.tab === 'customers' ? 'Customers' : 'Orders')),
       isOrdersTab: this.state.tab === 'orders' || !this.state.tab,
       isInventoryTab: this.state.tab === 'inventory',
       isProductsTab: this.state.tab === 'products',
@@ -913,16 +1087,20 @@ class Component extends DCLogic {
       inventoryTabStyle: 'padding:10px 14px;border-radius:30px;font-size:13px;border:1px solid #2E3D2C;background:' + (this.state.tab === 'inventory' ? '#2E3D2C' : 'transparent') + ';color:' + (this.state.tab === 'inventory' ? '#F1EEDF' : '#2E3D2C') + ';cursor:pointer;',
       productsTabStyle: 'padding:10px 14px;border-radius:30px;font-size:13px;border:1px solid #2E3D2C;background:' + (this.state.tab === 'products' ? '#2E3D2C' : 'transparent') + ';color:' + (this.state.tab === 'products' ? '#F1EEDF' : '#2E3D2C') + ';cursor:pointer;',
       customersTabStyle: 'padding:10px 14px;border-radius:30px;font-size:13px;border:1px solid #2E3D2C;background:' + (this.state.tab === 'customers' ? '#2E3D2C' : 'transparent') + ';color:' + (this.state.tab === 'customers' ? '#F1EEDF' : '#2E3D2C') + ';cursor:pointer;',
-      showOrdersTab: () => this.setState({ tab: 'orders' }),
+      showOrdersTab: () => {
+        this.setState({ tab: 'orders' });
+      },
       showInventoryTab: () => {
         const stock = this._ensureStock();
         this.setState({ tab: 'inventory', stock, stockDrafts: Object.assign({}, stock) });
       },
-      showProductsTab: () => this.setState(Object.assign({
-        tab: 'products',
-        customProducts: this._readCustomProducts(),
-        hiddenIds: this._readHiddenIds(),
-      }, this.state.editingId ? {} : this._blankProductForm())),
+      showProductsTab: () => {
+        this.setState(Object.assign({
+          tab: 'products',
+          customProducts: this._readCustomProducts(),
+          hiddenIds: this._readHiddenIds(),
+        }, this.state.editingId ? {} : this._blankProductForm()));
+      },
       showCustomersTab: () => {
         this.setState({ tab: 'customers', customerSearch: '' });
         this._loadCustomers();
@@ -951,9 +1129,20 @@ class Component extends DCLogic {
               sessionStorage.setItem('ak_admin_token', data.token);
               localStorage.setItem('ak_admin_logged', '1');
             } catch (er) {}
-            const pulled = this._mergeStoreOrders(this.state.orders);
-            const stock = this._ensureStock();
-            this.setState({ loggedIn: true, loginError: '', adminPassword: '', orders: pulled.list, stock, stockDrafts: Object.assign({}, stock), tab: 'orders' });
+            await this._hydrateAdminFromApi();
+            const pulled = this._mergeStoreOrders(this._readOrders());
+            const stock = this._readStock();
+            this.setState({
+              loggedIn: true,
+              loginError: '',
+              adminPassword: '',
+              orders: pulled.list,
+              stock,
+              stockDrafts: Object.assign({}, stock),
+              customProducts: this._readCustomProducts(),
+              hiddenIds: this._readHiddenIds(),
+              tab: 'orders',
+            });
             this._startLivePull();
             this._showToast(pulled.added ? ('Signed in · pulled ' + pulled.added + ' store order(s)') : 'Signed in to admin');
             return;
@@ -1003,7 +1192,7 @@ class Component extends DCLogic {
           statusLabel: this._statusLabel(o.status),
           badgeStyle: this._badgeStyle(o.status),
           customerLine: (o.customer && o.customer.name ? o.customer.name : 'Customer') + (o.customer && o.customer.phone ? ' · ' + o.customer.phone : ''),
-          metaLine: this._money(o.total) + ' · ' + String(o.payMethod || 'cod').toUpperCase() + ' · ' + (o.source === 'store' ? 'From store' : 'Mock') + ' · ' + this._fmtWhen(o.placedAt),
+          metaLine: this._money(o.total) + ' · ' + String(o.payMethod || 'cod').toUpperCase() + ' · ' + (o.source === 'store' ? 'From store' : 'Server') + ' · ' + this._fmtWhen(o.placedAt),
           rowStyle: 'width:100%; text-align:left; border:none; border-bottom:1px solid #E4DBC8; padding:14px 16px; cursor:pointer; background:' + (active ? '#EAF0E1' : 'transparent') + ';',
           onSelect: () => this.setState({ selectedId: o.id, statusError: '' }),
         };
@@ -1011,7 +1200,7 @@ class Component extends DCLogic {
       noSelection: !selected,
       hasSelection: !!selected,
       selectedId: selected ? selected.id : '',
-      selectedSourceLabel: selected ? (selected.source === 'store' ? 'Synced from store checkout' : 'Mock seed') : '',
+      selectedSourceLabel: selected ? (selected.source === 'store' ? 'From store checkout' : 'Server order') : '',
       selectedWhen: selected ? this._fmtWhen(selected.placedAt) : '',
       selectedStatusLabel: selected ? this._statusLabel(selected.status) : '',
       selectedBadgeStyle: selected ? this._badgeStyle(selected.status) : '',
@@ -1044,17 +1233,7 @@ class Component extends DCLogic {
             if (!allowed) {
               return this.setState({ statusError: 'Cannot move from ' + this._statusLabel(selected.status) + ' to ' + this._statusLabel(a.key) + '.' });
             }
-            const list = this._readOrders().map((o) => {
-              if (o.id !== selected.id) return o;
-              const hist = Array.isArray(o.statusHistory) ? o.statusHistory.slice() : [];
-              hist.push({ status: a.key, at: Date.now() });
-              return Object.assign({}, o, { status: a.key, statusHistory: hist });
-            });
-            const updated = list.find((o) => o.id === selected.id);
-            this._writeOrders(list);
-            if (updated) this._pushStatusToStore(updated.id, updated.status, updated.statusHistory);
-            this.setState({ orders: list, statusError: '' });
-            this._showToast(selected.id + ' → ' + this._statusLabel(a.key));
+            this._updateOrderStatusApi(selected.id, a.key);
           },
         };
       }),
@@ -1062,15 +1241,6 @@ class Component extends DCLogic {
       hasStatusError: !!this.state.statusError,
       syncStoreOrders: () => {
         this._livePull({ quiet: false });
-      },
-      reseedMocks: () => {
-        const keepStore = this._readOrders().filter((o) => o.source === 'store');
-        const mocks = this._seedMocks();
-        const list = mocks.concat(keepStore);
-        this._writeOrders(list);
-        const pulled = this._mergeStoreOrders(list);
-        this.setState({ orders: pulled.list, selectedId: '', statusError: '', filter: 'all', search: '' });
-        this._showToast('Mock orders reseeded');
       },
       invSearch: this.state.invSearch || '',
       onInvSearch: (e) => this.setState({ invSearch: e.target.value }),
@@ -1159,35 +1329,23 @@ class Component extends DCLogic {
               this.setState({ stockDrafts: next });
             },
             dec: () => {
-              const n = this._setStockQty(p.id, qty - 1);
-              this._showToast(p.name + ' → ' + n);
+              this._persistStockQty(p.id, qty - 1).then((n) => this._showToast(p.name + ' → ' + n));
             },
             inc: () => {
-              const n = this._setStockQty(p.id, qty + 1);
-              this._showToast(p.name + ' → ' + n);
+              this._persistStockQty(p.id, qty + 1).then((n) => this._showToast(p.name + ' → ' + n));
             },
             save: () => {
               const raw = drafts[p.id];
               if (raw === '' || raw === undefined || !/^\d+$/.test(String(raw).trim())) {
                 return this._showToast('Enter a whole number for stock');
               }
-              const n = this._setStockQty(p.id, raw);
-              this._showToast(p.name + ' stock set to ' + n);
+              this._persistStockQty(p.id, raw).then((n) => this._showToast(p.name + ' stock set to ' + n));
             },
           };
         });
       })(),
       reseedStock: () => {
-        const seed = this._defaultStock();
-        // Keep custom product stock keys when reseeding defaults
-        const customs = this._readCustomProducts();
-        const current = this._readStock();
-        customs.forEach((p) => {
-          if (p && p.id && current[p.id] !== undefined) seed[p.id] = current[p.id];
-        });
-        this._writeStock(seed);
-        this.setState({ stock: seed, stockDrafts: Object.assign({}, seed), invFilter: 'all', invSearch: '' });
-        this._showToast('Stock levels reseeded');
+        this._reseedStockApi();
       },
       productFormTitle: this.state.editingId ? 'Edit custom product' : 'Add product',
       productSaveLabel: this.state.editingId ? 'Save changes' : 'Publish product',
@@ -1224,7 +1382,7 @@ class Component extends DCLogic {
         reader.readAsDataURL(file);
       },
       clearPPhoto: () => this.setState({ pPhoto: '' }),
-      saveProduct: (e) => {
+      saveProduct: async (e) => {
         if (e && e.preventDefault) e.preventDefault();
         const name = String(this.state.pName || '').trim();
         const desc = String(this.state.pDesc || '').trim();
@@ -1237,48 +1395,94 @@ class Component extends DCLogic {
         if (!Number.isFinite(price) || price <= 0) return this.setState({ productError: 'Enter a valid price greater than 0.' });
         if (!Number.isFinite(discount) || discount < 0 || discount > 90) return this.setState({ productError: 'Discount must be 0–90%.' });
         if (!Number.isFinite(stockQty) || stockQty < 0) return this.setState({ productError: 'Enter a valid stock quantity.' });
-        const list = this._readCustomProducts().slice();
         const editingId = this.state.editingId;
         const sale = this._salePrice(price, discount);
-        const payload = {
-          id: editingId || ('custom-' + Date.now()),
-          name,
-          description: desc,
-          benefit: desc,
-          sub: 'Owner added',
-          concern,
-          element: 'All',
-          priceN: sale,
-          listPriceN: price,
-          discountPct: discount,
-          photo: this.state.pPhoto || '',
-          front: this.state.pPhoto || '',
-          jar: '#D9BE9C',
-          cap: '#A06437',
-          herbs: [],
-          tag: discount > 0 ? (discount + '% off') : 'New',
-          active: this.state.pActive !== false,
-          custom: true,
-          updatedAt: Date.now(),
+        const applyLocal = (id) => {
+          const list = this._readCustomProducts().slice();
+          const payload = {
+            id: id || editingId || ('custom-' + Date.now()),
+            name,
+            description: desc,
+            benefit: desc,
+            sub: 'Owner added',
+            concern,
+            element: 'All',
+            priceN: sale,
+            listPriceN: price,
+            discountPct: discount,
+            photo: this.state.pPhoto || '',
+            front: this.state.pPhoto || '',
+            jar: '#D9BE9C',
+            cap: '#A06437',
+            herbs: [],
+            tag: discount > 0 ? (discount + '% off') : 'New',
+            active: this.state.pActive !== false,
+            custom: true,
+            updatedAt: Date.now(),
+          };
+          if (editingId) {
+            const idx = list.findIndex((p) => p.id === editingId);
+            if (idx < 0) return this.setState({ productError: 'Product not found.' });
+            payload.createdAt = list[idx].createdAt || Date.now();
+            list[idx] = payload;
+          } else {
+            payload.createdAt = Date.now();
+            list.unshift(payload);
+          }
+          this._writeCustomProducts(list);
+          this._setStockQty(payload.id, stockQty);
+          const stock = this._readStock();
+          this.setState(Object.assign({
+            customProducts: list,
+            stock,
+            stockDrafts: Object.assign({}, this.state.stockDrafts || {}, stock),
+          }, this._blankProductForm()));
+          this._showToast(editingId ? ('Updated ' + name) : ('Added ' + name + ' to store'));
         };
-        if (editingId) {
-          const idx = list.findIndex((p) => p.id === editingId);
-          if (idx < 0) return this.setState({ productError: 'Product not found.' });
-          payload.createdAt = list[idx].createdAt || Date.now();
-          list[idx] = payload;
-        } else {
-          payload.createdAt = Date.now();
-          list.unshift(payload);
+
+        if (this._canUseAdminApi()) {
+          try {
+            const body = {
+              name,
+              description: desc,
+              listPriceN: price,
+              discountPct: discount,
+              stock: stockQty,
+              concern,
+              photo: this.state.pPhoto || '',
+              active: this.state.pActive !== false,
+            };
+            const path = editingId
+              ? '/api/admin/products/' + encodeURIComponent(editingId)
+              : '/api/admin/products';
+            const { ok, status, data } = await this._adminFetch(path, {
+              method: editingId ? 'PATCH' : 'POST',
+              body: JSON.stringify(body),
+            });
+            if (ok && data.product) {
+              const mapped = this._mapApiProductToLocal(data.product);
+              const list = this._readCustomProducts().slice();
+              const idx = list.findIndex((p) => p.id === mapped.id);
+              if (idx >= 0) list[idx] = mapped;
+              else list.unshift(mapped);
+              this._writeCustomProducts(list);
+              if (mapped.stock != null) this._setStockQty(mapped.id, mapped.stock);
+              else this._setStockQty(mapped.id, stockQty);
+              const stock = this._readStock();
+              this.setState(Object.assign({
+                customProducts: list,
+                stock,
+                stockDrafts: Object.assign({}, this.state.stockDrafts || {}, stock),
+              }, this._blankProductForm()));
+              this._showToast(editingId ? ('Updated ' + name) : ('Added ' + name + ' to store'));
+              return;
+            }
+            if (status === 400 || status === 404 || status === 422) {
+              return this.setState({ productError: data.message || 'Could not save product' });
+            }
+          } catch (er) { /* fall through */ }
         }
-        this._writeCustomProducts(list);
-        this._setStockQty(payload.id, stockQty);
-        const stock = this._readStock();
-        this.setState(Object.assign({
-          customProducts: list,
-          stock,
-          stockDrafts: Object.assign({}, this.state.stockDrafts || {}, stock),
-        }, this._blankProductForm()));
-        this._showToast(editingId ? ('Updated ' + name) : ('Added ' + name + ' to store'));
+        applyLocal();
       },
       prodSearch: this.state.prodSearch || '',
       onProdSearch: (e) => this.setState({ prodSearch: e.target.value }),
@@ -1307,13 +1511,33 @@ class Component extends DCLogic {
             canToggle: true,
             canDelete: false,
             toggleLabel: isHidden ? 'Show on store' : 'Hide from store',
-            toggle: () => {
-              let next = this._readHiddenIds().slice();
-              if (isHidden) next = next.filter((id) => id !== p.id);
-              else next.push(p.id);
-              this._writeHiddenIds(next);
-              this.setState({ hiddenIds: next });
-              this._showToast(isHidden ? (p.name + ' shown on store') : (p.name + ' hidden from store'));
+            toggle: async () => {
+              const nextHidden = !isHidden;
+              const applyLocal = () => {
+                let next = this._readHiddenIds().slice();
+                if (isHidden) next = next.filter((id) => id !== p.id);
+                else next.push(p.id);
+                this._writeHiddenIds(next);
+                this.setState({ hiddenIds: next });
+                this._showToast(isHidden ? (p.name + ' shown on store') : (p.name + ' hidden from store'));
+              };
+              if (this._canUseAdminApi()) {
+                try {
+                  const { ok, status, data } = await this._adminFetch('/api/admin/products/' + encodeURIComponent(p.id) + '/visibility', {
+                    method: 'PATCH',
+                    body: JSON.stringify({ hidden: nextHidden }),
+                  });
+                  if (ok) {
+                    applyLocal();
+                    return;
+                  }
+                  if (status === 400 || status === 404) {
+                    this._showToast(data.message || 'Could not update visibility');
+                    return;
+                  }
+                } catch (er) { /* fall through */ }
+              }
+              applyLocal();
             },
             edit: () => {},
             remove: () => {},
@@ -1352,24 +1576,66 @@ class Component extends DCLogic {
                 tab: 'products',
               });
             },
-            toggle: () => {
-              const list = this._readCustomProducts().map((row) => {
-                if (row.id !== p.id) return row;
-                return Object.assign({}, row, { active: !(row.active !== false) });
-              });
-              this._writeCustomProducts(list);
-              this.setState({ customProducts: list });
-              this._showToast(active ? (p.name + ' set to draft') : (p.name + ' published'));
+            toggle: async () => {
+              const nextActive = !active;
+              const applyLocal = () => {
+                const list = this._readCustomProducts().map((row) => {
+                  if (row.id !== p.id) return row;
+                  return Object.assign({}, row, { active: nextActive });
+                });
+                this._writeCustomProducts(list);
+                this.setState({ customProducts: list });
+                this._showToast(active ? (p.name + ' set to draft') : (p.name + ' published'));
+              };
+              if (this._canUseAdminApi()) {
+                try {
+                  const { ok, status, data } = await this._adminFetch('/api/admin/products/' + encodeURIComponent(p.id), {
+                    method: 'PATCH',
+                    body: JSON.stringify({ active: nextActive }),
+                  });
+                  if (ok && data.product) {
+                    const mapped = this._mapApiProductToLocal(data.product);
+                    const list = this._readCustomProducts().map((row) => (row.id === p.id ? mapped : row));
+                    this._writeCustomProducts(list);
+                    this.setState({ customProducts: list });
+                    this._showToast(active ? (p.name + ' set to draft') : (p.name + ' published'));
+                    return;
+                  }
+                  if (status === 400 || status === 404) {
+                    this._showToast(data.message || 'Could not update product');
+                    return;
+                  }
+                } catch (er) { /* fall through */ }
+              }
+              applyLocal();
             },
-            remove: () => {
-              const list = this._readCustomProducts().filter((row) => row.id !== p.id);
-              this._writeCustomProducts(list);
-              const st = this._readStock();
-              delete st[p.id];
-              this._writeStock(st);
-              const blank = this.state.editingId === p.id ? this._blankProductForm() : {};
-              this.setState(Object.assign({ customProducts: list, stock: st, stockDrafts: Object.assign({}, st) }, blank));
-              this._showToast('Deleted ' + p.name + ' from store');
+            remove: async () => {
+              const applyLocal = () => {
+                const list = this._readCustomProducts().filter((row) => row.id !== p.id);
+                this._writeCustomProducts(list);
+                const st = this._readStock();
+                delete st[p.id];
+                this._writeStock(st);
+                const blank = this.state.editingId === p.id ? this._blankProductForm() : {};
+                this.setState(Object.assign({ customProducts: list, stock: st, stockDrafts: Object.assign({}, st) }, blank));
+                this._showToast('Deleted ' + p.name + ' from store');
+              };
+              if (this._canUseAdminApi()) {
+                try {
+                  const { ok, status, data } = await this._adminFetch('/api/admin/products/' + encodeURIComponent(p.id), {
+                    method: 'DELETE',
+                  });
+                  if (ok) {
+                    applyLocal();
+                    return;
+                  }
+                  if (status === 400 || status === 404) {
+                    this._showToast(data.message || 'Could not delete product');
+                    return;
+                  }
+                } catch (er) { /* fall through */ }
+              }
+              applyLocal();
             },
           };
         });

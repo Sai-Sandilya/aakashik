@@ -3,6 +3,7 @@
  */
 const { test, expect } = require('@playwright/test');
 const { clearAuthStorage, seedEmailUser } = require('./helpers/storage');
+const { resetE2eApi } = require('./helpers/e2e-api');
 
 const ADMIN_URL = '/Admin';
 const LANDING_URL = '/';
@@ -10,7 +11,8 @@ const ADMIN_EMAIL = 'owner@aakashik.local';
 const ADMIN_PASSWORD = 'Admin@1234';
 const STRONG_PASSWORD = 'Test@1234';
 
-async function clearInvStorage(page) {
+async function clearInvStorage(page, request) {
+  if (request) await resetE2eApi(request);
   await page.goto(LANDING_URL);
   await page.evaluate(() => {
     localStorage.removeItem('ak_admin_logged');
@@ -18,6 +20,7 @@ async function clearInvStorage(page) {
     localStorage.removeItem('ak_orders');
     localStorage.removeItem('ak_stock');
     localStorage.removeItem('ak_cart');
+    try { sessionStorage.removeItem('ak_admin_token'); } catch (er) {}
   });
 }
 
@@ -26,12 +29,13 @@ async function adminLogin(page) {
   await page.getByLabel('Admin email').fill(ADMIN_EMAIL);
   await page.getByLabel('Admin password').fill(ADMIN_PASSWORD);
   await page.getByRole('button', { name: 'Enter Admin' }).click();
-  await expect(page.getByRole('heading', { name: 'Orders (mock)' })).toBeVisible({ timeout: 8000 });
+  await expect(page.getByRole('heading', { name: 'Orders' })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('button', { name: 'Log out' })).toBeVisible({ timeout: 15000 });
 }
 
 async function openInventory(page) {
   await page.getByRole('button', { name: 'Inventory', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Inventory (mock)' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Inventory' })).toBeVisible();
 }
 
 function stockRow(page, id) {
@@ -39,8 +43,8 @@ function stockRow(page, id) {
 }
 
 test.describe('Admin inventory — tab & seeding', () => {
-  test.beforeEach(async ({ page }) => {
-    await clearInvStorage(page);
+  test.beforeEach(async ({ page, request }) => {
+    await clearInvStorage(page, request);
   });
 
   test('TC-IN01 positive: Inventory tab shows seeded SKUs', async ({ page }) => {
@@ -56,14 +60,14 @@ test.describe('Admin inventory — tab & seeding', () => {
     await adminLogin(page);
     await openInventory(page);
     await page.getByRole('button', { name: 'Orders', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Orders (mock)' })).toBeVisible();
-    await expect(page.getByRole('button', { name: /AAK-10001/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Orders' })).toBeVisible();
+    await expect(page.getByText(/Total:/i)).toBeVisible();
   });
 });
 
 test.describe('Admin inventory — update & filters', () => {
-  test.beforeEach(async ({ page }) => {
-    await clearInvStorage(page);
+  test.beforeEach(async ({ page, request }) => {
+    await clearInvStorage(page, request);
     await adminLogin(page);
     await openInventory(page);
   });
@@ -120,8 +124,8 @@ test.describe('Admin inventory — update & filters', () => {
       }));
     });
     await page.reload();
-    await expect(page.getByRole('heading', { name: /Orders \(mock\)|Inventory \(mock\)/ })).toBeVisible({ timeout: 8000 });
-    if (await page.getByRole('heading', { name: 'Orders (mock)' }).count()) {
+    await expect(page.getByRole('heading', { name: /Orders|Inventory/ })).toBeVisible({ timeout: 8000 });
+    if (await page.getByRole('heading', { name: 'Orders' }).count()) {
       await openInventory(page);
     }
     await page.getByRole('button', { name: 'Reseed stock' }).click();
@@ -132,9 +136,9 @@ test.describe('Admin inventory — update & filters', () => {
 });
 
 test.describe('Admin inventory — store sync complex flows', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, request }) => {
     await clearAuthStorage(page);
-    await clearInvStorage(page);
+    await clearInvStorage(page, request);
   });
 
   test('TC-IN09 positive: zero stock blocks add-to-cart on store', async ({ page }) => {

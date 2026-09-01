@@ -10,4 +10,7 @@ export NODE_ENV=development
 export AAKASHIK_E2E=1
 export DB_PATH="$ROOT/api/data/e2e.db"
 export FRONTEND_URL="http://127.0.0.1:8080"
+# Fresh fixtures each E2E run so admin status mutations do not leak across suites.
+mkdir -p "$ROOT/api/data"
+rm -f "$DB_PATH"
 exec node server.js
