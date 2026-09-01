@@ -229,7 +229,7 @@ describe('API integration flows', () => {
       { method: 'POST', url: '/api/admin/products', payload: {} },
       { method: 'GET', url: '/api/admin/inventory' },
       { method: 'GET', url: '/api/admin/orders' },
-      { method: 'PATCH', url: '/api/admin/orders/AAK-10001/status', payload: { status: 'packed' } },
+      { method: 'PATCH', url: '/api/admin/orders/AAK-99999/status', payload: { status: 'packed' } },
     ];
 
     for (const r of routes) {

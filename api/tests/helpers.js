@@ -64,4 +64,24 @@ export function sampleOrderPayload(overrides = {}) {
   };
 }
 
+/** Create a real checkout order (no seeded mocks). */
+export async function createOrder(overrides = {}) {
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/orders',
+    payload: sampleOrderPayload(overrides),
+  });
+  return { res, order: res.json().order, statusCode: res.statusCode };
+}
+
+/** Advance an order through status steps. */
+export async function setOrderStatus(token, orderId, status) {
+  return app.inject({
+    method: 'PATCH',
+    url: `/api/admin/orders/${orderId}/status`,
+    headers: authHeaders(token),
+    payload: { status },
+  });
+}
+
 export { app, db, before, after, beforeEach };

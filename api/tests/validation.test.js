@@ -313,9 +313,28 @@ describe('API validation hardening (TC-VAL)', () => {
 
   it('TC-VAL25 negative: cannot cancel already delivered order via bad transition', async () => {
     const { token } = await loginAdmin();
+    const create = await app.inject({
+      method: 'POST',
+      url: '/api/orders',
+      payload: sampleOrderPayload({
+        items: [{ productId: 'ashta', qty: 1 }],
+        total: 199,
+        subtotal: 199,
+      }),
+    });
+    const id = create.json().order.id;
+    for (const status of ['packed', 'shipped', 'out_for_delivery', 'delivered']) {
+      const patch = await app.inject({
+        method: 'PATCH',
+        url: `/api/admin/orders/${id}/status`,
+        headers: authHeaders(token),
+        payload: { status },
+      });
+      assert.equal(patch.statusCode, 200);
+    }
     const res = await app.inject({
       method: 'PATCH',
-      url: '/api/admin/orders/AAK-10003/status',
+      url: `/api/admin/orders/${id}/status`,
       headers: authHeaders(token),
       payload: { status: 'cancelled' },
     });
@@ -397,9 +416,19 @@ describe('API validation hardening (TC-VAL)', () => {
 
   it('TC-VAL42 negative: status patch without status field', async () => {
     const { token } = await loginAdmin();
+    const create = await app.inject({
+      method: 'POST',
+      url: '/api/orders',
+      payload: sampleOrderPayload({
+        items: [{ productId: 'sunni', qty: 1 }],
+        total: 249,
+        subtotal: 249,
+      }),
+    });
+    const id = create.json().order.id;
     const res = await app.inject({
       method: 'PATCH',
-      url: '/api/admin/orders/AAK-10001/status',
+      url: `/api/admin/orders/${id}/status`,
       headers: authHeaders(token),
       payload: {},
     });

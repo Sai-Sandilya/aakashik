@@ -1229,7 +1229,12 @@
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#C8D4B9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
           </span>
           <h3 style="font-family: 'Marcellus', serif; font-size: 26px; color: #2E3D2C; margin: 0 0 8px;">Order Placed!</h3>
-          <p style="font-size: 14px; color: #5E6A54; margin: 0 0 8px; line-height: 1.6;">Thank you — order saved on this device (demo). No email/SMS is sent yet.</p>
+          <sc-if value="{{ lastOrderServerSynced }}">
+            <p style="font-size: 14px; color: #5E6A54; margin: 0 0 8px; line-height: 1.6;">Thank you — your order is confirmed on our system. Save your order ID to track delivery. No email/SMS is sent yet.</p>
+          </sc-if>
+          <sc-if value="{{ notLastOrderServerSynced }}">
+            <p style="font-size: 14px; color: #5E6A54; margin: 0 0 8px; line-height: 1.6;">Thank you — order saved on this device (demo). No email/SMS is sent yet.</p>
+          </sc-if>
           <p style="font-size: 12.5px; color: #8A3E2A; margin: 0 0 8px; line-height: 1.5;">Sales are final after order — except damaged, defective, or incorrect items (see Refund Policy).</p>
           <sc-if value="{{ hasLastOrderId }}">
             <p style="font-size: 13px; color: #8A9678; margin: 0 0 16px;">Order ID: <strong style="color: #2E3D2C; letter-spacing: 0.04em;">{{ lastOrderId }}</strong></p>
@@ -1788,14 +1793,19 @@
         <sc-if value="{{ notTrackSubmitted }}">
           <form onSubmit="{{ onTrackSubmit }}">
             <p style="font-size: 13px; color: #8A9678; margin: 0 0 10px; line-height: 1.55;">{{ trackHint }}</p>
-            <p style="font-size: 13.5px; color: #5E6A54; margin: 0 0 14px; line-height: 1.6;">Enter your order ID. Simulated demo tracking in this browser — status matches Admin updates (not live courier shipping).</p>
+            <p style="font-size: 13.5px; color: #5E6A54; margin: 0 0 14px; line-height: 1.6;">Enter your order ID. We check our order system first — status matches Admin updates. Falls back to simulated demo tracking on this device if not found online (not live courier GPS).</p>
             <input value="{{ trackOrderId }}" onInput="{{ onTrackOrderId }}" required placeholder="e.g. AAK-10482" style="width: 100%; background: #FBF7EE; border: 1px solid #D7CDB4; color: #2E3D2C; padding: 13px 16px; border-radius: 12px; font-size: 14px; outline: none; margin-bottom: 14px;">
             <button type="submit" style="width: 100%; background: #2E3D2C; color: #F1EEDF; border: none; padding: 14px; border-radius: 30px; font-size: 14.5px; font-weight: 500;">Track Order</button>
           </form>
         </sc-if>
         <sc-if value="{{ trackSubmitted }}">
           <sc-if value="{{ trackFound }}">
-            <p style="font-size: 12px; color: #A8894E; margin: 0 0 8px; letter-spacing: 0.06em; text-transform: uppercase;">Simulated timeline (demo)</p>
+            <sc-if value="{{ trackServerSynced }}">
+              <p style="font-size: 12px; color: #A8894E; margin: 0 0 8px; letter-spacing: 0.06em; text-transform: uppercase;">Live timeline</p>
+            </sc-if>
+            <sc-if value="{{ notTrackServerSynced }}">
+              <p style="font-size: 12px; color: #A8894E; margin: 0 0 8px; letter-spacing: 0.06em; text-transform: uppercase;">Simulated timeline (demo)</p>
+            </sc-if>
             <p style="font-size: 13px; color: #8A9678; margin: 0 0 12px;">Order <strong style="color: #2E3D2C;">{{ trackDisplayId }}</strong> · {{ trackEta }}</p>
             <sc-if value="{{ trackCancelled }}">
               <div style="background: #F8E8E2; border: 1px solid #E8B8A8; color: #8A3E2A; border-radius: 12px; padding: 12px 14px; font-size: 13.5px; line-height: 1.55; margin-bottom: 14px;">This order was cancelled.</div>
@@ -2016,7 +2026,8 @@ class Component extends DCLogic {
     profileName: '', profilePhone: '', profileEmail: '',
     profileAddress: '', profileCity: '', profileState: '', profilePincode: '',
     accountMenuOpen: false, profileOpen: false, ordersOpen: false,
-    lastOrderId: '', trackOrderId: '', trackOrder: null, trackNotFound: false,
+    lastOrderId: '', lastOrderServerSynced: false,
+    trackOrderId: '', trackOrder: null, trackNotFound: false, trackServerSynced: false,
     newsletterEmail: '',
     reminderContact: '', reminderTime: '08:00',
     lang: 'en', langOpen: false,
@@ -2351,9 +2362,139 @@ class Component extends DCLogic {
     return steps[0] ? steps[0].label : 'Order Confirmed';
   }
 
+  _mapApiOrderToLocal(apiOrder) {
+    const cust = apiOrder.customer || {};
+    const d = apiOrder.delivery || {};
+    const delivery = {
+      name: cust.name || d.name || '',
+      phone: cust.phone || d.phone || '',
+      email: cust.email || d.email || '',
+      address: d.address || '',
+      city: d.city || '',
+      state: d.state || '',
+      pincode: d.pincode || '',
+    };
+    return {
+      id: apiOrder.id,
+      placedAt: apiOrder.placedAt,
+      status: apiOrder.status || 'pending',
+      statusHistory: Array.isArray(apiOrder.statusHistory) && apiOrder.statusHistory.length
+        ? apiOrder.statusHistory
+        : [{ status: apiOrder.status || 'pending', at: apiOrder.placedAt }],
+      items: (apiOrder.items || []).map((it) => ({
+        id: it.productId,
+        name: it.name,
+        qty: it.qty,
+        line: it.line || '',
+        size: it.size || null,
+      })),
+      total: apiOrder.total,
+      subtotal: apiOrder.subtotal,
+      memberDiscount: apiOrder.memberDiscount,
+      payMethod: apiOrder.payMethod,
+      payment: apiOrder.payment,
+      delivery,
+      returnsAccepted: false,
+      serverSynced: true,
+    };
+  }
+
+  _buildServerOrderPayload(cartList, delivery, method, subtotalN, cartSubtotalN, memberDiscountN, memberPricing) {
+    const items = cartList.map((it) => {
+      const cartLine = this.state.cartItems[it.id] || {};
+      return {
+        productId: it.productId,
+        qty: it.qty,
+        subscribe: !!it.subscribe,
+        size: cartLine.size || null,
+        sizePrice: cartLine.sizePrice != null ? cartLine.sizePrice : null,
+      };
+    });
+    let payment = {};
+    if (method === 'upi') {
+      payment = { upiId: (this.state.payUpiId || '').trim() };
+    } else if (method === 'card') {
+      payment = {
+        cardNumber: String(this.state.payCardNumber || '').replace(/\s+/g, ''),
+        cardExpiry: String(this.state.payCardExpiry || '').trim(),
+        cardCvv: String(this.state.payCardCvv || '').trim(),
+      };
+    }
+    return {
+      items,
+      delivery,
+      payMethod: method,
+      payment,
+      total: subtotalN,
+      subtotal: cartSubtotalN,
+      memberDiscount: memberDiscountN,
+      memberPricing,
+      loggedIn: memberPricing,
+    };
+  }
+
+  _saveOrderLocally(order) {
+    const orders = this._readOrders();
+    const clean = String(order.id || '').toUpperCase();
+    const without = orders.filter((o) => String(o.id || '').toUpperCase() !== clean);
+    without.unshift(order);
+    this._writeJSON('ak_orders', without.slice(0, 50));
+  }
+
+  _finalizeOrderSuccess(order, serverSynced) {
+    try { localStorage.setItem('ak_cart', JSON.stringify({})); } catch (er) {}
+    this.confetti();
+    this.playChime();
+    this.showToast('Order placed! ID: ' + order.id);
+    this.setState({
+      orderPlaced: true,
+      lastOrderId: order.id,
+      lastOrderServerSynced: !!serverSynced,
+      cartItems: {},
+      checkoutStep: 'cart',
+      payError: '',
+      payUpiId: '',
+      payCardNumber: '',
+      payCardExpiry: '',
+      payCardCvv: '',
+    });
+  }
+
+  _lookupTrackOrder(id, cb) {
+    const clean = String(id || '').trim().toUpperCase();
+    if (!clean) {
+      cb({ clean, order: null, notFound: true, serverSynced: false });
+      return;
+    }
+    fetch('/api/orders/' + encodeURIComponent(clean) + '/track')
+      .then((r) => r.json().then((data) => ({ ok: r.ok, data })))
+      .then(({ ok, data }) => {
+        if (ok && data.track) {
+          const t = data.track;
+          const local = this._readOrders().find((o) => String(o.id || '').toUpperCase() === clean) || null;
+          const order = Object.assign({}, local || {}, {
+            id: t.orderId || clean,
+            status: t.status,
+            placedAt: t.placedAt,
+            statusHistory: t.statusHistory || (local && local.statusHistory) || [],
+            serverSynced: true,
+          });
+          this._saveOrderLocally(order);
+          cb({ clean, order, notFound: false, serverSynced: true });
+          return;
+        }
+        const found = this._readOrders().find((o) => String(o.id || '').toUpperCase() === clean) || null;
+        cb({ clean, order: found, notFound: !found, serverSynced: !!(found && found.serverSynced) });
+      })
+      .catch(() => {
+        const found = this._readOrders().find((o) => String(o.id || '').toUpperCase() === clean) || null;
+        cb({ clean, order: found, notFound: !found, serverSynced: !!(found && found.serverSynced) });
+      });
+  }
+
   _trackOrderById(id) {
     const clean = String(id || '').trim().toUpperCase();
-    const found = this._readOrders().find(o => String(o.id || '').toUpperCase() === clean) || null;
+    const local = this._readOrders().find((o) => String(o.id || '').toUpperCase() === clean) || null;
     this.setState({
       cartOpen: false,
       ordersOpen: false,
@@ -2364,8 +2505,12 @@ class Component extends DCLogic {
       trackOpen: true,
       trackOrderId: clean,
       trackSubmitted: true,
-      trackOrder: found,
-      trackNotFound: !found,
+      trackOrder: local,
+      trackNotFound: !local,
+      trackServerSynced: !!(local && local.serverSynced),
+    });
+    this._lookupTrackOrder(clean, ({ order, notFound, serverSynced }) => {
+      this.setState({ trackOrder: order, trackNotFound: notFound, trackServerSynced: serverSynced });
     });
   }
 
@@ -3671,7 +3816,7 @@ class Component extends DCLogic {
           } catch (er) {}
         }, 30);
       },
-      closeCart: () => this.setState({ cartOpen: false, orderPlaced: false, checkoutStep: 'cart' }),
+      closeCart: () => this.setState({ cartOpen: false, orderPlaced: false, lastOrderServerSynced: false, checkoutStep: 'cart' }),
       browseCartShelf: () => this.setState(Object.assign({
         cartOpen: false, orderPlaced: false, checkoutStep: 'cart',
         searchOpen: true, searchQuery: '',
@@ -3685,6 +3830,7 @@ class Component extends DCLogic {
       memberPricing, notMemberPricing: !memberPricing,
       orderPlaced: this.state.orderPlaced, notOrderPlaced: !this.state.orderPlaced,
       lastOrderId: this.state.lastOrderId, hasLastOrderId: !!this.state.lastOrderId, notLastOrderId: !this.state.lastOrderId,
+      lastOrderServerSynced: this.state.lastOrderServerSynced, notLastOrderServerSynced: !this.state.lastOrderServerSynced,
       orderHistory, hasOrderHistory: orderHistory.length > 0, ordersEmpty: orderHistory.length === 0,
       stepCart: this.state.checkoutStep === 'cart', stepAuth: this.state.checkoutStep === 'auth', stepDetails: this.state.checkoutStep === 'details',
       notStepCart: this.state.checkoutStep !== 'cart',
@@ -4000,6 +4146,7 @@ class Component extends DCLogic {
       payChips: [{ k: 'cod', label: 'Cash on Delivery' }, { k: 'upi', label: 'UPI' }, { k: 'card', label: 'Card' }].map(p => ({ label: p.label, active: this.state.payMethod === p.k, style: 'padding:9px 14px;border-radius:12px;font-size:12.5px;font-weight:500;cursor:pointer;border:1px solid ' + (this.state.payMethod === p.k ? '#2E3D2C' : '#D7CDB4') + ';background:' + (this.state.payMethod === p.k ? '#2E3D2C' : 'transparent') + ';color:' + (this.state.payMethod === p.k ? '#F1EEDF' : '#5E6A54') + ';', onClick: () => this.setState({ payMethod: p.k, payError: '' }) })),
       placeOrder: (e) => {
         if (e && e.preventDefault) e.preventDefault();
+        if (!cartList.length) { this.showToast('Your cart is empty'); return; }
         const pin = (this.state.profilePincode || '').trim();
         const p = {
           name: (this.state.profileName || '').trim(),
@@ -4042,34 +4189,58 @@ class Component extends DCLogic {
           paymentMeta = { method: 'card', mock: true, status: 'authorized', last4: num.slice(-4) };
         }
         try { this._writeProfileMerged(p); } catch (er) {}
-        const deduct = this._deductStockForCart(this.state.cartItems);
-        if (!deduct.ok) {
-          this.showToast('Not enough stock for one or more items — update cart or wait for restock');
-          return;
-        }
-        const orderId = 'AAK-' + String(10000 + Math.floor(Math.random() * 90000));
-        const items = cartList.map(it => ({ id: it.productId || it.id, name: it.name, qty: it.qty, line: it.lineStr, size: (this.state.cartItems[it.id] || {}).size || null }));
-        const placedAt = Date.now();
-        const order = {
-          id: orderId,
-          placedAt,
-          status: 'pending',
-          statusHistory: [{ status: 'pending', at: placedAt }],
-          items,
-          total: subtotalN,
-          subtotal: cartSubtotalN,
-          memberDiscount: memberDiscountN,
-          payMethod: method,
-          payment: paymentMeta,
-          delivery: p,
-          returnsAccepted: false,
+
+        const finishLocal = () => {
+          const deduct = this._deductStockForCart(this.state.cartItems);
+          if (!deduct.ok) {
+            this.showToast('Not enough stock for one or more items — update cart or wait for restock');
+            return;
+          }
+          const orderId = 'AAK-' + String(10000 + Math.floor(Math.random() * 90000));
+          const items = cartList.map(it => ({ id: it.productId || it.id, name: it.name, qty: it.qty, line: it.lineStr, size: (this.state.cartItems[it.id] || {}).size || null }));
+          const placedAt = Date.now();
+          const order = {
+            id: orderId,
+            placedAt,
+            status: 'pending',
+            statusHistory: [{ status: 'pending', at: placedAt }],
+            items,
+            total: subtotalN,
+            subtotal: cartSubtotalN,
+            memberDiscount: memberDiscountN,
+            payMethod: method,
+            payment: paymentMeta,
+            delivery: p,
+            returnsAccepted: false,
+            serverSynced: false,
+          };
+          this._saveOrderLocally(order);
+          this._finalizeOrderSuccess(order, false);
         };
-        const orders = this._readOrders();
-        orders.unshift(order);
-        this._writeJSON('ak_orders', orders.slice(0, 50));
-        try { localStorage.setItem('ak_cart', JSON.stringify({})); } catch (er) {}
-        this.confetti(); this.playChime(); this.showToast('Order placed! ID: ' + orderId);
-        this.setState({ orderPlaced: true, lastOrderId: orderId, cartItems: {}, checkoutStep: 'cart', payError: '', payUpiId: '', payCardNumber: '', payCardExpiry: '', payCardCvv: '' });
+
+        const payload = this._buildServerOrderPayload(cartList, p, method, subtotalN, cartSubtotalN, memberDiscountN, memberPricing);
+        fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+          .then((r) => r.json().then((data) => ({ ok: r.ok, status: r.status, data })))
+          .then(({ ok, status, data }) => {
+            if (ok && data.order) {
+              const order = this._mapApiOrderToLocal(data.order);
+              this._saveOrderLocally(order);
+              // Mirror server stock deduct into local ak_stock for same-browser Admin/store UX until Phase C4.
+              try { this._deductStockForCart(this.state.cartItems); } catch (er) {}
+              this._finalizeOrderSuccess(order, true);
+              return;
+            }
+            if (status === 400 || status === 409 || status === 422) {
+              this.showToast(data.message || 'Could not place order');
+              return;
+            }
+            finishLocal();
+          })
+          .catch(() => finishLocal());
       },
 
       openSearch: () => this.setState(Object.assign({
@@ -4137,7 +4308,7 @@ class Component extends DCLogic {
         trackNotFound: false,
         trackOrderId: '',
       }),
-      closeTrack: () => this.setState({ trackOpen: false, trackSubmitted: false, trackOrder: null, trackNotFound: false, trackOrderId: '' }),
+      closeTrack: () => this.setState({ trackOpen: false, trackSubmitted: false, trackOrder: null, trackNotFound: false, trackOrderId: '', trackServerSynced: false }),
       trackHint: this.state.loggedIn
         ? 'Forgot the ID? Open Order History from your account menu.'
         : 'Enter your order ID to track. Sign in later to find past IDs in Order History.',
@@ -4152,10 +4323,19 @@ class Component extends DCLogic {
       onTrackSubmit: (e) => {
         if (e && e.preventDefault) e.preventDefault();
         const id = (this.state.trackOrderId || '').trim().toUpperCase();
-        const found = this._readOrders().find(o => String(o.id || '').toUpperCase() === id) || null;
-        this.setState({ trackSubmitted: true, trackOrder: found, trackNotFound: !found });
+        const local = this._readOrders().find((o) => String(o.id || '').toUpperCase() === id) || null;
+        this.setState({
+          trackSubmitted: true,
+          trackOrder: local,
+          trackNotFound: !local,
+          trackServerSynced: !!(local && local.serverSynced),
+        });
+        this._lookupTrackOrder(id, ({ order, notFound, serverSynced }) => {
+          this.setState({ trackOrder: order, trackNotFound: notFound, trackServerSynced: serverSynced });
+        });
       },
       trackSubmitted: this.state.trackSubmitted, notTrackSubmitted: !this.state.trackSubmitted,
+      trackServerSynced: this.state.trackServerSynced, notTrackServerSynced: !this.state.trackServerSynced,
       trackFound: this.state.trackSubmitted && !!this.state.trackOrder,
       trackMissing: this.state.trackSubmitted && !this.state.trackOrder,
       trackDisplayId: (this.state.trackOrderId || '').trim().toUpperCase() || '—',
