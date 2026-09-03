@@ -2,7 +2,7 @@
  * Admin custom products — add / hide / delete syncs to the store catalog.
  */
 const { test, expect } = require('@playwright/test');
-const { resetE2eApi } = require('./helpers/e2e-api');
+const { resetE2eApi, createCustomProduct, waitForStoreCatalog, loginAdmin, authHeaders } = require('./helpers/e2e-api');
 
 const ADMIN_URL = '/Admin';
 const LANDING_URL = '/';
@@ -118,51 +118,38 @@ test.describe('Admin products — store visibility', () => {
   });
 
   test('TC-PR05 positive: published product appears on store search', async ({ page }) => {
-    await page.goto(LANDING_URL);
-    await page.evaluate(() => {
-      localStorage.setItem('ak_custom_products', JSON.stringify([{
-        id: 'custom-test-1',
-        name: 'Forest Rose Scrub',
-        description: 'Gentle rose scrub for glowing skin.',
-        benefit: 'Gentle rose scrub for glowing skin.',
-        concern: 'Skin & Body',
-        listPriceN: 399,
-        discountPct: 0,
-        priceN: 399,
-        active: true,
-        custom: true,
-        photo: '',
-      }]));
-      const stock = {
-        sunni: 25, diabetic: 20, immunity: 30, kaphahara: 40, ashta: 35, navojas: 40,
-        'kit-immunity': 15, 'kit-glow': 15, 'sample-trio': 50,
-        'custom-test-1': 8,
-      };
-      localStorage.setItem('ak_stock', JSON.stringify(stock));
+    await adminLogin(page);
+    await openProducts(page);
+    await fillProductForm(page, {
+      name: 'Forest Rose Scrub',
+      desc: 'Gentle rose scrub for glowing skin.',
+      price: '399',
+      discount: '0',
+      stock: '8',
+      concern: 'Skin & Body',
     });
+    await page.getByRole('button', { name: 'Publish product' }).click();
+    await expect(page.getByText(/Added Forest Rose Scrub/i)).toBeVisible();
+    await page.goto(LANDING_URL);
     await page.reload();
+    await waitForStoreCatalog(page);
     await page.getByRole('button', { name: 'Search' }).first().click({ force: true });
     await page.getByPlaceholder(/Search blends/i).fill('Forest Rose');
     await expect(page.getByRole('dialog', { name: 'Search' }).getByRole('heading', { name: 'Forest Rose Scrub' })).toBeVisible({ timeout: 8000 });
   });
 
-  test('TC-PR06 positive: draft (inactive) product stays off the store', async ({ page }) => {
-    await page.goto(LANDING_URL);
-    await page.evaluate(() => {
-      localStorage.setItem('ak_custom_products', JSON.stringify([{
-        id: 'custom-draft-1',
-        name: 'Hidden Draft Blend',
-        description: 'Should not appear',
-        benefit: 'Should not appear',
-        concern: 'Immunity',
-        listPriceN: 199,
-        discountPct: 0,
-        priceN: 199,
-        active: false,
-        custom: true,
-      }]));
+  test('TC-PR06 positive: draft (inactive) product stays off the store', async ({ page, request }) => {
+    await createCustomProduct(request, {
+      name: 'Hidden Draft Blend',
+      description: 'Should not appear',
+      concern: 'Immunity',
+      listPriceN: 199,
+      stock: 5,
+      active: false,
     });
+    await page.goto(LANDING_URL);
     await page.reload();
+    await waitForStoreCatalog(page);
     await page.getByRole('button', { name: 'Search' }).first().click({ force: true });
     await page.getByPlaceholder(/Search blends/i).fill('Hidden Draft');
     await expect(page.getByRole('dialog', { name: 'Search' }).getByText('Hidden Draft Blend')).toHaveCount(0);
@@ -177,6 +164,7 @@ test.describe('Admin products — store visibility', () => {
 
     await page.goto(LANDING_URL);
     await page.reload();
+    await waitForStoreCatalog(page);
     const onStore = await page.evaluate(() => {
       const hidden = JSON.parse(localStorage.getItem('ak_hidden_ids') || '[]');
       return hidden.includes('immunity');
@@ -191,40 +179,38 @@ test.describe('Admin products — store visibility', () => {
     expect(hidden.includes('immunity')).toBe(false);
   });
 
-  test('TC-PR08 complex: delete custom product removes it from admin + store', async ({ page }) => {
-    await page.goto(LANDING_URL);
-    await page.evaluate(() => {
-      localStorage.setItem('ak_custom_products', JSON.stringify([{
-        id: 'custom-del-1',
-        name: 'Temp Delete Me',
-        description: 'temp',
-        benefit: 'temp',
-        concern: 'Digestion',
-        listPriceN: 149,
-        discountPct: 0,
-        priceN: 149,
-        active: true,
-        custom: true,
-      }]));
-      const stock = JSON.parse(localStorage.getItem('ak_stock') || '{}');
-      stock['custom-del-1'] = 5;
-      localStorage.setItem('ak_stock', JSON.stringify(stock));
-    });
-    await seedAdminSession(page);
-    await page.goto(ADMIN_URL);
+  test('TC-PR08 complex: delete custom product removes it from admin + store', async ({ page, request }) => {
+    await adminLogin(page);
     await openProducts(page);
-    await expect(page.locator('[data-product-row="custom-del-1"]')).toBeVisible();
-    await page.locator('[data-product-row="custom-del-1"]').getByRole('button', { name: 'Delete' }).click();
-    await expect(page.getByText(/Deleted Temp Delete Me from store/i)).toBeVisible();
+    await fillProductForm(page, {
+      name: 'Temp Delete Me',
+      desc: 'temp',
+      price: '149',
+      discount: '0',
+      stock: '5',
+      concern: 'Digestion',
+    });
+    await page.getByRole('button', { name: 'Publish product' }).click();
+    await expect(page.getByText(/Added Temp Delete Me/i)).toBeVisible();
+    const productId = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_custom_products') || '[]')[0].id);
+    const token = await loginAdmin(request);
+    const delRes = await request.delete(`/api/admin/products/${encodeURIComponent(productId)}`, {
+      headers: authHeaders(token),
+    });
+    expect(delRes.ok()).toBeTruthy();
+    await page.reload();
+    await openProducts(page);
+    await expect(page.getByText('Temp Delete Me', { exact: true })).toHaveCount(0);
     const data = await page.evaluate(() => ({
       products: JSON.parse(localStorage.getItem('ak_custom_products') || '[]'),
       stock: JSON.parse(localStorage.getItem('ak_stock') || '{}'),
     }));
-    expect(data.products.find((p) => p.id === 'custom-del-1')).toBeFalsy();
-    expect(data.stock['custom-del-1']).toBeUndefined();
+    expect(data.products.find((p) => p.id === productId)).toBeFalsy();
+    expect(data.stock[productId]).toBeUndefined();
 
     await page.goto(LANDING_URL);
     await page.reload();
+    await waitForStoreCatalog(page);
     await expect(page.getByText('Temp Delete Me')).toHaveCount(0);
   });
 });
@@ -235,30 +221,20 @@ test.describe('Admin products — edit & inventory link', () => {
   });
 
   test('TC-PR09 positive: edit updates name and discount', async ({ page }) => {
-    await page.goto(LANDING_URL);
-    await page.evaluate(() => {
-      localStorage.setItem('ak_custom_products', JSON.stringify([{
-        id: 'custom-edit-1',
-        name: 'Old Name Blend',
-        description: 'Old desc',
-        benefit: 'Old desc',
-        concern: 'Immunity',
-        listPriceN: 500,
-        discountPct: 0,
-        priceN: 500,
-        active: true,
-        custom: true,
-      }]));
-      const stock = {
-        sunni: 25, diabetic: 20, immunity: 30, kaphahara: 40, ashta: 35, navojas: 40,
-        'kit-immunity': 15, 'kit-glow': 15, 'sample-trio': 50, 'custom-edit-1': 9,
-      };
-      localStorage.setItem('ak_stock', JSON.stringify(stock));
-    });
-    await seedAdminSession(page);
-    await page.goto(ADMIN_URL);
+    await adminLogin(page);
     await openProducts(page);
-    await page.locator('[data-product-row="custom-edit-1"]').getByRole('button', { name: 'Edit' }).click();
+    await fillProductForm(page, {
+      name: 'Old Name Blend',
+      desc: 'Old desc',
+      price: '500',
+      discount: '0',
+      stock: '9',
+      concern: 'Immunity',
+    });
+    await page.getByRole('button', { name: 'Publish product' }).click();
+    await expect(page.getByText(/Added Old Name Blend/i)).toBeVisible();
+    const productId = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_custom_products') || '[]')[0].id);
+    await page.locator(`[data-product-row="${productId}"]`).getByRole('button', { name: 'Edit' }).click();
     await expect(page.getByRole('heading', { name: 'Edit custom product' })).toBeVisible();
     await page.getByLabel('Product name').fill('New Name Blend');
     await page.getByLabel('Product discount percent').fill('20');
@@ -283,29 +259,24 @@ test.describe('Admin products — edit & inventory link', () => {
   });
 
   test('TC-PR11 complex: toggle draft hides from store then republish', async ({ page }) => {
-    await page.goto(LANDING_URL);
-    await page.evaluate(() => {
-      localStorage.setItem('ak_custom_products', JSON.stringify([{
-        id: 'custom-tog-1',
-        name: 'Toggle Ritual Tea',
-        description: 'tea',
-        benefit: 'tea',
-        concern: 'Immunity',
-        listPriceN: 220,
-        discountPct: 0,
-        priceN: 220,
-        active: true,
-        custom: true,
-      }]));
-    });
-    await seedAdminSession(page);
-    await page.goto(ADMIN_URL);
+    await adminLogin(page);
     await openProducts(page);
-    await page.locator('[data-product-row="custom-tog-1"]').getByRole('button', { name: 'Hide (draft)' }).click();
+    await fillProductForm(page, {
+      name: 'Toggle Ritual Tea',
+      desc: 'tea',
+      price: '220',
+      discount: '0',
+      stock: '6',
+      concern: 'Immunity',
+    });
+    await page.getByRole('button', { name: 'Publish product' }).click();
+    await expect(page.getByText(/Added Toggle Ritual Tea/i)).toBeVisible();
+    const productId = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_custom_products') || '[]')[0].id);
+    await page.locator(`[data-product-row="${productId}"]`).getByRole('button', { name: 'Hide (draft)' }).click();
     await expect(page.getByText(/set to draft/i)).toBeVisible();
     let active = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_custom_products') || '[]')[0].active);
     expect(active).toBe(false);
-    await page.locator('[data-product-row="custom-tog-1"]').getByRole('button', { name: 'Make active' }).click();
+    await page.locator(`[data-product-row="${productId}"]`).getByRole('button', { name: 'Make active' }).click();
     await expect(page.getByText(/Toggle Ritual Tea published/i)).toBeVisible();
     active = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_custom_products') || '[]')[0].active);
     expect(active).toBe(true);

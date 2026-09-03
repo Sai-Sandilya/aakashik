@@ -1,5 +1,12 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const {
+  resetE2eApi,
+  seedStockMap,
+  createCustomProduct,
+  setProductHidden,
+  waitForStoreCatalog,
+} = require('./helpers/e2e-api');
 
 const LANDING_URL = '/';
 
@@ -39,15 +46,17 @@ async function openMobileSearch(page) {
   return dialog;
 }
 
-/** @param {import('@playwright/test').Page} page @param {Record<string, number>} overrides */
-async function seedStock(page, overrides) {
-  await page.evaluate((stock) => {
-    const base = {
-      sunni: 25, diabetic: 20, immunity: 30, kaphahara: 40, ashta: 35, navojas: 40,
-      'kit-immunity': 15, 'kit-glow': 15, 'sample-trio': 50,
-    };
-    localStorage.setItem('ak_stock', JSON.stringify({ ...base, ...stock }));
-  }, overrides);
+/** @param {import('@playwright/test').Page} page @param {import('@playwright/test').APIRequestContext} request @param {Record<string, number>} overrides */
+async function seedStock(page, request, overrides) {
+  await seedStockMap(request, overrides);
+  await page.reload();
+  await waitForStoreCatalog(page);
+}
+
+/** @param {import('@playwright/test').Page} page */
+async function reloadCatalog(page) {
+  await page.reload();
+  await waitForStoreCatalog(page);
 }
 
 /** @param {import('@playwright/test').Locator} dialog @param {string} name */
@@ -56,7 +65,8 @@ function productCard(dialog, name) {
 }
 
 test.describe('Search overlay — full automation (TC-SO)', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, request }) => {
+    await resetE2eApi(request);
     await page.goto(LANDING_URL);
     await page.evaluate(() => {
       [
@@ -64,7 +74,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
         'ak_recent', 'ak_lang',
       ].forEach((k) => localStorage.removeItem(k));
     });
-    await page.reload();
+    await reloadCatalog(page);
   });
 
   // ─── Open / close entry points ───────────────────────────────────────────
@@ -488,15 +498,9 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     expect(wished.sunni || wished['sunni']).toBeTruthy();
   });
 
-  test('TC-SO56 negative: out-of-stock card shows badge and blocks add', async ({ page }) => {
-    await page.evaluate(() => {
-      localStorage.setItem('ak_stock', JSON.stringify({
-        sunni: 0, diabetic: 20, immunity: 30, kaphahara: 40, ashta: 35, navojas: 40,
-        'kit-immunity': 15, 'kit-glow': 15, 'sample-trio': 50,
-      }));
-      localStorage.removeItem('ak_cart');
-    });
-    await page.reload();
+  test('TC-SO56 negative: out-of-stock card shows badge and blocks add', async ({ page, request }) => {
+    await seedStock(page, request, { sunni: 0 });
+    await page.evaluate(() => localStorage.removeItem('ak_cart'));
     const dialog = await openCategory(page, 'Natural Bath Powders');
     const card = productCard(dialog, 'Herbal Sunni Pindi');
     await expect(card.getByRole('button', { name: 'Out of stock' })).toBeVisible();
@@ -515,9 +519,9 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
 
   // ─── Catalog integrity / admin sync edges ────────────────────────────────
 
-  test('TC-SO58 negative: hidden built-in product card itself is gone', async ({ page }) => {
-    await page.evaluate(() => localStorage.setItem('ak_hidden_ids', JSON.stringify(['ashta'])));
-    await page.reload();
+  test('TC-SO58 negative: hidden built-in product card itself is gone', async ({ page, request }) => {
+    await setProductHidden(request, 'ashta', true);
+    await reloadCatalog(page);
     await expect(page.getByRole('button', { name: 'Search' })).toBeVisible({ timeout: 8000 });
     const dialog = await openSearch(page);
     await chipRow(dialog, 0).getByRole('button', { name: 'Spiritual', exact: true }).click();
@@ -526,54 +530,33 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(dialog.getByRole('heading', { name: 'No blends match yet' })).toBeVisible({ timeout: 5000 });
   });
 
-  test('TC-SO59 positive: published custom product appears in search', async ({ page }) => {
-    await page.evaluate(() => {
-      localStorage.setItem('ak_custom_products', JSON.stringify([{
-        id: 'custom-forest-rose',
-        name: 'Forest Rose Scrub',
-        sub: 'Body Scrub',
-        element: 'Earth',
-        concern: 'Skin & Body',
-        priceN: 279,
-        listPriceN: 279,
-        discountPct: 0,
-        jar: '#D9BE9C',
-        cap: '#A06437',
-        benefit: 'A rose-scented scrub for soft skin.',
-        herbs: ['Rose', 'Gram'],
-        tag: 'New',
-        active: true,
-        stock: 12,
-      }]));
-      const stock = JSON.parse(localStorage.getItem('ak_stock') || '{}');
-      stock['custom-forest-rose'] = 12;
-      localStorage.setItem('ak_stock', JSON.stringify(stock));
+  test('TC-SO59 positive: published custom product appears in search', async ({ page, request }) => {
+    await createCustomProduct(request, {
+      id: 'custom-forest-rose',
+      name: 'Forest Rose Scrub',
+      description: 'A rose-scented scrub for soft skin.',
+      concern: 'Skin & Body',
+      listPriceN: 279,
+      discountPct: 0,
+      stock: 12,
     });
-    await page.reload();
+    await reloadCatalog(page);
     const dialog = await openSearch(page);
     await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Forest Rose');
     await expect(dialog.getByRole('heading', { name: 'Forest Rose Scrub' })).toBeVisible({ timeout: 8000 });
   });
 
-  test('TC-SO60 negative: inactive custom product stays off search', async ({ page }) => {
-    await page.evaluate(() => {
-      localStorage.setItem('ak_custom_products', JSON.stringify([{
-        id: 'custom-draft',
-        name: 'Hidden Draft Blend',
-        sub: 'Kashayam',
-        element: 'Water',
-        concern: 'Immunity',
-        priceN: 199,
-        jar: '#BCC8A2',
-        cap: '#5E7A4C',
-        benefit: 'Draft only',
-        herbs: ['Tulsi'],
-        tag: 'Draft',
-        active: false,
-        stock: 5,
-      }]));
+  test('TC-SO60 negative: inactive custom product stays off search', async ({ page, request }) => {
+    await createCustomProduct(request, {
+      id: 'custom-draft',
+      name: 'Hidden Draft Blend',
+      description: 'Draft only',
+      concern: 'Immunity',
+      listPriceN: 199,
+      stock: 5,
+      active: false,
     });
-    await page.reload();
+    await reloadCatalog(page);
     const dialog = await openSearch(page);
     await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Hidden Draft Blend');
     await expect(dialog.getByRole('heading', { name: 'No blends match yet' })).toBeVisible({ timeout: 5000 });
@@ -652,24 +635,13 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(dialog.locator('.searchCard').first()).toBeVisible();
   });
 
-  test('TC-SO66 complex: OOS product recovers after restock mid-session', async ({ page }) => {
-    await page.evaluate(() => {
-      localStorage.setItem('ak_stock', JSON.stringify({
-        sunni: 0, diabetic: 20, immunity: 30, kaphahara: 40, ashta: 35, navojas: 40,
-        'kit-immunity': 15, 'kit-glow': 15, 'sample-trio': 50,
-      }));
-    });
-    await page.reload();
+  test('TC-SO66 complex: OOS product recovers after restock mid-session', async ({ page, request }) => {
+    await seedStock(page, request, { sunni: 0 });
     let dialog = await openCategory(page, 'Natural Bath Powders');
     await expect(productCard(dialog, 'Herbal Sunni Pindi').getByRole('button', { name: 'Out of stock' })).toBeVisible();
     await dialog.getByRole('button', { name: /Close/i }).click();
 
-    await page.evaluate(() => {
-      const s = JSON.parse(localStorage.getItem('ak_stock') || '{}');
-      s.sunni = 25;
-      localStorage.setItem('ak_stock', JSON.stringify(s));
-    });
-    await page.reload();
+    await seedStock(page, request, { sunni: 25 });
     dialog = await openCategory(page, 'Natural Bath Powders');
     const card = productCard(dialog, 'Herbal Sunni Pindi');
     await expect(card.getByRole('button', { name: 'Add to Cart' })).toBeVisible();
@@ -1014,9 +986,8 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     expect(qty).toBe(2);
   });
 
-  test('TC-SO112 negative: stock limit 1 blocks second add with toast', async ({ page }) => {
-    await seedStock(page, { sunni: 1 });
-    await page.reload();
+  test('TC-SO112 negative: stock limit 1 blocks second add with toast', async ({ page, request }) => {
+    await seedStock(page, request, { sunni: 1 });
     const dialog = await openCategory(page, 'Natural Bath Powders');
     const addBtn = productCard(dialog, 'Herbal Sunni Pindi').getByRole('button', { name: 'Add to Cart' });
     await addBtn.click();
@@ -1025,9 +996,8 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(page.getByText(/Only 1 left in stock/i)).toBeVisible({ timeout: 8000 });
   });
 
-  test('TC-SO113 negative: OOS sized product shows Out of stock on card', async ({ page }) => {
-    await seedStock(page, { kaphahara: 0 });
-    await page.reload();
+  test('TC-SO113 negative: OOS sized product shows Out of stock on card', async ({ page, request }) => {
+    await seedStock(page, request, { kaphahara: 0 });
     const dialog = await openSearch(page);
     await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Kaphahara');
     await expect(productCard(dialog, 'Kaphahara').getByRole('button', { name: 'Out of stock' })).toBeVisible();
@@ -1065,24 +1035,26 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
 
   // ─── Catalog / admin sync edges (TC-SO119–128) ───────────────────────────
 
-  test('TC-SO119 negative: hide Sunni still shows Glow kit under Skin & Body', async ({ page }) => {
-    await page.evaluate(() => localStorage.setItem('ak_hidden_ids', JSON.stringify(['sunni'])));
-    await page.reload();
+  test('TC-SO119 negative: hide Sunni still shows Glow kit under Skin & Body', async ({ page, request }) => {
+    await setProductHidden(request, 'sunni', true);
+    await reloadCatalog(page);
     const dialog = await openCategory(page, 'Natural Bath Powders');
     await expect(productCard(dialog, 'Herbal Sunni Pindi')).toHaveCount(0);
     await expect(dialog.getByRole('heading', { name: 'Glow & Cleanse Kit' })).toBeVisible();
   });
 
-  test('TC-SO120 negative: hide multiple SKUs reduces visible cards', async ({ page }) => {
-    await page.evaluate(() => localStorage.setItem('ak_hidden_ids', JSON.stringify(['sunni', 'ashta', 'diabetic'])));
-    await page.reload();
+  test('TC-SO120 negative: hide multiple SKUs reduces visible cards', async ({ page, request }) => {
+    const token = await setProductHidden(request, 'sunni', true);
+    await setProductHidden(request, 'ashta', true, token);
+    await setProductHidden(request, 'diabetic', true, token);
+    await reloadCatalog(page);
     const dialog = await openSearch(page);
     expect(await dialog.locator('.searchCard').count()).toBeLessThan(9);
   });
 
-  test('TC-SO121 negative: hidden SKU still findable via kit herb text in search', async ({ page }) => {
-    await page.evaluate(() => localStorage.setItem('ak_hidden_ids', JSON.stringify(['immunity'])));
-    await page.reload();
+  test('TC-SO121 negative: hidden SKU still findable via kit herb text in search', async ({ page, request }) => {
+    await setProductHidden(request, 'immunity', true);
+    await reloadCatalog(page);
     const dialog = await openSearch(page);
     await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Daily Immunity');
     // Hidden single is gone, but Immunity Ritual Kit lists Daily Immunity in searchable herbs
@@ -1090,30 +1062,17 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(dialog.getByRole('heading', { name: 'Immunity Ritual Kit' })).toBeVisible({ timeout: 5000 });
   });
 
-  test('TC-SO122 positive: custom product with discount shows strikethrough list price', async ({ page }) => {
-    await page.evaluate(() => {
-      localStorage.setItem('ak_custom_products', JSON.stringify([{
-        id: 'custom-sale',
-        name: 'Monsoon Mist Scrub',
-        sub: 'Scrub',
-        element: 'Water',
-        concern: 'Skin & Body',
-        priceN: 180,
-        listPriceN: 200,
-        discountPct: 10,
-        jar: '#BCC8A2',
-        cap: '#5E7A4C',
-        benefit: 'Cooling seasonal scrub.',
-        herbs: ['Neem', 'Tulsi'],
-        tag: 'Sale',
-        active: true,
-        stock: 8,
-      }]));
-      const stock = JSON.parse(localStorage.getItem('ak_stock') || '{}');
-      stock['custom-sale'] = 8;
-      localStorage.setItem('ak_stock', JSON.stringify(stock));
+  test('TC-SO122 positive: custom product with discount shows strikethrough list price', async ({ page, request }) => {
+    await createCustomProduct(request, {
+      id: 'custom-sale',
+      name: 'Monsoon Mist Scrub',
+      description: 'Cooling seasonal scrub.',
+      concern: 'Skin & Body',
+      listPriceN: 200,
+      discountPct: 10,
+      stock: 8,
     });
-    await page.reload();
+    await reloadCatalog(page);
     const dialog = await openSearch(page);
     await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Monsoon Mist');
     const card = productCard(dialog, 'Monsoon Mist Scrub');
@@ -1121,112 +1080,70 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(card.getByText('₹180')).toBeVisible();
   });
 
-  test('TC-SO123 positive: custom product appears under matching concern filter', async ({ page }) => {
-    await page.evaluate(() => {
-      localStorage.setItem('ak_custom_products', JSON.stringify([{
-        id: 'custom-rose',
-        name: 'Rose Ubtan',
-        sub: 'Ubtan',
-        element: 'Earth',
-        concern: 'Skin & Body',
-        priceN: 229,
-        listPriceN: 229,
-        discountPct: 0,
-        jar: '#D9BE9C',
-        cap: '#A06437',
-        benefit: 'Rose ubtan for glow.',
-        herbs: ['Rose'],
-        tag: 'New',
-        active: true,
-        stock: 6,
-      }]));
+  test('TC-SO123 positive: custom product appears under matching concern filter', async ({ page, request }) => {
+    await createCustomProduct(request, {
+      id: 'custom-rose',
+      name: 'Rose Ubtan',
+      description: 'Rose ubtan for glow.',
+      concern: 'Skin & Body',
+      listPriceN: 229,
+      stock: 6,
     });
-    await page.reload();
+    await reloadCatalog(page);
     const dialog = await openSearch(page);
     await chipRow(dialog, 0).getByRole('button', { name: 'Skin & Body' }).click();
     await expect(dialog.getByRole('heading', { name: 'Rose Ubtan' })).toBeVisible();
   });
 
-  test('TC-SO124 negative: custom OOS product shows Out of stock in search', async ({ page }) => {
-    await page.evaluate(() => {
-      localStorage.setItem('ak_custom_products', JSON.stringify([{
-        id: 'custom-oos',
-        name: 'Sold Out Serum',
-        sub: 'Serum',
-        element: 'Water',
-        concern: 'Immunity',
-        priceN: 299,
-        listPriceN: 299,
-        discountPct: 0,
-        jar: '#BCC8A2',
-        cap: '#5E7A4C',
-        benefit: 'Temporarily unavailable.',
-        herbs: ['Tulsi'],
-        tag: 'New',
-        active: true,
-        stock: 0,
-      }]));
-      localStorage.setItem('ak_stock', JSON.stringify({ 'custom-oos': 0 }));
+  test('TC-SO124 negative: custom OOS product shows Out of stock in search', async ({ page, request }) => {
+    await createCustomProduct(request, {
+      id: 'custom-oos',
+      name: 'Sold Out Serum',
+      description: 'Temporarily unavailable.',
+      concern: 'Immunity',
+      listPriceN: 299,
+      stock: 0,
     });
-    await page.reload();
+    await reloadCatalog(page);
     const dialog = await openSearch(page);
     await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Sold Out Serum');
     await expect(productCard(dialog, 'Sold Out Serum').getByRole('button', { name: 'Out of stock' })).toBeVisible();
   });
 
-  test('TC-SO125 negative: hide ashta + Spiritual filter shows empty not crash', async ({ page }) => {
-    await page.evaluate(() => localStorage.setItem('ak_hidden_ids', JSON.stringify(['ashta'])));
-    await page.reload();
+  test('TC-SO125 negative: hide ashta + Spiritual filter shows empty not crash', async ({ page, request }) => {
+    await setProductHidden(request, 'ashta', true);
+    await reloadCatalog(page);
     const dialog = await openCategory(page, 'Spiritual Wellness');
     await expect(productCard(dialog, 'Ashtagandham')).toHaveCount(0);
     await expect(dialog.getByRole('heading', { name: 'No blends match yet' })).toBeVisible({ timeout: 5000 });
   });
 
-  test('TC-SO126 positive: custom + built-in both visible in browse', async ({ page }) => {
-    await page.evaluate(() => {
-      localStorage.setItem('ak_custom_products', JSON.stringify([{
-        id: 'custom-extra',
-        name: 'Extra Glow Powder',
-        sub: 'Powder',
-        element: 'Earth',
-        concern: 'Skin & Body',
-        priceN: 199,
-        listPriceN: 199,
-        discountPct: 0,
-        jar: '#D9BE9C',
-        cap: '#A06437',
-        benefit: 'Extra glow.',
-        herbs: ['Turmeric'],
-        tag: 'New',
-        active: true,
-        stock: 10,
-      }]));
+  test('TC-SO126 positive: custom + built-in both visible in browse', async ({ page, request }) => {
+    await createCustomProduct(request, {
+      id: 'custom-extra',
+      name: 'Extra Glow Powder',
+      description: 'Extra glow.',
+      concern: 'Skin & Body',
+      listPriceN: 199,
+      stock: 10,
     });
-    await page.reload();
+    await reloadCatalog(page);
     const dialog = await openSearch(page);
     await expect(dialog.getByRole('heading', { name: 'Herbal Sunni Pindi' })).toBeVisible();
     await expect(dialog.getByRole('heading', { name: 'Extra Glow Powder' })).toBeVisible();
   });
 
-  test('TC-SO127 negative: inactive custom ignored even if name searched', async ({ page }) => {
-    await page.evaluate(() => {
-      localStorage.setItem('ak_custom_products', JSON.stringify([{
-        id: 'custom-off',
-        name: 'Ghost Blend',
-        sub: 'Powder',
-        element: 'Air',
-        concern: 'Respiratory',
-        priceN: 199,
-        jar: '#D6BA8D',
-        cap: '#A8894E',
-        benefit: 'Inactive.',
-        herbs: ['Tulsi'],
-        tag: 'Draft',
-        active: false,
-        stock: 5,
-      }]));
+  test('TC-SO127 negative: inactive custom ignored even if name searched', async ({ page, request }) => {
+    await createCustomProduct(request, {
+      id: 'custom-off',
+      name: 'Ghost Blend',
+      description: 'Inactive.',
+      concern: 'Respiratory',
+      listPriceN: 199,
+      stock: 5,
+      active: false,
     });
-    await page.reload();
+    await reloadCatalog(page);
     const dialog = await openSearch(page);
     await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Ghost Blend');
     await expect(dialog.getByRole('heading', { name: 'No blends match yet' })).toBeVisible({ timeout: 5000 });
@@ -1335,15 +1252,13 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(dialog.getByRole('heading', { name: 'Daily Immunity' })).toBeVisible();
   });
 
-  test('TC-SO138 complex: OOS kit recovers after restock and adds successfully', async ({ page }) => {
-    await seedStock(page, { 'kit-glow': 0 });
-    await page.reload();
+  test('TC-SO138 complex: OOS kit recovers after restock and adds successfully', async ({ page, request }) => {
+    await seedStock(page, request, { 'kit-glow': 0 });
     let dialog = await openSearch(page);
     await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Glow');
     await expect(productCard(dialog, 'Glow & Cleanse Kit').getByRole('button', { name: 'Out of stock' })).toBeVisible();
     await dialog.getByRole('button', { name: /Close/i }).click();
-    await seedStock(page, { 'kit-glow': 5 });
-    await page.reload();
+    await seedStock(page, request, { 'kit-glow': 5 });
     dialog = await openSearch(page);
     await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Glow');
     await productCard(dialog, 'Glow & Cleanse Kit').getByRole('button', { name: 'Add to Cart' }).click();

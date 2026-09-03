@@ -3,7 +3,7 @@
  */
 const { test, expect } = require('@playwright/test');
 const { clearAuthStorage, seedEmailUser } = require('./helpers/storage');
-const { resetE2eApi } = require('./helpers/e2e-api');
+const { resetE2eApi, seedStockMap, waitForStoreCatalog } = require('./helpers/e2e-api');
 
 const ADMIN_URL = '/Admin';
 const LANDING_URL = '/';
@@ -141,35 +141,29 @@ test.describe('Admin inventory — store sync complex flows', () => {
     await clearInvStorage(page, request);
   });
 
-  test('TC-IN09 positive: zero stock blocks add-to-cart on store', async ({ page }) => {
+  test('TC-IN09 positive: zero stock blocks add-to-cart on store', async ({ page, request }) => {
+    await seedStockMap(request, { sunni: 0 });
     await page.goto(LANDING_URL);
-    await page.evaluate(() => {
-      localStorage.setItem('ak_stock', JSON.stringify({
-        sunni: 0, diabetic: 20, immunity: 30, kaphahara: 40, ashta: 35, navojas: 40,
-        'kit-immunity': 15, 'kit-glow': 15, 'sample-trio': 50,
-      }));
-      localStorage.removeItem('ak_cart');
-    });
+    await page.evaluate(() => localStorage.removeItem('ak_cart'));
     await page.reload();
+    await waitForStoreCatalog(page);
     await page.getByRole('button', { name: 'Out of stock' }).first().click({ force: true });
     await expect(page.getByText(/Out of stock — ask the owner to restock/i)).toBeVisible({ timeout: 8000 });
     const cart = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_cart') || '{}'));
     expect(Object.keys(cart).length).toBe(0);
   });
 
-  test('TC-IN10 positive: checkout deducts stock in ak_stock', async ({ page }) => {
+  test('TC-IN10 positive: checkout deducts stock in ak_stock', async ({ page, request }) => {
     const email = `inv-${Date.now()}@test.com`;
     await seedEmailUser(page, { email, password: STRONG_PASSWORD, name: 'Inv Buyer' });
+    await seedStockMap(request, { immunity: 5 });
     await page.evaluate(() => {
-      localStorage.setItem('ak_stock', JSON.stringify({
-        sunni: 25, diabetic: 20, immunity: 5, kaphahara: 40, ashta: 35, navojas: 40,
-        'kit-immunity': 15, 'kit-glow': 15, 'sample-trio': 50,
-      }));
       localStorage.setItem('ak_cart', JSON.stringify({
         'immunity::std': { productId: 'immunity', qty: 2, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await page.reload();
+    await waitForStoreCatalog(page);
     await page.locator('[data-cart-icon="true"]').click({ force: true });
     await page.getByRole('button', { name: 'Proceed to Checkout' }).evaluate((el) => /** @type {HTMLElement} */ (el).click());
     await expect(page.getByRole('heading', { name: 'Delivery details' })).toBeVisible({ timeout: 8000 });
@@ -198,6 +192,7 @@ test.describe('Admin inventory — store sync complex flows', () => {
     await page.goto(LANDING_URL);
     await page.evaluate(() => localStorage.removeItem('ak_cart'));
     await page.reload();
+    await waitForStoreCatalog(page);
     const blocked = await page.evaluate(() => Number(JSON.parse(localStorage.getItem('ak_stock') || '{}').immunity || 0));
     expect(blocked).toBe(0);
 
@@ -211,22 +206,21 @@ test.describe('Admin inventory — store sync complex flows', () => {
 
     await page.goto(LANDING_URL);
     await page.reload();
+    await waitForStoreCatalog(page);
     const restocked = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_stock') || '{}').immunity);
     expect(restocked).toBe(4);
   });
 
-  test('TC-IN12 complex: cannot cart more than available stock', async ({ page }) => {
+  test('TC-IN12 complex: cannot cart more than available stock', async ({ page, request }) => {
+    await seedStockMap(request, { immunity: 1 });
     await page.goto(LANDING_URL);
     await page.evaluate(() => {
-      localStorage.setItem('ak_stock', JSON.stringify({
-        sunni: 25, diabetic: 20, immunity: 1, kaphahara: 40, ashta: 35, navojas: 40,
-        'kit-immunity': 15, 'kit-glow': 15, 'sample-trio': 50,
-      }));
       localStorage.setItem('ak_cart', JSON.stringify({
         'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await page.reload();
+    await waitForStoreCatalog(page);
     await page.locator('[data-cart-icon="true"]').click({ force: true });
     await page.getByRole('button', { name: 'Increase' }).click();
     await expect(page.getByRole('status')).toContainText(/Only 1 left in stock/i, { timeout: 8000 });

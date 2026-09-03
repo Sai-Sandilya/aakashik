@@ -5,6 +5,7 @@ const {
   seedEmailUser,
   STRONG_PASSWORD,
 } = require('./helpers/storage');
+const { seedStockMap, waitForStoreCatalog } = require('./helpers/e2e-api');
 
 const LANDING_URL = '/';
 const AUTH_URL = '/login';
@@ -112,10 +113,11 @@ test.describe('UX low — polish & a11y', () => {
     await expect.poll(async () => page.getByRole('dialog', { name: 'Product quick view' }).count(), { timeout: 8000 }).toBe(0);
   });
 
-  test('TC-L32d positive: Quick View Out of stock add is disabled', async ({ page }) => {
+  test('TC-L32d positive: Quick View Out of stock add is disabled', async ({ page, request }) => {
+    await seedStockMap(request, { immunity: 0 });
     await page.goto(LANDING_URL);
-    await page.evaluate(() => localStorage.setItem('ak_stock', JSON.stringify({ immunity: 0 })));
     await page.reload();
+    await waitForStoreCatalog(page);
     await page.locator('#featured').getByRole('heading', { name: 'Daily Immunity' }).locator('xpath=ancestor::div[contains(@style,\"border-radius\")][1]').getByRole('button', { name: 'View' }).click();
     const qv = page.getByRole('dialog', { name: 'Product quick view' });
     await expect(qv).toBeVisible({ timeout: 8000 });

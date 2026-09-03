@@ -2001,6 +2001,10 @@ class Component extends DCLogic {
     'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
     'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
   ];
+  _BUILTIN_PRODUCT_IDS = [
+    'sunni', 'diabetic', 'immunity', 'kaphahara', 'ashta', 'navojas',
+    'kit-immunity', 'kit-glow', 'sample-trio',
+  ];
 
   state = {
     subscribed: false,
@@ -2032,6 +2036,7 @@ class Component extends DCLogic {
     reminderContact: '', reminderTime: '08:00',
     lang: 'en', langOpen: false,
     termsOpen: false, termsChecked: false,
+    catalogEpoch: 0,
   };
 
   _maybeOpenTermsGate() {
@@ -2170,9 +2175,62 @@ class Component extends DCLogic {
     const list = this._readJSON('ak_custom_products', []);
     return Array.isArray(list) ? list : [];
   }
+  _writeCustomProducts(list) {
+    this._writeJSON('ak_custom_products', Array.isArray(list) ? list : []);
+  }
   _readHiddenIds() {
     const list = this._readJSON('ak_hidden_ids', []);
     return Array.isArray(list) ? list : [];
+  }
+  _writeHiddenIds(list) {
+    this._writeJSON('ak_hidden_ids', Array.isArray(list) ? list : []);
+  }
+  _mapApiProductToStore(p) {
+    if (!p || !p.id) return null;
+    return this._normalizeCustomProduct({
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      sub: p.sub,
+      concern: p.concern,
+      element: p.element,
+      listPriceN: p.listPriceN,
+      discountPct: p.discountPct,
+      priceN: p.priceN,
+      photo: p.photo,
+      active: p.active,
+    });
+  }
+  _hydrateStoreFromApi() {
+    if (this._catalogFetchInFlight) return this._catalogFetchInFlight;
+    this._catalogFetchInFlight = fetch('/api/products')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data || !Array.isArray(data.products)) return false;
+        const customs = [];
+        const stock = {};
+        const visible = new Set();
+        data.products.forEach((raw) => {
+          if (!raw || !raw.id) return;
+          visible.add(raw.id);
+          stock[raw.id] = Math.max(0, Math.floor(Number(raw.stock) || 0));
+          if (raw.custom) {
+            const mapped = this._mapApiProductToStore(raw);
+            if (mapped) customs.push(mapped);
+          }
+        });
+        const hidden = this._BUILTIN_PRODUCT_IDS.filter((id) => !visible.has(id));
+        this._writeStock(stock);
+        this._writeCustomProducts(customs);
+        this._writeHiddenIds(hidden);
+        this._apiStock = stock;
+        this._stockFromApi = true;
+        this.setState({ catalogEpoch: (this.state.catalogEpoch || 0) + 1 });
+        return true;
+      })
+      .catch(() => false)
+      .finally(() => { this._catalogFetchInFlight = null; });
+    return this._catalogFetchInFlight;
   }
   _normalizeCustomProduct(p) {
     if (!p || !p.id) return null;
@@ -2200,6 +2258,12 @@ class Component extends DCLogic {
     };
   }
   _stockOf(id) {
+    if (this._stockFromApi && this._apiStock) {
+      if (Object.prototype.hasOwnProperty.call(this._apiStock, id)) {
+        return Number(this._apiStock[id] || 0);
+      }
+      return 0;
+    }
     const stock = this._readStock();
     return Number(stock[id] || 0);
   }
@@ -2695,6 +2759,9 @@ class Component extends DCLogic {
         .catch(() => {});
     };
     this._hydrateServerSession();
+    this._apiStock = null;
+    this._stockFromApi = false;
+    this._hydrateStoreFromApi();
     this._syncGoogleSession = () => {
       fetch('/api/auth/me', { credentials: 'include' })
         .then((r) => r.json())
@@ -2727,8 +2794,16 @@ class Component extends DCLogic {
         this._syncGoogleSession();
       }
     } catch (e) {}
-    this._onPageShow = () => this._syncLogin();
-    this._onVis = () => { if (!document.hidden) this._syncLogin(); };
+    this._onPageShow = () => {
+      this._syncLogin();
+      this._hydrateStoreFromApi();
+    };
+    this._onVis = () => {
+      if (!document.hidden) {
+        this._syncLogin();
+        this._hydrateStoreFromApi();
+      }
+    };
     window.addEventListener('pageshow', this._onPageShow);
     window.addEventListener('focus', this._onPageShow);
     document.addEventListener('visibilitychange', this._onVis);
@@ -4229,9 +4304,10 @@ class Component extends DCLogic {
             if (ok && data.order) {
               const order = this._mapApiOrderToLocal(data.order);
               this._saveOrderLocally(order);
-              // Mirror server stock deduct into local ak_stock for same-browser Admin/store UX until Phase C4.
-              try { this._deductStockForCart(this.state.cartItems); } catch (er) {}
-              this._finalizeOrderSuccess(order, true);
+              const refresh = this._hydrateStoreFromApi();
+              const done = () => this._finalizeOrderSuccess(order, true);
+              if (refresh && typeof refresh.then === 'function') refresh.then(done);
+              else done();
               return;
             }
             if (status === 400 || status === 409 || status === 422) {
