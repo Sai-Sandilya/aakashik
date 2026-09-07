@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { config } from '../config.js';
 import { BUILTIN_PRODUCTS, DEFAULT_STOCK } from '../lib/constants.js';
 import { withTransaction } from './transaction.js';
-import { hashPassword, isPasswordHash } from '../services/password.js';
+import { hashPassword, isPasswordHash, verifyPassword } from '../services/password.js';
 
 const require = createRequire(import.meta.url);
 
@@ -221,6 +221,42 @@ async function migratePlaintextAdminPassword(db) {
   db.prepare('UPDATE admin_users SET password = ? WHERE id = ?').run(hashed, row.id);
 }
 
+/**
+ * When ADMIN_PASSWORD is set in the environment, keep the seed admin hash in sync.
+ * Lets production rotate credentials via Hostinger env without wiping the DB.
+ */
+async function syncAdminCredentialsFromEnv(db) {
+  if (config.isTest) return;
+  if (!process.env.ADMIN_PASSWORD) return;
+
+  const email = String(config.adminEmail || '').trim().toLowerCase();
+  if (!email) return;
+
+  const hashed = await hashPassword(config.adminPassword);
+  const row = db.prepare('SELECT id, email, password FROM admin_users WHERE lower(email) = ?').get(email);
+
+  if (!row) {
+    db.prepare('INSERT INTO admin_users (email, password, name) VALUES (?, ?, ?)').run(
+      config.adminEmail,
+      hashed,
+      'Aakashik Owner',
+    );
+    console.log('[aakashik-api] created admin user from ADMIN_EMAIL / ADMIN_PASSWORD');
+    return;
+  }
+
+  if (isPasswordHash(row.password) && await verifyPassword(config.adminPassword, row.password)) {
+    return;
+  }
+
+  db.prepare('UPDATE admin_users SET password = ?, email = ? WHERE id = ?').run(
+    hashed,
+    config.adminEmail,
+    row.id,
+  );
+  console.log('[aakashik-api] synced admin password from ADMIN_PASSWORD');
+}
+
 function migrateSchema(db) {
   let userCols = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
   if (!userCols.includes('password_hash')) {
@@ -251,6 +287,7 @@ export async function createDb(options = {}) {
 
   if (options.seed !== false) await seedIfEmpty(db);
   await migratePlaintextAdminPassword(db);
+  await syncAdminCredentialsFromEnv(db);
 
   return db;
 }
