@@ -1,7 +1,7 @@
 /**
  * Mock Admin Inventory — owner updates stock; store checkout respects it.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./fixtures');
 const { clearAuthStorage, seedEmailUser } = require('./helpers/storage');
 const { resetE2eApi, seedStockMap, waitForStoreCatalog } = require('./helpers/e2e-api');
 

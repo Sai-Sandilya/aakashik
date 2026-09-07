@@ -2,7 +2,7 @@
 /**
  * Final polish UX fixes — max positive + negative coverage.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./fixtures');
 const {
   clearAuthStorage,
   seedEmailUser,

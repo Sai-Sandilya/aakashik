@@ -2525,6 +2525,7 @@ class Component extends DCLogic {
     this.playChime();
     this.showToast('Order placed! ID: ' + order.id);
     this.setState({
+      cartOpen: true,
       orderPlaced: true,
       lastOrderId: order.id,
       lastOrderServerSynced: !!serverSynced,
@@ -4319,8 +4320,7 @@ class Component extends DCLogic {
               this._saveOrderLocally(order);
               const refresh = this._hydrateStoreFromApi({ force: true });
               const done = () => this._finalizeOrderSuccess(order, true);
-              if (refresh && typeof refresh.then === 'function') refresh.then(done);
-              else done();
+              Promise.resolve(refresh).then(done, done);
               return;
             }
             if (status === 400 || status === 409 || status === 422) {

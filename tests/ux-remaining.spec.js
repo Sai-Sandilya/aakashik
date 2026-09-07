@@ -1,7 +1,7 @@
 /**
  * Remaining UX audit issues (1-23) — positive and negative E2E coverage.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./fixtures');
 const {
   clearAuthStorage,
   seedEmailUser,

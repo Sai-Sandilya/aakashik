@@ -1,7 +1,7 @@
 /**
  * Admin custom products — add / hide / delete syncs to the store catalog.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./fixtures');
 const { resetE2eApi, createCustomProduct, waitForStoreCatalog, loginAdmin, authHeaders } = require('./helpers/e2e-api');
 
 const ADMIN_URL = '/Admin';

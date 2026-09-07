@@ -1,7 +1,7 @@
 /**
  * Phone signup must not overwrite an existing verified phone account.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./fixtures');
 const {
   clearAuthStorage,
   seedPhoneUser,
