@@ -1,7 +1,7 @@
 /**
  * Checkout delivery fields must all be filled before Place Order succeeds.
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./fixtures');
 const {
   clearAuthStorage,
   seedEmailUser,

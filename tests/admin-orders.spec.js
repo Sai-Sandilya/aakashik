@@ -1,7 +1,7 @@
 /**
  * Admin Orders console — real API orders (no seeded mock AAK-1000x).
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./fixtures');
 const { clearAuthStorage } = require('./helpers/storage');
 const { resetE2eApi } = require('./helpers/e2e-api');
 
