@@ -1149,9 +1149,9 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(dialog.getByRole('heading', { name: 'No blends match yet' })).toBeVisible({ timeout: 5000 });
   });
 
-  test('TC-SO128 positive: hidden immunity kit still hidden from Immunity concern', async ({ page }) => {
-    await page.evaluate(() => localStorage.setItem('ak_hidden_ids', JSON.stringify(['kit-immunity'])));
-    await page.reload();
+  test('TC-SO128 positive: hidden immunity kit still hidden from Immunity concern', async ({ page, request }) => {
+    await setProductHidden(request, 'kit-immunity', true);
+    await reloadCatalog(page);
     const dialog = await openSearch(page);
     await chipRow(dialog, 0).getByRole('button', { name: 'Immunity' }).click();
     await expect(productCard(dialog, 'Immunity Ritual Kit')).toHaveCount(0);
@@ -1181,7 +1181,11 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
   test('TC-SO131 complex: add three different products from search in one session', async ({ page }) => {
     const dialog = await openSearch(page);
     await productCard(dialog, 'Herbal Sunni Pindi').getByRole('button', { name: 'Add to Cart' }).click();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog', { name: 'Your Cart' })).toHaveCount(0);
     await productCard(dialog, 'Daily Immunity').getByRole('button', { name: 'Add to Cart' }).click();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog', { name: 'Your Cart' })).toHaveCount(0);
     await productCard(dialog, 'Ashtagandham').getByRole('button', { name: 'Add to Cart' }).click();
     const keys = await page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('ak_cart') || '{}')));
     expect(keys.length).toBeGreaterThanOrEqual(3);
@@ -1343,9 +1347,9 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     expect(state.wish.ashta || state.wish['ashta']).toBeTruthy();
   });
 
-  test('TC-SO146 complex: hide ashta → show all rituals after spiritual empty still works', async ({ page }) => {
-    await page.evaluate(() => localStorage.setItem('ak_hidden_ids', JSON.stringify(['ashta'])));
-    await page.reload();
+  test('TC-SO146 complex: hide ashta → show all rituals after spiritual empty still works', async ({ page, request }) => {
+    await setProductHidden(request, 'ashta', true);
+    await reloadCatalog(page);
     const dialog = await openCategory(page, 'Spiritual Wellness');
     await expect(dialog.getByRole('heading', { name: 'No blends match yet' })).toBeVisible({ timeout: 5000 });
     await dialog.getByRole('button', { name: 'Show all rituals' }).click();

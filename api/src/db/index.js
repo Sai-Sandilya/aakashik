@@ -200,6 +200,7 @@ export function resetE2eFixtures(db) {
       DELETE FROM orders;
       DELETE FROM inventory WHERE product_id IN (SELECT id FROM products WHERE is_builtin = 0);
       DELETE FROM products WHERE is_builtin = 0;
+      UPDATE products SET hidden = 0, active = 1 WHERE is_builtin = 1;
     `);
     for (const [id, qty] of Object.entries(DEFAULT_STOCK)) {
       db.prepare(`

@@ -78,10 +78,14 @@ async function setProductHidden(request, productId, hidden, token) {
 }
 
 async function waitForStoreCatalog(page) {
-  await page.waitForResponse(
-    (r) => r.url().includes('/api/products') && r.status() === 200,
-    { timeout: 15000 },
-  ).catch(() => {});
+  await page.waitForFunction(() => {
+    try {
+      const stock = JSON.parse(localStorage.getItem('ak_stock') || '{}');
+      return Number(stock.immunity) > 0 || Number(stock.sunni) > 0;
+    } catch (e) {
+      return false;
+    }
+  }, { timeout: 10000 }).catch(() => {});
 }
 
 module.exports = {
