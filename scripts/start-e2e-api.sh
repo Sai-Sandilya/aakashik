@@ -10,6 +10,9 @@ export NODE_ENV=development
 export AAKASHIK_E2E=1
 export DB_PATH="$ROOT/api/data/e2e.db"
 export FRONTEND_URL="http://127.0.0.1:8080"
+# Keep E2E on demo admin creds even if api/runtime.env has production values.
+export ADMIN_EMAIL="owner@aakashik.local"
+export ADMIN_PASSWORD="Admin@1234"
 # Fresh fixtures each E2E run so admin status mutations do not leak across suites.
 mkdir -p "$ROOT/api/data"
 rm -f "$DB_PATH"

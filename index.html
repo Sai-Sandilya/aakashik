@@ -2023,7 +2023,7 @@ class Component extends DCLogic {
     doshaStep: 0, doshaAns: [],
     toast: '', toastKey: 0, soundOn: false, breatheOpen: false, breathePhase: 'in', recent: [],
     hoverJar: null, weather: null,
-    checkoutStep: 'cart', loggedIn: false, authMode: 'signin', payMethod: 'cod',
+    checkoutStep: 'cart', loggedIn: false, memberEligible: false, authMode: 'signin', payMethod: 'cod',
     payUpiId: '', payCardNumber: '', payCardExpiry: '', payCardCvv: '', payError: '',
     authContact: '', authName: '', authPassword: '', authConfirmPw: '', authOtpCode: '', authError: '', authOtp: false,
     authRemember: true, authFailCount: 0, authLockUntil: 0,
@@ -2753,7 +2753,10 @@ class Component extends DCLogic {
           return r.json();
         })
         .then((data) => {
-          if (!data || !data.loggedIn || !data.user) return;
+          if (!data || !data.loggedIn || !data.user) {
+            if (this.state.memberEligible) this.setState({ memberEligible: false });
+            return;
+          }
           const u = data.user;
           const profile = {
             name: u.name || '',
@@ -2767,11 +2770,14 @@ class Component extends DCLogic {
             localStorage.setItem('ak_logged', '1');
             localStorage.setItem('ak_persist', '1');
           } catch (e) {}
+          this.setState({ memberEligible: true });
           this._syncLogin();
           this._maybeOpenTermsGate();
           this._maybeResumeCheckout();
         })
-        .catch(() => {});
+        .catch(() => {
+          if (this.state.memberEligible) this.setState({ memberEligible: false });
+        });
     };
     this._hydrateServerSession();
     this._apiStock = null;
@@ -2783,7 +2789,10 @@ class Component extends DCLogic {
       fetch('/api/auth/me', { credentials: 'include' })
         .then((r) => r.json())
         .then((data) => {
-          if (!data || !data.loggedIn || !data.user) return;
+          if (!data || !data.loggedIn || !data.user) {
+            if (this.state.memberEligible) this.setState({ memberEligible: false });
+            return;
+          }
           const u = data.user;
           const profile = {
             name: u.name || '',
@@ -2797,12 +2806,15 @@ class Component extends DCLogic {
             localStorage.setItem('ak_logged', '1');
             localStorage.setItem('ak_persist', '1');
           } catch (e) {}
+          this.setState({ memberEligible: true });
           this._syncLogin();
           this.showToast('Signed in with Google');
           this._maybeOpenTermsGate();
           this._maybeResumeCheckout();
         })
-        .catch(() => {});
+        .catch(() => {
+          if (this.state.memberEligible) this.setState({ memberEligible: false });
+        });
     };
     try {
       const params = new URLSearchParams(location.search || '');
@@ -3416,7 +3428,8 @@ class Component extends DCLogic {
 
     // ---- Cart summary ----
     const MEMBER_RATE = 0.10;
-    const memberPricing = !!this.state.loggedIn;
+    // Member 10% only when /api/auth/me confirms a real session (not localStorage demo login).
+    const memberPricing = !!this.state.memberEligible;
     const cartList = Object.keys(this.state.cartItems).map(key => {
       const it = this.state.cartItems[key] || {};
       const pid = it.productId || String(key).split('::')[0];
@@ -4044,7 +4057,7 @@ class Component extends DCLogic {
         } catch (e) {}
         this.showToast('Signed out');
         this.setState({
-          loggedIn: false, checkoutStep: 'cart', accountMenuOpen: false, profileOpen: false, ordersOpen: false, termsOpen: false, termsChecked: false,
+          loggedIn: false, memberEligible: false, checkoutStep: 'cart', accountMenuOpen: false, profileOpen: false, ordersOpen: false, termsOpen: false, termsChecked: false,
           profileName: '', profilePhone: '', profileEmail: '', profileAddress: '', profileCity: '', profileState: '', profilePincode: '',
         });
       },
@@ -4310,6 +4323,7 @@ class Component extends DCLogic {
         const payload = this._buildServerOrderPayload(cartList, p, method, subtotalN, cartSubtotalN, memberDiscountN, memberPricing);
         fetch('/api/orders', {
           method: 'POST',
+          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         })
