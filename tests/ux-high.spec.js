@@ -5,6 +5,7 @@ const {
   seedEmailUser,
   STRONG_PASSWORD,
 } = require('./helpers/storage');
+const { seedApiEmailUser } = require('./helpers/e2e-api');
 
 const LANDING_URL = '/';
 
@@ -180,15 +181,16 @@ test.describe('UX high fixes', () => {
 
   test('TC-H11 positive: logged-in member gets 10% discount line', async ({ page }) => {
     const email = `member-${Date.now()}@test.com`;
-    await seedEmailUser(page, { email, password: STRONG_PASSWORD, name: 'Member User' });
+    // Seed cart before session so the final reload in seedApiEmailUser keeps it.
+    await page.goto('/');
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
         'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
-    await page.reload();
+    await seedApiEmailUser(page, { email, password: STRONG_PASSWORD, name: 'Member User' });
     await cartButton(page).click({ force: true });
-    await expect(page.getByText(/10% off applies once|Member 10% off|Member pricing applied/i).first()).toBeVisible();
+    await expect(page.getByText(/10% off applies once|Member 10% off|Member pricing applied/i).first()).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('−₹35')).toBeVisible();
   });
 

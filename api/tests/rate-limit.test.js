@@ -43,4 +43,23 @@ describe('Auth rate limiting', () => {
     assert.equal(reply.statusCode, 429);
     assert.equal(reply.body.error, 'rate_limit_exceeded');
   });
+
+  it('TC-RL03 negative: spoofed X-Forwarded-For does not create a new bucket', async () => {
+    const hook = createRateLimit({ max: 2, windowMs: 60_000 });
+    const base = {
+      method: 'POST',
+      url: '/api/admin/login',
+      routerPath: '/api/admin/login',
+      ip: '203.0.113.10',
+    };
+    let reply = mockReply();
+    for (let i = 0; i < 3; i += 1) {
+      reply = mockReply();
+      await hook({
+        ...base,
+        headers: { 'x-forwarded-for': `${10 + i}.0.0.1` },
+      }, reply);
+    }
+    assert.equal(reply.statusCode, 429);
+  });
 });

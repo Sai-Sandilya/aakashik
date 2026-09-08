@@ -1,10 +1,11 @@
 const buckets = new Map();
 
+/**
+ * Rate-limit identity: use Fastify's request.ip only.
+ * Do not read X-Forwarded-For here — clients can spoof that header.
+ * With trustProxy enabled on the app, request.ip is set from the reverse proxy hop.
+ */
 function clientKey(request) {
-  const forwarded = request.headers['x-forwarded-for'];
-  if (typeof forwarded === 'string' && forwarded.trim()) {
-    return forwarded.split(',')[0].trim();
-  }
   return request.ip || 'unknown';
 }
 

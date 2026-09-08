@@ -4,6 +4,7 @@ import {
   setupTestApp,
   teardownTestApp,
   loginAdmin,
+  loginCustomer,
   authHeaders,
   sampleDelivery,
   sampleOrderPayload,
@@ -53,12 +54,13 @@ describe('API validation hardening (TC-VAL)', () => {
     assert.equal(res.json().order.total, 349);
   });
 
-  it('TC-VAL03 positive: member pricing applies 10% when loggedIn', async () => {
+  it('TC-VAL03 positive: member pricing applies 10% with real customer session', async () => {
+    const { cookie } = await loginCustomer();
     const res = await app.inject({
       method: 'POST',
       url: '/api/orders',
+      headers: { cookie },
       payload: sampleOrderPayload({
-        loggedIn: true,
         total: 314,
         subtotal: 349,
         items: [{ productId: 'immunity', qty: 1 }],
@@ -67,6 +69,23 @@ describe('API validation hardening (TC-VAL)', () => {
     assert.equal(res.statusCode, 201);
     assert.equal(res.json().order.total, 314);
     assert.equal(res.json().order.memberDiscount, 35);
+  });
+
+  it('TC-VAL03b negative: client loggedIn flag alone does not grant member pricing', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/orders',
+      payload: sampleOrderPayload({
+        loggedIn: true,
+        memberPricing: true,
+        total: 349,
+        subtotal: 349,
+        items: [{ productId: 'immunity', qty: 1 }],
+      }),
+    });
+    assert.equal(res.statusCode, 201);
+    assert.equal(res.json().order.total, 349);
+    assert.equal(res.json().order.memberDiscount, 0);
   });
 
   it('TC-VAL04 positive: subscribe discount on line (10%)', async () => {
@@ -83,11 +102,12 @@ describe('API validation hardening (TC-VAL)', () => {
   });
 
   it('TC-VAL05 positive: subscribe wins over member — still 10% not 19%', async () => {
+    const { cookie } = await loginCustomer();
     const res = await app.inject({
       method: 'POST',
       url: '/api/orders',
+      headers: { cookie },
       payload: sampleOrderPayload({
-        loggedIn: true,
         items: [{ productId: 'ashta', qty: 1, subscribe: true }],
         total: 179,
       }),

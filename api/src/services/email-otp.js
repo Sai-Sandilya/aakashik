@@ -44,7 +44,7 @@ export function generateOtpCode() {
 }
 
 async function deliverOtpEmail({ to, displayName, code, subject, intro }) {
-  if (config.isTest) return;
+  if (config.isTest || config.isE2e) return;
 
   if (!smtpReady()) {
     throw new ApiError(
@@ -139,7 +139,7 @@ export async function sendSignupOtp(db, { email, name }) {
     intro: 'Your verification code for Aakashik Wellness is:',
   });
 
-  return { ok: true, expiresIn: 600, ...(config.isTest ? { testCode: code } : {}) };
+  return { ok: true, expiresIn: 600, ...((config.isTest || config.isE2e) ? { testCode: code } : {}) };
 }
 
 export async function sendPasswordResetOtp(db, { email }) {
@@ -171,7 +171,7 @@ export async function sendPasswordResetOtp(db, { email }) {
     intro: 'Use this code to reset your Aakashik Wellness password:',
   });
 
-  return { ok: true, expiresIn: 600, ...(config.isTest ? { testCode: code } : {}) };
+  return { ok: true, expiresIn: 600, ...((config.isTest || config.isE2e) ? { testCode: code } : {}) };
 }
 
 export function verifySignupOtp(db, params) {

@@ -2,6 +2,7 @@ import { before, after, beforeEach } from 'node:test';
 import { buildApp } from '../src/app.js';
 import { createDb, setDb, closeDb } from '../src/db/index.js';
 import { config } from '../src/config.js';
+import { hashPassword } from '../src/services/password.js';
 
 let app;
 let db;
@@ -36,6 +37,30 @@ export async function loginAdmin() {
   return { res, token: body.token, admin: body.admin };
 }
 
+/** Create a customer row and return a session cookie header for inject(). */
+export async function loginCustomer(overrides = {}) {
+  const email = overrides.email || `member-${Date.now()}@example.com`;
+  const password = overrides.password || 'Test@1234';
+  const name = overrides.name || 'Member Customer';
+  const now = Date.now();
+  const pwHash = await hashPassword(password);
+  app.db.prepare(`
+    INSERT INTO users (email, name, phone, google_id, avatar, password_hash, verified, created_at, updated_at)
+    VALUES (?, ?, '', NULL, '', ?, 1, ?, ?)
+  `).run(email, name, pwHash, now, now);
+
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/auth/login',
+    payload: { email, password },
+  });
+  const setCookie = res.headers['set-cookie'];
+  const cookieHeader = Array.isArray(setCookie)
+    ? setCookie.map((c) => String(c).split(';')[0]).join('; ')
+    : String(setCookie || '').split(';')[0];
+  return { res, email, password, cookie: cookieHeader };
+}
+
 export function authHeaders(token) {
   return { authorization: `Bearer ${token}` };
 }
@@ -65,11 +90,12 @@ export function sampleOrderPayload(overrides = {}) {
 }
 
 /** Create a real checkout order (no seeded mocks). */
-export async function createOrder(overrides = {}) {
+export async function createOrder(overrides = {}, injectOpts = {}) {
   const res = await app.inject({
     method: 'POST',
     url: '/api/orders',
     payload: sampleOrderPayload(overrides),
+    ...injectOpts,
   });
   return { res, order: res.json().order, statusCode: res.statusCode };
 }

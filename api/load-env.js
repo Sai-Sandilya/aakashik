@@ -27,5 +27,10 @@ function loadEnvFile(filePath) {
   }
 }
 
-loadEnvFile(path.join(__dirname, 'runtime.env'));
+// Skip production runtime.env during Playwright E2E so cookie domain/secure
+// and admin password from Hostinger do not break local http://127.0.0.1 tests.
+const isE2e = process.env.AAKASHIK_E2E === '1' || process.env.E2E === '1';
+if (!isE2e) {
+  loadEnvFile(path.join(__dirname, 'runtime.env'));
+}
 loadEnvFile(path.join(__dirname, '.env'));

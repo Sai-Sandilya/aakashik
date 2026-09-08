@@ -1,4 +1,5 @@
 import { listOrders, getOrder, getTrackPayload, createOrder, updateOrderStatus } from '../services/orders.js';
+import { readCustomerSession } from '../services/customer-auth.js';
 import { adminPreHandler } from './admin-guard.js';
 import { sendError } from '../lib/errors.js';
 import { validateOrderStatusFilter, validateOrderId, validateStatusUpdate } from '../lib/validation.js';
@@ -6,7 +7,10 @@ import { validateOrderStatusFilter, validateOrderId, validateStatusUpdate } from
 export default async function orderRoutes(fastify) {
   fastify.post('/orders', async (request, reply) => {
     try {
-      const order = createOrder(fastify.db, request.body || {});
+      const session = readCustomerSession(request, fastify.db);
+      const order = createOrder(fastify.db, request.body || {}, {
+        memberPricing: !!session,
+      });
       return reply.code(201).send({ order });
     } catch (err) {
       return sendError(reply, err);

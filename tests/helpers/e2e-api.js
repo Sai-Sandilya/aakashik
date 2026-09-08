@@ -88,6 +88,59 @@ async function waitForStoreCatalog(page) {
   }, { timeout: 10000 }).catch(() => {});
 }
 
+/**
+ * Create a real API customer + session cookie in the browser context.
+ * Required for member pricing (10% off) after server-side session checks.
+ */
+async function seedApiEmailUser(page, {
+  email = `member-${Date.now()}@test.com`,
+  password = 'Test@1234',
+  name = 'Member User',
+} = {}) {
+  const send = await page.request.post('/api/auth/send-otp', {
+    data: { email, name, purpose: 'signup' },
+  });
+  if (!send.ok()) {
+    const body = await send.text().catch(() => '');
+    throw new Error(`send-otp failed (${send.status()}): ${body}`);
+  }
+  const { testCode } = await send.json();
+  if (!testCode) throw new Error('send-otp missing testCode');
+
+  const verify = await page.request.post('/api/auth/verify-signup', {
+    data: { email, code: testCode, name, password, rememberMe: true },
+  });
+  if (!verify.ok()) {
+    const body = await verify.text().catch(() => '');
+    throw new Error(`verify-signup failed (${verify.status()}): ${body}`);
+  }
+
+  await page.goto('/');
+  await page.evaluate(({ email, name }) => {
+    localStorage.setItem('ak_profile', JSON.stringify({
+      name, email, phone: '', verified: true,
+    }));
+    localStorage.setItem('ak_logged', '1');
+    localStorage.setItem('ak_persist', '1');
+    localStorage.setItem('ak_terms_accepted', '1');
+  }, { email, name });
+  await page.reload();
+  // Wait until /api/auth/me confirms session AND landing has applied memberEligible.
+  await page.waitForFunction(async () => {
+    try {
+      const res = await fetch('/api/auth/me', { credentials: 'include' });
+      if (!res.ok) return false;
+      const data = await res.json();
+      return !!(data && data.loggedIn);
+    } catch (e) {
+      return false;
+    }
+  }, { timeout: 10000 });
+  // One paint after hydrate setState({ memberEligible: true })
+  await page.waitForFunction(() => document.readyState === 'complete');
+  return { email, password, name };
+}
+
 module.exports = {
   ADMIN_EMAIL,
   ADMIN_PASSWORD,
@@ -99,4 +152,5 @@ module.exports = {
   createCustomProduct,
   setProductHidden,
   waitForStoreCatalog,
+  seedApiEmailUser,
 };
