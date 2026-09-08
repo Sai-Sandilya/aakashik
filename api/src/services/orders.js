@@ -176,7 +176,13 @@ function restoreStockForOrder(db, orderId) {
   }
 }
 
-export function createOrder(db, payload) {
+/**
+ * @param {object} db
+ * @param {object} payload
+ * @param {{ memberPricing?: boolean }} [options]
+ *   memberPricing must come from a verified customer session — never from the client body.
+ */
+export function createOrder(db, payload, options = {}) {
   const itemsIn = Array.isArray(payload.items) ? payload.items : [];
   if (!itemsIn.length) throw new ApiError(400, 'validation_error', 'Cart is empty');
 
@@ -184,7 +190,7 @@ export function createOrder(db, payload) {
   const payMethod = validatePayMethod(payload.payMethod);
   const payment = validatePaymentDetails(payMethod, payload.payment || {});
 
-  const memberPricing = !!(payload.memberPricing || payload.loggedIn);
+  const memberPricing = !!options.memberPricing;
   const cartLines = aggregateCartLines(itemsIn);
   const normalizedItems = normalizeOrderLines(db, cartLines, memberPricing);
   const totals = computeOrderTotals(normalizedItems);

@@ -17,6 +17,9 @@ export async function buildApp(options = {}) {
   const app = Fastify({
     logger: options.logger ?? false,
     bodyLimit: options.bodyLimit ?? 3 * 1024 * 1024,
+    // Trust one reverse-proxy hop (Hostinger) so request.ip is the real client.
+    // Rate limits must use request.ip — never a raw client-supplied X-Forwarded-For.
+    trustProxy: options.trustProxy ?? true,
   });
 
   const db = options.db || (options.dbOptions ? await createDb(options.dbOptions) : getDb());
