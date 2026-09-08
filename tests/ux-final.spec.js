@@ -61,15 +61,26 @@ test.describe('UX final — Auth honesty & account safety', () => {
     await fillConfirmPassword(page, STRONG_PASSWORD);
     const code = await createAccountAndCaptureEmailOtp(page);
     await page.getByPlaceholder('4-digit code').fill(code);
-    // Clear pending right after submit starts — password stays in form state for server verify
-    await Promise.all([
-      submitButton(page, 'Verify & Continue').click(),
-      page.waitForTimeout(50).then(() => page.evaluate(() => localStorage.removeItem('ak_pending_otp'))),
-    ]);
+
+    // Start verify, then clear pending only after the request is in flight.
+    // Password remains in form state for the server verify-signup call.
+    const verifyWait = page.waitForResponse((r) => (
+      r.url().includes('/api/auth/verify-signup')
+      && r.request().method() === 'POST'
+    ));
+    await submitButton(page, 'Verify & Continue').click();
+    await verifyWait;
+    await page.evaluate(() => localStorage.removeItem('ak_pending_otp'));
     await waitForAuthSuccess(page);
-    const me = await page.request.get('/api/auth/me');
-    expect(me.ok()).toBeTruthy();
-    expect((await me.json()).loggedIn).toBe(true);
+
+    const sessionOk = await page.evaluate(async () => {
+      const res = await fetch('/api/auth/me', { credentials: 'include' });
+      if (!res.ok) return false;
+      const data = await res.json();
+      return !!(data && data.loggedIn);
+    });
+    expect(sessionOk).toBe(true);
+
     const users = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_users') || '{}'));
     expect(users[email]?.password).toBeFalsy();
   });

@@ -43,7 +43,11 @@ async function hashPassword(page, password) {
   }, password);
 }
 
-/** Seed a verified email user directly in localStorage (skips OTP). Stores pwHash only. */
+/**
+ * Seed a verified email user directly in localStorage (skips OTP). Stores pwHash only.
+ * @param {import('@playwright/test').Page} page
+ * @param {{ email: string, password: string, name?: string, acceptTerms?: boolean }} opts
+ */
 async function seedEmailUser(page, { email, password, name = 'Test User', acceptTerms = true } = {}) {
   const pwHash = await hashPassword(page, password);
   await page.evaluate(({ email, pwHash, name, acceptTerms }) => {
@@ -64,7 +68,11 @@ async function seedEmailUser(page, { email, password, name = 'Test User', accept
   }, { email, pwHash, name, acceptTerms });
 }
 
-/** Seed a verified phone-only user (OTP login; no password). */
+/**
+ * Seed a verified phone-only user (OTP login; no password).
+ * @param {import('@playwright/test').Page} page
+ * @param {{ phone: string, name?: string, acceptTerms?: boolean }} opts
+ */
 async function seedPhoneUser(page, { phone, name = 'Phone User', acceptTerms = true } = {}) {
   await page.evaluate(({ phone, name, acceptTerms }) => {
     const users = JSON.parse(localStorage.getItem('ak_users') || '{}');

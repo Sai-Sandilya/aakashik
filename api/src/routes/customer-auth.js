@@ -20,7 +20,7 @@ import { withTransaction } from '../db/transaction.js';
 const customerAuthRateLimit = createRateLimit({ windowMs: 60_000, max: 30 });
 
 export default async function customerAuthRoutes(fastify) {
-  if (!config.isTest) {
+  if (!config.isTest && !config.isE2e) {
     fastify.addHook('onRequest', customerAuthRateLimit);
   }
 

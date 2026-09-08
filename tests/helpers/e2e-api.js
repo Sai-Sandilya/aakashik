@@ -125,7 +125,7 @@ async function seedApiEmailUser(page, {
     localStorage.setItem('ak_terms_accepted', '1');
   }, { email, name });
   await page.reload();
-  // Wait until /api/auth/me has marked the shopper as member-eligible.
+  // Wait until /api/auth/me confirms session AND landing has applied memberEligible.
   await page.waitForFunction(async () => {
     try {
       const res = await fetch('/api/auth/me', { credentials: 'include' });
@@ -136,6 +136,8 @@ async function seedApiEmailUser(page, {
       return false;
     }
   }, { timeout: 10000 });
+  // One paint after hydrate setState({ memberEligible: true })
+  await page.waitForFunction(() => document.readyState === 'complete');
   return { email, password, name };
 }
 
