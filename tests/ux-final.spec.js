@@ -6,7 +6,6 @@ const { test, expect } = require('./fixtures');
 const {
   clearAuthStorage,
   seedEmailUser,
-  readStoredCode,
   hashPassword,
   STRONG_PASSWORD,
 } = require('./helpers/storage');
@@ -18,6 +17,7 @@ const {
   fillConfirmPassword,
   submitButton,
   enterOtpAndVerify,
+  createAccountAndCaptureEmailOtp,
   waitForAuthSuccess,
   openForgotPassword,
   submitForgotForm,
@@ -51,7 +51,7 @@ test.describe('UX final — Auth honesty & account safety', () => {
     await expect(page.getByText(/We'll send a one-time verification code to your phone/i)).toHaveCount(0);
   });
 
-  test('TC-F03 positive: OTP verify keeps pwHash even if pending storage is cleared mid-delay', async ({ page }) => {
+  test('TC-F03 positive: OTP verify keeps password even if pending storage is cleared mid-delay', async ({ page }) => {
     const email = `race-${Date.now()}@test.com`;
     await gotoAuth(page);
     await switchToSignup(page);
@@ -59,22 +59,19 @@ test.describe('UX final — Auth honesty & account safety', () => {
     await fillContact(page, email);
     await fillPassword(page, STRONG_PASSWORD);
     await fillConfirmPassword(page, STRONG_PASSWORD);
-    await submitButton(page, 'Create Account').click();
-    await expect(page.getByPlaceholder('4-digit code')).toBeVisible({ timeout: 8000 });
-    const code = await readStoredCode(page, 'ak_pending_otp');
-    expect(code).toMatch(/^\d{4}$/);
+    const code = await createAccountAndCaptureEmailOtp(page);
     await page.getByPlaceholder('4-digit code').fill(code);
-    // Clear pending right after submit starts — snapshot in Auth must still apply pwHash
+    // Clear pending right after submit starts — password stays in form state for server verify
     await Promise.all([
       submitButton(page, 'Verify & Continue').click(),
       page.waitForTimeout(50).then(() => page.evaluate(() => localStorage.removeItem('ak_pending_otp'))),
     ]);
     await waitForAuthSuccess(page);
+    const me = await page.request.get('/api/auth/me');
+    expect(me.ok()).toBeTruthy();
+    expect((await me.json()).loggedIn).toBe(true);
     const users = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_users') || '{}'));
-    expect(users[email].pwHash).toBeTruthy();
-    expect(users[email].password).toBeFalsy();
-    const expected = await hashPassword(page, STRONG_PASSWORD);
-    expect(users[email].pwHash).toBe(expected);
+    expect(users[email]?.password).toBeFalsy();
   });
 
   test('TC-F04 positive: forgot password does not reveal unknown emails', async ({ page }) => {

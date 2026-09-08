@@ -17,6 +17,7 @@ const {
   fillConfirmPassword,
   submitButton,
   enterOtpAndVerify,
+  createAccountAndCaptureEmailOtp,
   waitForAuthSuccess,
   signInWithEmail,
   mockEmailLoginApi,
@@ -29,7 +30,7 @@ test.describe('UX remaining — password hashing & demo OTP (1-2, 11-12)', () =>
     await clearAuthStorage(page);
   });
 
-  test('TC-R01 positive: email signup stores pwHash, not plaintext password', async ({ page }) => {
+  test('TC-R01 positive: email signup stores password on server, not plaintext in localStorage', async ({ page }) => {
     const email = `hash-${Date.now()}@test.com`;
     await gotoAuth(page);
     await switchToSignup(page);
@@ -37,24 +38,24 @@ test.describe('UX remaining — password hashing & demo OTP (1-2, 11-12)', () =>
     await fillContact(page, email);
     await fillPassword(page, STRONG_PASSWORD);
     await fillConfirmPassword(page, STRONG_PASSWORD);
-    await submitButton(page, 'Create Account').click();
-    await expect(page.getByText(/Demo verification code/i)).toBeVisible({ timeout: 8000 });
+    const code = await createAccountAndCaptureEmailOtp(page);
+    await expect(page.getByText(/Verification code sent/i)).toBeVisible({ timeout: 8000 });
 
     const pending = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_pending_otp') || 'null'));
-    expect(pending.pwHash).toBeTruthy();
+    expect(pending && pending.server).toBe(true);
     expect(pending.password).toBeFalsy();
+    expect(pending.pwHash).toBeFalsy();
     const usersBefore = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_users') || '{}'));
     expect(usersBefore[email]).toBeFalsy();
 
-    const code = await readStoredCode(page, 'ak_pending_otp');
     await enterOtpAndVerify(page, code);
     await waitForAuthSuccess(page);
 
     const users = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_users') || '{}'));
-    expect(users[email].pwHash).toBeTruthy();
-    expect(users[email].password).toBeFalsy();
-    const expected = await hashPassword(page, STRONG_PASSWORD);
-    expect(users[email].pwHash).toBe(expected);
+    expect(users[email]?.password).toBeFalsy();
+    const me = await page.request.get('/api/auth/me');
+    expect(me.ok()).toBeTruthy();
+    expect((await me.json()).loggedIn).toBe(true);
   });
 
   test('TC-R02 negative: wrong password fails against hashed user', async ({ page }) => {

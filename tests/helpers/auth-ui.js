@@ -200,6 +200,29 @@ async function signupWithEmail(page, { name, email, password }) {
   await submitButton(page, 'Create Account').click();
 }
 
+/**
+ * Click Create Account and return the E2E `testCode` from POST /api/auth/send-otp.
+ * Email signup uses the real API (not localStorage demo OTP).
+ */
+async function createAccountAndCaptureEmailOtp(page) {
+  const respPromise = page.waitForResponse((r) => (
+    r.url().includes('/api/auth/send-otp')
+    && r.request().method() === 'POST'
+  ));
+  await submitButton(page, 'Create Account').click();
+  const resp = await respPromise;
+  const data = await resp.json();
+  if (!resp.ok()) {
+    throw new Error(`send-otp failed (${resp.status()}): ${JSON.stringify(data)}`);
+  }
+  const code = data && data.testCode != null ? String(data.testCode) : '';
+  if (!/^\d{4}$/.test(code)) {
+    throw new Error(`send-otp missing testCode: ${JSON.stringify(data)}`);
+  }
+  await page.getByPlaceholder('4-digit code').waitFor({ timeout: 8000 });
+  return code;
+}
+
 async function signInWithEmail(page, { email, password }) {
   await gotoAuth(page);
   await fillContact(page, email);
@@ -232,6 +255,7 @@ module.exports = {
   mockEmailResetApi,
   waitForAuthSuccess,
   signupWithEmail,
+  createAccountAndCaptureEmailOtp,
   signInWithEmail,
   openForgotPassword,
   submitForgotForm,

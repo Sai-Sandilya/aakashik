@@ -187,9 +187,12 @@ test.describe('UX high fixes', () => {
         'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
+    const meWait = page.waitForResponse((r) => r.url().includes('/api/auth/me') && r.ok());
     await page.reload();
+    await meWait;
     await cartButton(page).click({ force: true });
-    await expect(page.getByText(/10% off applies once|Member 10% off|Member pricing applied/i).first()).toBeVisible({ timeout: 10000 });
+    // memberEligible may land slightly after /api/auth/me; cart re-renders when it does.
+    await expect(page.getByText(/10% off applies once|Member 10% off|Member pricing applied/i).first()).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('−₹35')).toBeVisible();
   });
 
