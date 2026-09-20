@@ -16,11 +16,10 @@ test.describe('UX low — polish & a11y', () => {
   });
 
   // TC-L29
-  test('featured products section is rendered', async ({ page }) => {
+  test('featured products section is removed', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await expect(page.getByRole('heading', { name: 'Featured Products' })).toBeVisible();
-    await expect(page.locator('#featured')).toContainText('Daily Immunity');
-    await expect(page.locator('#featured')).toContainText('Kaphahara');
+    await expect(page.getByRole('heading', { name: 'Featured Products' })).toHaveCount(0);
+    await expect(page.locator('#featured')).toHaveCount(0);
   });
 
   // TC-L29b
@@ -59,15 +58,20 @@ test.describe('UX low — polish & a11y', () => {
 
   test('TC-L32b positive: Ingredients toggle only when pack back exists', async ({ page }) => {
     await page.goto(LANDING_URL);
-    // Daily Immunity has no pack photos → no Ingredients toggle
-    await page.locator('#featured').getByRole('heading', { name: 'Daily Immunity' }).locator('xpath=ancestor::div[contains(@style,\"border-radius\")][1]').getByRole('button', { name: 'View' }).click();
+    await page.getByRole('button', { name: 'Search' }).click();
+    const dialog = page.getByRole('dialog').filter({ has: page.getByPlaceholder('Search blends, herbs, concerns…') });
+    await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Ashtagandham');
+    await dialog.getByRole('heading', { name: 'Ashtagandham' }).locator('xpath=ancestor::div[contains(@class,\"searchCard\") or contains(@style,\"border-radius\")][1]').getByRole('button', { name: 'View' }).click();
     let qv = page.getByRole('dialog', { name: 'Product quick view' });
     await expect(qv).toBeVisible({ timeout: 8000 });
     await expect(qv.getByRole('button', { name: 'Ingredients' })).toHaveCount(0);
     await page.keyboard.press('Escape');
+    await dialog.getByRole('button', { name: /Close/i }).click();
 
-    // Kaphahara has front + back pack photos
-    await page.locator('#featured').getByRole('heading', { name: 'Kaphahara' }).locator('xpath=ancestor::div[contains(@style,\"border-radius\")][1]').getByRole('button', { name: 'View' }).click();
+    await page.getByRole('button', { name: 'Search' }).click();
+    const dialog2 = page.getByRole('dialog').filter({ has: page.getByPlaceholder('Search blends, herbs, concerns…') });
+    await dialog2.getByPlaceholder('Search blends, herbs, concerns…').fill('Dried Moringa Leaves');
+    await dialog2.getByRole('heading', { name: 'Dried Moringa Leaves' }).locator('xpath=ancestor::div[contains(@class,\"searchCard\") or contains(@style,\"border-radius\")][1]').getByRole('button', { name: 'View' }).click();
     qv = page.getByRole('dialog', { name: 'Product quick view' });
     await expect(qv).toBeVisible({ timeout: 8000 });
     await expect(qv.getByRole('button', { name: 'Ingredients' })).toBeVisible();
@@ -114,11 +118,14 @@ test.describe('UX low — polish & a11y', () => {
   });
 
   test('TC-L32d positive: Quick View Out of stock add is disabled', async ({ page, request }) => {
-    await seedStockMap(request, { immunity: 0 });
+    await seedStockMap(request, { kaphahara: 0 });
     await page.goto(LANDING_URL);
     await page.reload();
     await waitForStoreCatalog(page);
-    await page.locator('#featured').getByRole('heading', { name: 'Daily Immunity' }).locator('xpath=ancestor::div[contains(@style,\"border-radius\")][1]').getByRole('button', { name: 'View' }).click();
+    await page.getByRole('button', { name: 'Search' }).click();
+    const dialog = page.getByRole('dialog').filter({ has: page.getByPlaceholder('Search blends, herbs, concerns…') });
+    await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Kaphahara');
+    await dialog.getByRole('heading', { name: 'Kaphahara' }).locator('xpath=ancestor::div[contains(@class,\"searchCard\") or contains(@style,\"border-radius\")][1]').getByRole('button', { name: 'View' }).click();
     const qv = page.getByRole('dialog', { name: 'Product quick view' });
     await expect(qv).toBeVisible({ timeout: 8000 });
     const addBtn = qv.getByRole('button', { name: 'Out of stock' });
@@ -181,7 +188,7 @@ test.describe('UX low — polish & a11y', () => {
     await expect(page.getByText(/Diwali/i)).toHaveCount(0);
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await page.reload();
@@ -367,10 +374,9 @@ test.describe('UX low — polish & a11y', () => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Language' }).click();
     await expect(page.getByRole('menu')).toBeVisible();
-    await page.locator('footer').getByRole('button', { name: 'Privacy Policy' }).click();
-    await expect(page.getByRole('menu')).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Language' })).toHaveAttribute('aria-expanded', 'false');
-    await expect(page.getByRole('dialog', { name: 'Legal' })).toBeVisible();
+    await page.locator('footer').getByRole('link', { name: 'Privacy Policy' }).click();
+    await expect(page).toHaveURL(/\/privacy\/?$/);
+    await expect(page.getByRole('heading', { name: 'Privacy Policy' })).toBeVisible();
   });
 
   // TC-L47

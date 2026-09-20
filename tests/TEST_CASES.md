@@ -192,7 +192,7 @@ View runs under the repo **Actions** tab → **E2E Tests**.
 | TC-R07 | Reviews = sample stories (no 1,240+ / Verified buyer) | + |
 | TC-R08 | Medical overclaims removed from sample reviews | − |
 | TC-R09 | Kit prices match Save ₹ vs singles (599 / 349) | + |
-| TC-R10 | “Sugar Balance Support” replaces “Diabetic Care” | + |
+| TC-R10 | “Jamun Seed Powder” replaces “Jamun Seed” | + |
 | TC-R11 | Order confirm = saved on device (demo) | + |
 | TC-R12 | Track modal discloses simulated timeline | + |
 | TC-R13 | Reminder + newsletter device-only demo copy | + |

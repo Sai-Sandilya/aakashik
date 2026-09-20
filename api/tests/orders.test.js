@@ -66,7 +66,7 @@ describe('API orders', () => {
     const phone = '9876501999';
     const { order } = await createOrder({
       delivery: sampleDelivery({ phone, name: 'Search Buyer' }),
-      items: [{ productId: 'sunni', qty: 1 }],
+      items: [{ productId: 'herbal-bath', qty: 1 }],
       total: 249,
       subtotal: 249,
     });
@@ -86,7 +86,7 @@ describe('API orders', () => {
       url: '/api/admin/inventory',
       headers: authHeaders(token),
     });
-    const immunityBefore = before.json().inventory.find((r) => r.productId === 'immunity').quantity;
+    const ashtaBefore = before.json().inventory.find((r) => r.productId === 'ashta').quantity;
 
     const create = await app.inject({
       method: 'POST',
@@ -104,8 +104,8 @@ describe('API orders', () => {
       url: '/api/admin/inventory',
       headers: authHeaders(token),
     });
-    const immunityAfter = after.json().inventory.find((r) => r.productId === 'immunity').quantity;
-    assert.equal(immunityAfter, immunityBefore - 1);
+    const ashtaAfter = after.json().inventory.find((r) => r.productId === 'ashta').quantity;
+    assert.equal(ashtaAfter, ashtaBefore - 1);
   });
 
   it('TC-API44 negative: checkout with empty cart rejected', async () => {
@@ -139,7 +139,7 @@ describe('API orders', () => {
     const { token } = await loginAdmin();
     await app.inject({
       method: 'PATCH',
-      url: '/api/admin/inventory/diabetic',
+      url: '/api/admin/inventory/herbal-bath',
       headers: authHeaders(token),
       payload: { quantity: 0 },
     });
@@ -147,9 +147,9 @@ describe('API orders', () => {
       method: 'POST',
       url: '/api/orders',
       payload: sampleOrderPayload({
-        items: [{ productId: 'diabetic', qty: 1 }],
-        total: 399,
-        subtotal: 399,
+        items: [{ productId: 'herbal-bath', qty: 1 }],
+        total: 249,
+        subtotal: 249,
       }),
     });
     assert.equal(res.statusCode, 409);
@@ -158,9 +158,9 @@ describe('API orders', () => {
 
   it('TC-API48 positive: track order returns 5-step timeline', async () => {
     const { order } = await createOrder({
-      items: [{ productId: 'kaphahara', qty: 1, size: '100g', sizePrice: 199 }],
-      total: 199,
-      subtotal: 199,
+      items: [{ productId: 'kaphahara', qty: 1, size: '250g', sizePrice: 599 }],
+      total: 599,
+      subtotal: 599,
     });
     const res = await app.inject({ method: 'GET', url: `/api/orders/${order.id}/track` });
     assert.equal(res.statusCode, 200);
@@ -192,9 +192,9 @@ describe('API orders', () => {
   it('TC-API51 negative: invalid status jump pending → delivered', async () => {
     const { token } = await loginAdmin();
     const { order } = await createOrder({
-      items: [{ productId: 'navojas', qty: 1, size: '100g', sizePrice: 199 }],
-      total: 199,
-      subtotal: 199,
+      items: [{ productId: 'navojas', qty: 1, size: '250g', sizePrice: 599 }],
+      total: 599,
+      subtotal: 599,
     });
     const res = await setOrderStatus(token, order.id, 'delivered');
     assert.equal(res.statusCode, 400);

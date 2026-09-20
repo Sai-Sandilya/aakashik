@@ -177,7 +177,7 @@ test.describe('UX medium — landing UX', () => {
     await page.goto(LANDING_URL);
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await page.reload();

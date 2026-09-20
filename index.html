@@ -11,6 +11,7 @@
   <title>Aakashik Wellness — Clearing the Space Within</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link rel="icon" href="assets/aakashik-logo.jpeg" type="image/jpeg">
   <link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&amp;family=Jost:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
@@ -38,17 +39,6 @@
     @keyframes nodePop { 0% { opacity: 0; transform: translateX(-10px) scale(0.8); } 100% { opacity: 1; transform: translateX(0) scale(1); } }
     @keyframes ringPulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.55; } 50% { transform: translate(-50%, -50%) scale(1.35); opacity: 0; } }
     @keyframes centerIn { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
-    @keyframes celBob { 0%, 100% { transform: translate(-50%, -50%) translateY(0); } 50% { transform: translate(-50%, -50%) translateY(-6px); } }
-    @keyframes twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
-    @keyframes wxRain { 0% { transform: translateY(-24px); opacity: 0; } 25% { opacity: 0.7; } 100% { transform: translateY(96px); opacity: 0; } }
-    @keyframes wxSnow { 0% { transform: translateY(-14px) translateX(0); opacity: 0; } 25% { opacity: 0.95; } 100% { transform: translateY(96px) translateX(12px); opacity: 0; } }
-    @keyframes wxLeaf { 0% { transform: translateY(-14px) rotate(0); opacity: 0; } 25% { opacity: 1; } 100% { transform: translateY(96px) rotate(240deg); opacity: 0; } }
-    @keyframes wxRays { to { transform: translate(-50%, -50%) rotate(360deg); } }
-    @keyframes sceneFade { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes cloudDrift { 0% { transform: translateX(-60px); opacity: 0; } 15% { opacity: 0.9; } 85% { opacity: 0.9; } 100% { transform: translateX(420px); opacity: 0; } }
-    @keyframes birdFly { 0% { transform: translateX(-30px) translateY(0); opacity: 0; } 12% { opacity: 1; } 50% { transform: translateX(180px) translateY(-8px); } 88% { opacity: 1; } 100% { transform: translateX(400px) translateY(4px); opacity: 0; } }
-    @keyframes shootStar { 0%, 82% { opacity: 0; transform: translate(0,0) scaleX(1); } 84% { opacity: 0; } 88% { opacity: 1; } 96% { opacity: 0; transform: translate(120px, 60px) scaleX(1.6); } 100% { opacity: 0; } }
-    @keyframes heatShimmer { 0%, 100% { opacity: 0.14; transform: translateY(0); } 50% { opacity: 0.28; transform: translateY(-3px); } }
     @keyframes drawerIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
     @keyframes bubblePop { 0% { transform: scale(1); } 30% { transform: scale(1.55); } 60% { transform: scale(0.85); } 100% { transform: scale(1); } }
     @keyframes bubbleFloat { 0% { opacity: 0; transform: translateY(12px) scale(0.3); } 20% { opacity: 0.9; } 100% { opacity: 0; transform: translateY(-76px) scale(1); } }
@@ -255,123 +245,6 @@
     </div>
   </section>
 
-  <!-- CIRCADIAN + SEASON : Your Ritual Right Now -->
-  <section style="width: 100%; max-width: none; margin: 0; padding: 72px clamp(24px, 5vw, 90px) 8px;">
-    <div style="text-align: center; margin-bottom: 34px;">
-      <span style="font-size: 12px; letter-spacing: 0.3em; text-transform: uppercase; color: #A8894E;">{{ t.ritualEye }}</span>
-      <h2 style="font-family: 'Marcellus', serif; font-weight: 400; font-size: clamp(30px, 4vw, 42px); color: #2E3D2C; margin: 12px 0 8px;">{{ t.ritualTitle }}</h2>
-      <p style="font-size: 15px; color: #5E6A54; margin: 0; max-width: 560px; margin-inline: auto; line-height: 1.6;">{{ circadian.greeting }} — {{ t.ritualSub }}</p>
-    </div>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 22px;">
-
-      <!-- TIME CARD -->
-      <div style="background: rgba(255,253,245,0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.65); border-radius: 20px; padding: 28px 26px; box-shadow: 0 24px 44px -28px rgba(46,61,44,0.4);">
-        <div style="position: relative; height: 96px; border-radius: 14px; overflow: hidden; margin-bottom: 16px; background: {{ period.sky }}; transition: background .6s ease; box-shadow: inset 0 0 30px rgba(0,0,0,0.06);">
-          <sc-if value="{{ period.night }}">
-            <span style="position: absolute; top: 18px; left: 20%; width: 3px; height: 3px; border-radius: 50%; background: #FBF7EE; animation: twinkle 2.4s ease-in-out infinite;"></span>
-            <span style="position: absolute; top: 34px; left: 34%; width: 2px; height: 2px; border-radius: 50%; background: #FBF7EE; animation: twinkle 2.4s ease-in-out infinite 0.6s;"></span>
-            <span style="position: absolute; top: 22px; left: 82%; width: 2.5px; height: 2.5px; border-radius: 50%; background: #FBF7EE; animation: twinkle 2.4s ease-in-out infinite 1.1s;"></span>
-            <span style="position: absolute; top: 48px; left: 12%; width: 2px; height: 2px; border-radius: 50%; background: #FBF7EE; animation: twinkle 2.4s ease-in-out infinite 1.7s;"></span>
-            <span style="position: absolute; top: 12px; left: 50%; width: 2px; height: 2px; border-radius: 50%; background: #FBF7EE; animation: twinkle 2.4s ease-in-out infinite 0.3s;"></span>
-            <span style="position: absolute; top: 40px; left: 68%; width: 2px; height: 2px; border-radius: 50%; background: #FBF7EE; animation: twinkle 2.4s ease-in-out infinite 0.9s;"></span>
-            <span style="position: absolute; top: 16px; left: 8%; width: 2px; height: 2px; border-radius: 50%; background: #FBF7EE; animation: twinkle 2.4s ease-in-out infinite 1.4s;"></span>
-            <span style="position: absolute; top: 10px; left: 30%; width: 24px; height: 1.5px; border-radius: 2px; background: linear-gradient(90deg, #FBF7EE, transparent); animation: shootStar 7s ease-in infinite 2s;"></span>
-          </sc-if>
-          <sc-if value="{{ period.day }}">
-            <div style="position: absolute; top: 16px; left: 0; width: 46px; height: 16px; border-radius: 12px; background: rgba(255,255,255,0.7); box-shadow: 14px 4px 0 -2px rgba(255,255,255,0.6), -12px 3px 0 -3px rgba(255,255,255,0.55); animation: cloudDrift 22s linear infinite; z-index: 3;"></div>
-            <div style="position: absolute; top: 30px; left: 0; font-size: 11px; color: rgba(46,61,44,0.5); animation: birdFly 13s linear infinite 3s; z-index: 3;">︿︿</div>
-            <div style="position: absolute; top: 22px; left: 0; font-size: 9px; color: rgba(46,61,44,0.4); animation: birdFly 13s linear infinite 6s; z-index: 3;">︿</div>
-          </sc-if>
-          <div style="{{ period.haloStyle }}"></div>
-          <div style="{{ period.hill2Style }}"></div>
-          <div style="{{ period.bodyStyle }}"></div>
-          <div style="{{ period.hill1Style }}"></div>
-        </div>
-        <div style="margin-bottom: 18px;">
-          <span style="display: block; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #A8894E;">{{ t.byTime }}</span>
-          <span style="display: block; font-family: 'Marcellus', serif; font-size: 19px; color: #2E3D2C;">{{ period.label }} · {{ period.range }}</span>
-        </div>
-        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
-          <sc-for list="{{ periodChips }}" as="c" hint-placeholder-count="4">
-            <button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
-          </sc-for>
-        </div>
-        <div style="border-top: 1px solid #E4DBC8; padding-top: 18px;">
-          <span style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A9678;">{{ t.weSuggest }}</span>
-          <h3 style="font-family: 'Marcellus', serif; font-weight: 400; font-size: 24px; color: #2E3D2C; margin: 5px 0 8px;">{{ period.blend }}</h3>
-          <p style="font-size: 13.5px; line-height: 1.65; color: #5E6A54; margin: 0 0 16px;">{{ period.why }}</p>
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-            <span style="font-family: 'Marcellus', serif; font-size: 20px; color: #2E3D2C;">{{ period.price }}</span>
-            <button onClick="{{ period.add }}" style="display: inline-flex; align-items: center; gap: 7px; background: #2E3D2C; color: #F1EEDF; border: none; padding: 11px 20px; border-radius: 30px; font-size: 13.5px; font-weight: 500;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>{{ period.addLabel }}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- SEASON CARD -->
-      <div style="background: rgba(255,253,245,0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.65); border-radius: 20px; padding: 28px 26px; box-shadow: 0 24px 44px -28px rgba(46,61,44,0.4);">
-        <div style="position: relative; height: 96px; border-radius: 14px; overflow: hidden; margin-bottom: 16px; background: {{ season.sky }}; transition: background .6s ease; box-shadow: inset 0 0 30px rgba(0,0,0,0.06);">
-          <sc-if value="{{ seasonFx.cloud }}">
-            <div style="position: absolute; top: 8px; left: 24%; width: 60px; height: 20px; border-radius: 14px; background: rgba(255,255,255,0.72); box-shadow: 20px 5px 0 -3px rgba(255,255,255,0.62), -16px 4px 0 -4px rgba(255,255,255,0.55); z-index: 5;"></div>
-          </sc-if>
-          <sc-if value="{{ seasonFx.isRays }}">
-            <div style="position: absolute; left: 50%; top: 50%; width: 150px; height: 150px; transform: translate(-50%,-50%); background: repeating-conic-gradient(from 0deg, rgba(255,240,190,0.55) 0deg 6deg, transparent 6deg 22deg); border-radius: 50%; animation: wxRays 26s linear infinite;"></div>
-            <div style="position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; transform: translate(-50%,-50%); border-radius: 50%; background: radial-gradient(circle at 40% 36%, #FBE9A6, #F2B818); box-shadow: 0 0 26px 8px rgba(242,194,48,0.6);"></div>
-          </sc-if>
-          <sc-if value="{{ seasonFx.isRain }}">
-            <span style="position: absolute; top: 0; left: 12%; width: 1.5px; height: 14px; background: rgba(255,255,255,0.8); animation: wxRain 1s linear infinite;"></span>
-            <span style="position: absolute; top: 0; left: 28%; width: 1.5px; height: 12px; background: rgba(255,255,255,0.75); animation: wxRain 1s linear infinite 0.3s;"></span>
-            <span style="position: absolute; top: 0; left: 44%; width: 1.5px; height: 14px; background: rgba(255,255,255,0.8); animation: wxRain 1s linear infinite 0.6s;"></span>
-            <span style="position: absolute; top: 0; left: 60%; width: 1.5px; height: 12px; background: rgba(255,255,255,0.75); animation: wxRain 1s linear infinite 0.15s;"></span>
-            <span style="position: absolute; top: 0; left: 76%; width: 1.5px; height: 14px; background: rgba(255,255,255,0.8); animation: wxRain 1s linear infinite 0.45s;"></span>
-            <span style="position: absolute; top: 0; left: 90%; width: 1.5px; height: 12px; background: rgba(255,255,255,0.75); animation: wxRain 1s linear infinite 0.75s;"></span>
-          </sc-if>
-          <sc-if value="{{ seasonFx.isSnow }}">
-            <span style="position: absolute; top: 0; left: 14%; width: 5px; height: 5px; border-radius: 50%; background: #fff; animation: wxSnow 3s linear infinite;"></span>
-            <span style="position: absolute; top: 0; left: 32%; width: 4px; height: 4px; border-radius: 50%; background: #fff; animation: wxSnow 3s linear infinite 0.8s;"></span>
-            <span style="position: absolute; top: 0; left: 50%; width: 5px; height: 5px; border-radius: 50%; background: #fff; animation: wxSnow 3s linear infinite 1.5s;"></span>
-            <span style="position: absolute; top: 0; left: 68%; width: 4px; height: 4px; border-radius: 50%; background: #fff; animation: wxSnow 3s linear infinite 0.4s;"></span>
-            <span style="position: absolute; top: 0; left: 86%; width: 5px; height: 5px; border-radius: 50%; background: #fff; animation: wxSnow 3s linear infinite 2s;"></span>
-          </sc-if>
-          <sc-if value="{{ seasonFx.isLeaves }}">
-            <span style="position: absolute; top: 0; left: 16%; width: 8px; height: 6px; border-radius: 60% 0 60% 0; background: #C46A2E; animation: wxLeaf 3.4s linear infinite;"></span>
-            <span style="position: absolute; top: 0; left: 40%; width: 7px; height: 5px; border-radius: 60% 0 60% 0; background: #D68A3A; animation: wxLeaf 3.4s linear infinite 1.1s;"></span>
-            <span style="position: absolute; top: 0; left: 64%; width: 8px; height: 6px; border-radius: 60% 0 60% 0; background: #B4551F; animation: wxLeaf 3.4s linear infinite 0.6s;"></span>
-            <span style="position: absolute; top: 0; left: 82%; width: 7px; height: 5px; border-radius: 60% 0 60% 0; background: #D68A3A; animation: wxLeaf 3.4s linear infinite 2s;"></span>
-          </sc-if>
-          <sc-if value="{{ seasonFx.isRays }}">
-            <div style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; background: linear-gradient(180deg, rgba(255,240,190,0.5), transparent); animation: heatShimmer 3s ease-in-out infinite; z-index: 3;"></div>
-          </sc-if>
-          <div style="{{ seasonFx.hill2Style }}"></div>
-          <div style="{{ seasonFx.hill1Style }}"></div>
-        </div>
-        <div style="margin-bottom: 18px;">
-          <span style="display: block; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #A8894E;">{{ t.bySeason }}</span>
-          <span style="display: block; font-family: 'Marcellus', serif; font-size: 19px; color: #2E3D2C;">This {{ season.label }}</span>
-        </div>
-        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
-          <sc-for list="{{ seasonChips }}" as="c" hint-placeholder-count="4">
-            <button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
-          </sc-for>
-        </div>
-        <div style="border-top: 1px solid #E4DBC8; padding-top: 18px;">
-          <p style="font-size: 14.5px; line-height: 1.7; color: #45543E; margin: 0 0 14px;">{{ season.note }}</p>
-          <span style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A9678;">{{ t.seasonalPick }}</span>
-          <h3 style="font-family: 'Marcellus', serif; font-weight: 400; font-size: 24px; color: #2E3D2C; margin: 5px 0 8px;">{{ season.blend }}</h3>
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
-            <span style="font-family: 'Marcellus', serif; font-size: 20px; color: #2E3D2C;">{{ season.price }}</span>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button type="button" onClick="{{ season.onQuick }}" style="background: transparent; color: #2E3D2C; border: 1px solid #C2B591; padding: 10px 16px; border-radius: 30px; font-size: 13px; font-weight: 500; cursor: pointer;">Quick View</button>
-              <button type="button" onClick="{{ season.add }}" style="display: inline-flex; align-items: center; gap: 7px; background: #2E3D2C; color: #F1EEDF; border: none; padding: 10px 16px; border-radius: 30px; font-size: 13px; font-weight: 500; cursor: pointer;">{{ season.addLabel }}</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
   <!-- SHOP BY CATEGORY -->
   <section id="categories" style="width: 100%; max-width: none; margin: 0; padding: 78px clamp(24px, 5vw, 90px) 40px;">
     <div data-reveal="true" style="text-align: center; margin-bottom: 42px;">
@@ -396,33 +269,33 @@
         </div>
       </a>
       <!-- cat 2 -->
-      <a href="#shop" onClick="{{ filterConcernSugar }}" style="text-decoration: none; display: block; cursor: pointer;">
+      <a href="#shop" onClick="{{ filterConcernTargetedKashayams }}" style="text-decoration: none; display: block; cursor: pointer;">
         <div class="catCard" style="border-radius: 18px; overflow: hidden; background: #FBF7EE; border: 1px solid #E7DECB;">
           <div style="position: relative; height: 190px; overflow: hidden;">
             <img class="catImg" src="assets/hero-spices.png" alt="Targeted kashayams and herbs" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">
             <div style="position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, rgba(46,61,44,0.28) 100%); pointer-events: none;"></div>
             <span class="catSheen" style="position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,251,240,0.65), transparent); transform: translateX(-140%) skewX(-18deg); pointer-events: none;"></span>
-            <span class="catBadge" style="position: absolute; top: 14px; left: 14px; transform: none; font-family: monospace; font-size: 11px; color: #6E5849; background: rgba(251,247,238,0.9); padding: 5px 11px; border-radius: 30px;">sugar balance</span>
+            <span class="catBadge" style="position: absolute; top: 14px; left: 14px; transform: none; font-family: monospace; font-size: 11px; color: #6E5849; background: rgba(251,247,238,0.9); padding: 5px 11px; border-radius: 30px;">gut &amp; breath</span>
           </div>
           <div style="padding: 18px 20px 22px;">
             <h3 style="font-family: 'Marcellus', serif; font-size: 22px; font-weight: 600; color: #2E3D2C; margin: 0;">Targeted Kashayams</h3>
-            <p style="font-size: 13px; color: #7A8570; margin: 6px 0 0;">Metabolic wellness rituals</p>
+            <p style="font-size: 13px; color: #7A8570; margin: 6px 0 0;">Navojas &amp; Kaphahara</p>
             <span class="catShop" style="display: block; font-size: 12.5px; letter-spacing: 0.04em; color: #B65E38; margin-top: 8px;">Shop now →</span>
           </div>
         </div>
       </a>
       <!-- cat 3 -->
-      <a href="#shop" onClick="{{ filterConcernImmunity }}" style="text-decoration: none; display: block; cursor: pointer;">
+      <a href="#shop" onClick="{{ filterConcernDetox }}" style="text-decoration: none; display: block; cursor: pointer;">
         <div class="catCard" style="border-radius: 18px; overflow: hidden; background: #FBF7EE; border: 1px solid #E7DECB;">
           <div style="position: relative; height: 190px; overflow: hidden;">
-            <img class="catImg" src="assets/hero-pouch.png" alt="Daily wellness kashayams" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">
+            <img class="catImg" src="assets/hero-pouch.png" alt="Daily de-toxification herbs and flowers" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">
             <div style="position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, rgba(46,61,44,0.28) 100%); pointer-events: none;"></div>
             <span class="catSheen" style="position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,251,240,0.65), transparent); transform: translateX(-140%) skewX(-18deg); pointer-events: none;"></span>
-            <span class="catBadge" style="position: absolute; top: 14px; left: 14px; transform: none; font-family: monospace; font-size: 11px; color: #5E6A45; background: rgba(251,247,238,0.9); padding: 5px 11px; border-radius: 30px;">daily immunity</span>
+            <span class="catBadge" style="position: absolute; top: 14px; left: 14px; transform: none; font-family: monospace; font-size: 11px; color: #5E6A45; background: rgba(251,247,238,0.9); padding: 5px 11px; border-radius: 30px;">daily detox</span>
           </div>
           <div style="padding: 18px 20px 22px;">
-            <h3 style="font-family: 'Marcellus', serif; font-size: 22px; font-weight: 600; color: #2E3D2C; margin: 0;">Daily Wellness Kashayams</h3>
-            <p style="font-size: 13px; color: #7A8570; margin: 6px 0 0;">Everyday immunity support</p>
+            <h3 style="font-family: 'Marcellus', serif; font-size: 22px; font-weight: 600; color: #2E3D2C; margin: 0;">Daily De-toxification</h3>
+            <p style="font-size: 13px; color: #7A8570; margin: 6px 0 0;">Flowers, leaves &amp; seed powders</p>
             <span class="catShop" style="display: block; font-size: 12.5px; letter-spacing: 0.04em; color: #B65E38; margin-top: 8px;">Shop now →</span>
           </div>
         </div>
@@ -434,11 +307,27 @@
             <img class="catImg" src="assets/mandala-bg.png" alt="Spiritual wellness sacred blends" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.55;">
             <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(46,61,44,0.08) 0%, rgba(46,61,44,0.55) 100%); pointer-events: none;"></div>
             <span class="catSheen" style="position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,251,240,0.65), transparent); transform: translateX(-140%) skewX(-18deg); pointer-events: none;"></span>
-            <span class="catBadge" style="position: absolute; top: 14px; left: 14px; transform: none; font-family: monospace; font-size: 11px; color: #74603F; background: rgba(251,247,238,0.9); padding: 5px 11px; border-radius: 30px;">ashtagandham</span>
+            <span class="catBadge" style="position: absolute; top: 14px; left: 14px; transform: none; font-family: monospace; font-size: 11px; color: #74603F; background: rgba(251,247,238,0.9); padding: 5px 11px; border-radius: 30px;">sacred blends</span>
           </div>
           <div style="padding: 18px 20px 22px;">
             <h3 style="font-family: 'Marcellus', serif; font-size: 22px; font-weight: 600; color: #2E3D2C; margin: 0;">Spiritual Wellness</h3>
-            <p style="font-size: 13px; color: #7A8570; margin: 6px 0 0;">Ashtagandham &amp; sacred blends</p>
+            <p style="font-size: 13px; color: #7A8570; margin: 6px 0 0;">Ashtagandham, bath powder &amp; rose water</p>
+            <span class="catShop" style="display: block; font-size: 12.5px; letter-spacing: 0.04em; color: #B65E38; margin-top: 8px;">Shop now →</span>
+          </div>
+        </div>
+      </a>
+      <!-- cat 5 -->
+      <a href="#shop" onClick="{{ filterConcernNutrition }}" style="text-decoration: none; display: block; cursor: pointer;">
+        <div class="catCard" style="border-radius: 18px; overflow: hidden; background: #FBF7EE; border: 1px solid #E7DECB;">
+          <div style="position: relative; height: 190px; overflow: hidden;">
+            <img class="catImg" src="assets/amirit-ahaar-front.jpeg" alt="Amirit Ahaar health mix" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, rgba(46,61,44,0.28) 100%); pointer-events: none;"></div>
+            <span class="catSheen" style="position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,251,240,0.65), transparent); transform: translateX(-140%) skewX(-18deg); pointer-events: none;"></span>
+            <span class="catBadge" style="position: absolute; top: 14px; left: 14px; transform: none; font-family: monospace; font-size: 11px; color: #5E6A45; background: rgba(251,247,238,0.9); padding: 5px 11px; border-radius: 30px;">health mix</span>
+          </div>
+          <div style="padding: 18px 20px 22px;">
+            <h3 style="font-family: 'Marcellus', serif; font-size: 22px; font-weight: 600; color: #2E3D2C; margin: 0;">Family Health Mix</h3>
+            <p style="font-size: 13px; color: #7A8570; margin: 6px 0 0;">Amirit Ahaar · 6 months to adults</p>
             <span class="catShop" style="display: block; font-size: 12.5px; letter-spacing: 0.04em; color: #B65E38; margin-top: 8px;">Shop now →</span>
           </div>
         </div>
@@ -457,7 +346,7 @@
     <!-- shelf -->
     <div style="position: relative; padding: 40px 20px 0; overflow: visible;">
       <div style="display: flex; gap: clamp(24px, 7vw, 130px); justify-content: center; flex-wrap: wrap; align-items: flex-end; padding: 120px 0 20px; min-height: 250px; overflow: visible;">
-        <sc-for list="{{ jars }}" as="j" hint-placeholder-count="6">
+        <sc-for list="{{ jars }}" as="j" hint-placeholder-count="13">
           <button onClick="{{ j.onClick }}" onMouseEnter="{{ j.onEnter }}" onMouseLeave="{{ j.onLeave }}" style="{{ j.btnStyle }}">
             <sc-if value="{{ j.hovered }}">
               <div aria-hidden="true" style="position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%); z-index: 12; pointer-events: none; width: max-content; max-width: min(240px, 78vw); animation: herbPanelIn .25s ease both;">
@@ -563,32 +452,6 @@
     </div>
   </section>
 
-
-  <!-- FEATURED PRODUCTS -->
-  <section id="featured" style="width: 100%; max-width: none; margin: 0; padding: 70px clamp(24px, 5vw, 90px) 10px;">
-    <div style="text-align: center; margin-bottom: 34px;">
-      <span style="font-size: 12px; letter-spacing: 0.3em; text-transform: uppercase; color: #A8894E;">{{ t.featEye }}</span>
-      <h2 style="font-family: 'Marcellus', serif; font-weight: 400; font-size: clamp(30px, 4vw, 42px); color: #2E3D2C; margin: 12px 0 0;">{{ t.featTitle }}</h2>
-    </div>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 20px;">
-      <sc-for list="{{ featuredProducts }}" as="p" hint-placeholder-count="4">
-        <div style="background: rgba(255,253,245,0.7); border: 1px solid #E7DECB; border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
-          <div style="height: 120px; border-radius: 14px; background: linear-gradient(145deg, {{ p.jar }}, {{ p.cap }}); display: flex; align-items: center; justify-content: center;">
-            <span style="font-family: 'Marcellus', serif; font-size: 13px; color: #FBF7EE; text-align: center; padding: 0 10px;">{{ p.name }}</span>
-          </div>
-          <p style="font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #A99C7E; margin: 0;">{{ p.concern }}</p>
-          <h3 style="font-family: 'Marcellus', serif; font-size: 20px; color: #2E3D2C; margin: 0;">{{ p.name }}</h3>
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto;">
-            <span style="font-family: 'Marcellus', serif; font-size: 18px; color: #2E3D2C;">{{ p.priceStr }}</span>
-            <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
-              <button onClick="{{ p.onQuick }}" style="background: transparent; color: #2E3D2C; border: 1px solid #C2B591; padding: 9px 12px; border-radius: 30px; font-size: 12.5px; cursor: pointer;">View</button>
-              <button onClick="{{ p.onAdd }}" style="display: inline-flex; align-items: center; gap: 5px; background: #2E3D2C; color: #F1EEDF; border: none; padding: 9px 12px; border-radius: 30px; font-size: 12.5px; cursor: pointer;">{{ p.addLabel }}</button>
-            </div>
-          </div>
-        </div>
-      </sc-for>
-    </div>
-  </section>
 
   <sc-if value="{{ hasRecent }}">
     <section id="recent" style="width: 100%; max-width: none; margin: 0; padding: 40px clamp(24px, 5vw, 90px) 20px;">
@@ -702,9 +565,7 @@
       <div style="position: relative; width: 100%; max-width: 620px; margin: 0 auto; aspect-ratio: 460 / 320;">
         <!-- threads -->
         <svg viewBox="0 0 460 320" preserveAspectRatio="xMidYMid meet" style="position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;">
-          <sc-for list="{{ webNodes }}" as="n" hint-placeholder-count="2">
-            <line x1="{{ herbCenter.cx }}" y1="{{ herbCenter.cy }}" x2="{{ n.x2 }}" y2="{{ n.y2 }}" style="{{ n.lineStyle }}"></line>
-          </sc-for>
+          {{ webLinesEl }}
         </svg>
         <!-- center herb node -->
         <div style="position: absolute; left: {{ herbCenter.xPct }}%; top: {{ herbCenter.yPct }}%; transform: translate(-50%, -50%); animation: centerIn .5s cubic-bezier(.34,1.5,.6,1) both; z-index: 2;">
@@ -1054,7 +915,7 @@
         </span>
         <h3 style="font-family: 'Marcellus', serif; font-size: 19px; font-weight: 400; color: #2E3D2C; margin: 0 0 5px;">No Returns</h3>
         <p style="font-size: 13px; line-height: 1.55; color: #7A8570; margin: 0;">Sales are final after order — except damaged, defective, or incorrect items (see Refund Policy).</p>
-        <button type="button" onClick="{{ openRefund }}" style="margin-top: 10px; background: transparent; border: none; padding: 0; font-size: 12.5px; color: #5E7A4C; text-decoration: underline; cursor: pointer; font-family: inherit;">Refund Policy</button>
+        <a href="/refund" style="margin-top: 10px; display: inline-block; font-size: 12.5px; color: #5E7A4C; text-decoration: underline;">Refund Policy</a>
       </div>
       <div style="background: #2E3D2C; border-radius: 18px; padding: 24px 22px; color: #E8E4D2;">
         <span style="width: 44px; height: 44px; border-radius: 12px; background: rgba(200,212,185,0.14); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px;">
@@ -1092,7 +953,7 @@
               </div>
               <div style="min-width: 110px;">
                 <label for="reminder-time" style="display: block; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A9678; margin-bottom: 9px;">Time</label>
-                <input id="reminder-time" type="time" value="{{ reminderTime }}" onInput="{{ onReminderTime }}" style="background: rgba(255,255,255,0.7); border: 1px solid #D7CDB4; color: #2E3D2C; padding: 12px 14px; border-radius: 12px; font-size: 14px; outline: none;">
+                <input id="reminder-time" type="time" onInput="{{ onReminderTime }}" style="background: rgba(255,255,255,0.7); border: 1px solid #D7CDB4; color: #2E3D2C; padding: 12px 14px; border-radius: 12px; font-size: 14px; outline: none;">
               </div>
             </div>
             <button type="submit" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #BE6A45; color: #FBF7EE; border: none; padding: 14px 22px; border-radius: 30px; font-size: 15px; font-weight: 500; box-shadow: 0 12px clamp(24px, 5vw, 90px) -12px rgba(190,106,69,0.7);">
@@ -1154,8 +1015,9 @@
           <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 13.5px;">
             <li><a href="#shop" onClick="{{ filterConcernSkin }}" style="color: #C5CBB4; text-decoration: none; cursor: pointer;">Bath Powders</a></li>
             <li><a href="#shop" onClick="{{ filterConcernKashayams }}" style="color: #C5CBB4; text-decoration: none; cursor: pointer;">Targeted Kashayams</a></li>
-            <li><a href="#shop" onClick="{{ filterConcernImmunity }}" style="color: #C5CBB4; text-decoration: none; cursor: pointer;">Daily Wellness</a></li>
+            <li><a href="#shop" onClick="{{ filterConcernDetox }}" style="color: #C5CBB4; text-decoration: none; cursor: pointer;">Daily De-toxification</a></li>
             <li><a href="#shop" onClick="{{ filterConcernSpiritual }}" style="color: #C5CBB4; text-decoration: none; cursor: pointer;">Ashtagandham</a></li>
+            <li><a href="#shop" onClick="{{ filterConcernNutrition }}" style="color: #C5CBB4; text-decoration: none; cursor: pointer;">Health Mix</a></li>
           </ul>
         </div>
         <!-- Company -->
@@ -1165,8 +1027,11 @@
             <li><a href="#story" onClick="{{ goStory }}" style="color: #C5CBB4; text-decoration: none;">Our Story</a></li>
             <li><a href="#ingredients" style="color: #C5CBB4; text-decoration: none;">Ingredients</a></li>
             <li><a href="#reviews" style="color: #C5CBB4; text-decoration: none;">Reviews</a></li>
-            <li><button onClick="{{ openRefund }}" style="background: transparent; border: none; padding: 0; cursor: pointer; font-family: inherit; font-size: 13.5px; color: #C5CBB4; text-align: left;">Return &amp; Refund Policy</button></li>
-            <li><button onClick="{{ openDisclaimer }}" style="background: transparent; border: none; padding: 0; cursor: pointer; font-family: inherit; font-size: 13.5px; color: #C5CBB4; text-align: left;">Disclaimer</button></li>
+            <li><a href="/refund" style="color: #C5CBB4; text-decoration: none;">Return &amp; Refund Policy</a></li>
+            <li><a href="/disclaimer" style="color: #C5CBB4; text-decoration: none;">Disclaimer</a></li>
+            <li><a href="/terms" style="color: #C5CBB4; text-decoration: none;">Terms &amp; Conditions</a></li>
+            <li><a href="/privacy" style="color: #C5CBB4; text-decoration: none;">Privacy Policy</a></li>
+            <li><a href="/shipping" style="color: #C5CBB4; text-decoration: none;">Shipping Policy</a></li>
           </ul>
         </div>
         <!-- Contact -->
@@ -1198,7 +1063,7 @@
       </div>
       <div style="border-top: 1px solid #384630; padding: 22px 0; display: flex; flex-wrap: wrap; gap: 10px clamp(24px, 5vw, 90px); align-items: center; justify-content: space-between; font-size: 12.5px; color: #B2B79E;">
         <span style="max-width: 560px; line-height: 1.65;">© 2026 Aakashik Wellness. All rights reserved. AAKASHIK&trade; and the Aakashik logo are trademarks of Aakashik Wellness. Unauthorised use is prohibited.</span>
-        <span style="display: flex; flex-wrap: wrap; gap: 8px 20px;"><button onClick="{{ openPrivacy }}" style="background: transparent; border: none; padding: 0; cursor: pointer; font-family: inherit; font-size: 12.5px; color: #B2B79E;">Privacy Policy</button><button onClick="{{ openTerms }}" style="background: transparent; border: none; padding: 0; cursor: pointer; font-family: inherit; font-size: 12.5px; color: #B2B79E;">Terms &amp; Conditions</button><button onClick="{{ openRefund }}" style="background: transparent; border: none; padding: 0; cursor: pointer; font-family: inherit; font-size: 12.5px; color: #B2B79E;">Refund Policy</button><button onClick="{{ openDisclaimer }}" style="background: transparent; border: none; padding: 0; cursor: pointer; font-family: inherit; font-size: 12.5px; color: #B2B79E;">Disclaimer</button></span>
+        <span style="display: flex; flex-wrap: wrap; gap: 8px 20px;"><a href="/privacy" style="font-size: 12.5px; color: #B2B79E; text-decoration: none;">Privacy Policy</a><a href="/terms" style="font-size: 12.5px; color: #B2B79E; text-decoration: none;">Terms &amp; Conditions</a><a href="/refund" style="font-size: 12.5px; color: #B2B79E; text-decoration: none;">Refund Policy</a><a href="/disclaimer" style="font-size: 12.5px; color: #B2B79E; text-decoration: none;">Disclaimer</a><a href="/shipping" style="font-size: 12.5px; color: #B2B79E; text-decoration: none;">Shipping Policy</a></span>
       </div>
     </div>
   </footer>
@@ -1569,13 +1434,13 @@
 
   <!-- ===== QUICK VIEW MODAL ===== -->
   <sc-if value="{{ quickViewOpen }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ closeQuickView }}" style="position: fixed; inset: 0; background: rgba(35,45,25,0.42); z-index: 230; display: flex; align-items: center; justify-content: center; padding: 20px; animation: sceneFade .25s ease;">
-      <div onClick="{{ stop }}" role="dialog" aria-modal="true" aria-label="Product quick view" style="position: relative; width: min(720px, 100%); background: #F6F1E4; border-radius: 24px; overflow: hidden; box-shadow: 0 40px 80px -30px rgba(35,45,25,0.6); display: flex; flex-wrap: wrap; animation: modalIn .3s cubic-bezier(.34,1.4,.6,1);">
+    <div onClick="{{ closeQuickView }}" style="position: fixed; inset: 0; background: rgba(35,45,25,0.42); z-index: 230; display: flex; align-items: center; justify-content: center; padding: clamp(12px, 2.5vw, 28px); animation: sceneFade .25s ease;">
+      <div onClick="{{ stop }}" role="dialog" aria-modal="true" aria-label="Product quick view" style="position: relative; width: min(1040px, 100%); max-height: min(92vh, 900px); background: #F6F1E4; border-radius: 24px; overflow: auto; box-shadow: 0 40px 80px -30px rgba(35,45,25,0.6); display: flex; flex-wrap: wrap; animation: modalIn .3s cubic-bezier(.34,1.4,.6,1);">
         <button onClick="{{ closeQuickView }}" aria-label="Close" style="position: absolute; top: 14px; right: 14px; z-index: 2; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,253,245,0.9); border: none; cursor: pointer; color: #2E3D2C; display: inline-flex; align-items: center; justify-content: center;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
         <sc-if value="{{ qv.hasPhoto }}" hint-placeholder-val="{{ false }}">
-          <div style="flex: 1 1 260px; min-height: 300px; position: relative; background: #F1EBDC; display: flex; align-items: center; justify-content: center; padding: {{ qv.photoPad }};">
+          <div style="flex: 1.2 1 420px; min-height: min(72vh, 560px); position: relative; background: #F1EBDC; display: flex; align-items: center; justify-content: center; padding: {{ qv.photoPad }};">
             {{ qv.photoEl }}
             <sc-if value="{{ qv.hasBack }}">
               <div style="position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px;">
@@ -1586,13 +1451,13 @@
           </div>
         </sc-if>
         <sc-if value="{{ qv.noPhoto }}" hint-placeholder-val="{{ false }}">
-          <div style="flex: 1 1 240px; min-height: 260px; background: linear-gradient(150deg, {{ qv.jar }}, {{ qv.cap }}); display: flex; align-items: center; justify-content: center;">
+          <div style="flex: 1.2 1 380px; min-height: min(56vh, 420px); background: linear-gradient(150deg, {{ qv.jar }}, {{ qv.cap }}); display: flex; align-items: center; justify-content: center;">
             <span style="width: 96px; height: 128px; border-radius: 10px 10px 18px 18px; background: rgba(255,253,245,0.22); border: 1px solid rgba(255,255,255,0.4); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px;">
               <span style="width: 60px; height: 40px; border-radius: 5px; background: rgba(255,253,245,0.92); display: flex; align-items: center; justify-content: center; font-family: 'Marcellus', serif; font-size: 10px; color: #45543E; text-align: center; line-height: 1.1; padding: 3px;">{{ qv.name }}</span>
             </span>
           </div>
         </sc-if>
-        <div style="flex: 1 1 300px; padding: 32px 30px;">
+        <div style="flex: 1 1 340px; padding: 36px 34px; max-height: min(92vh, 900px); overflow-y: auto;">
           <span style="font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #A8894E;">{{ qv.sub }} · {{ qv.element }}</span>
           <h3 style="font-family: 'Marcellus', serif; font-weight: 400; font-size: 30px; color: #2E3D2C; margin: 6px 0 10px;">{{ qv.name }}<span style="font-size: 13px; vertical-align: super; color: #A8894E;">&trade;</span></h3>
           <p style="font-size: 14.5px; line-height: 1.7; color: #5E6A54; margin: 0 0 16px;">{{ qv.benefit }}</p>
@@ -1693,7 +1558,7 @@
               <div class="searchCard" style="background: #FBF7EE; border: 1px solid #E7DECB; border-radius: 20px; overflow: hidden; animation-delay: {{ p.cardDelay }};">
                 <div style="height: 148px; position: relative; background: {{ p.thumbBg }}; overflow: hidden;">
                   <sc-if value="{{ p.hasPhoto }}">
-                    <img src="{{ p.photoUrl }}" alt="{{ p.name }}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 14px; filter: drop-shadow(0 16px 20px rgba(46,61,44,0.18));">
+                    {{ p.photoEl }}
                   </sc-if>
                   <sc-if value="{{ p.noPhoto }}">
                     <div class="searchJar" style="position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center;">
@@ -1966,6 +1831,7 @@
             <button type="button" onClick="{{ openPrivacy }}" style="background: transparent; border: none; padding: 0; cursor: pointer; font-family: inherit; font-size: 12.5px; color: #5E7A4C; text-decoration: underline;">Privacy Policy</button>
             <button type="button" onClick="{{ openRefund }}" style="background: transparent; border: none; padding: 0; cursor: pointer; font-family: inherit; font-size: 12.5px; color: #5E7A4C; text-decoration: underline;">Refund Policy</button>
             <button type="button" onClick="{{ openDisclaimer }}" style="background: transparent; border: none; padding: 0; cursor: pointer; font-family: inherit; font-size: 12.5px; color: #5E7A4C; text-decoration: underline;">Disclaimer</button>
+            <a href="/shipping" style="font-size: 12.5px; color: #5E7A4C; text-decoration: underline;">Shipping Policy</a>
           </div>
           <label style="display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #2E3D2C; cursor: pointer; margin-bottom: 14px;">
             <input type="checkbox" checked="{{ termsChecked }}" onChange="{{ onTermsCheck }}" style="accent-color: #2E3D2C; margin-top: 3px; flex-shrink: 0;">
@@ -2002,13 +1868,12 @@ class Component extends DCLogic {
     'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
   ];
   _BUILTIN_PRODUCT_IDS = [
-    'sunni', 'diabetic', 'immunity', 'kaphahara', 'ashta', 'navojas',
+    'herbal-bath', 'kaphahara', 'ashta', 'navojas', 'amirit-ahaar', 'aparajitha', 'avartaki', 'tulasi', 'hibiscus', 'jamun-seed', 'tamarind-seed', 'moringa', 'rose-water',
     'kit-immunity', 'kit-glow', 'sample-trio',
   ];
 
   state = {
     subscribed: false,
-    manualPeriod: null, manualSeason: null,
     openJar: 0,
     bottleAngle: 0, peeled: false,
     activeHerb: 'Tulasi',
@@ -2134,12 +1999,19 @@ class Component extends DCLogic {
   }
   _defaultStock() {
     return {
-      sunni: 25,
-      diabetic: 20,
-      immunity: 30,
+      'herbal-bath': 25,
       kaphahara: 40,
       ashta: 35,
       navojas: 40,
+      'amirit-ahaar': 30,
+      aparajitha: 40,
+      avartaki: 40,
+      tulasi: 40,
+      hibiscus: 40,
+      'jamun-seed': 35,
+      'tamarind-seed': 35,
+      moringa: 40,
+      'rose-water': 40,
       'kit-immunity': 15,
       'kit-glow': 15,
       'sample-trio': 50,
@@ -2618,10 +2490,10 @@ class Component extends DCLogic {
           const c = d && d.current; if (!c) return; const code = c.weather_code, temp = Math.round(c.temperature_2m);
           let w;
           if ([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].indexOf(code) >= 0) w = { emoji: '🌧️', label: 'Rainy & damp', productId: 'kaphahara' };
-          else if ([71,73,75,77,85,86].indexOf(code) >= 0) w = { emoji: '❄️', label: 'Cold out', productId: 'immunity' };
+          else if ([71,73,75,77,85,86].indexOf(code) >= 0) w = { emoji: '❄️', label: 'Cold out', productId: 'tulasi' };
           else if ([45,48,2,3].indexOf(code) >= 0) w = { emoji: '☁️', label: 'Grey skies', productId: 'navojas' };
-          else if (temp >= 30) w = { emoji: '☀️', label: 'Warm & bright', productId: 'sunni' };
-          else w = { emoji: '🌤️', label: 'A fine day', productId: 'immunity' };
+          else if (temp >= 30) w = { emoji: '☀️', label: 'Warm & bright', productId: 'herbal-bath' };
+          else w = { emoji: '🌤️', label: 'A fine day', productId: 'moringa' };
           this.setState({ weather: { temp, emoji: w.emoji, label: w.label, productId: w.productId } });
           this.showToast('Seasonal tip ready');
         }).catch(() => { this.showToast('Could not load weather right now'); });
@@ -2692,6 +2564,7 @@ class Component extends DCLogic {
       else if (h === 'legal-privacy') boot.legal = 'privacy';
       else if (h === 'legal-refund') boot.legal = 'refund';
       else if (h === 'legal-disclaimer') boot.legal = 'disclaimer';
+      else if (h === 'legal-shipping') boot.legal = 'shipping';
     } catch (e) {}
     if (Object.keys(boot).length) this.setState(boot);
     this._syncLogin = () => {
@@ -2886,20 +2759,31 @@ class Component extends DCLogic {
       this.setState({ accountMenuOpen: false, langOpen: false });
     };
     document.addEventListener('pointerdown', this._onDocPointer, true);
+    this._prevLogicState = Object.assign({}, this.state);
+    this._syncReminderTimeInput();
+  }
+  _syncReminderTimeInput() {
+    try {
+      const el = document.getElementById('reminder-time');
+      const v = this.state.reminderTime || '08:00';
+      if (el && el.value !== v) el.value = v;
+    } catch (e) {}
   }
   componentDidUpdate(prevProps, prevState) {
+    // dc-runtime only forwards prevProps — track prior logic state ourselves
+    const prev = prevState || this._prevLogicState || {};
     const openedDialog =
-      (!prevState.cartOpen && this.state.cartOpen) ||
-      (!prevState.searchOpen && this.state.searchOpen) ||
-      (!prevState.wishlistOpen && this.state.wishlistOpen) ||
-      (!prevState.profileOpen && this.state.profileOpen) ||
-      (!prevState.ordersOpen && this.state.ordersOpen) ||
-      (!prevState.trackOpen && this.state.trackOpen) ||
-      (!prevState.quickView && this.state.quickView) ||
-      (!prevState.legal && this.state.legal);
+      (!prev.cartOpen && this.state.cartOpen) ||
+      (!prev.searchOpen && this.state.searchOpen) ||
+      (!prev.wishlistOpen && this.state.wishlistOpen) ||
+      (!prev.profileOpen && this.state.profileOpen) ||
+      (!prev.ordersOpen && this.state.ordersOpen) ||
+      (!prev.trackOpen && this.state.trackOpen) ||
+      (!prev.quickView && this.state.quickView) ||
+      (!prev.legal && this.state.legal);
     if (openedDialog) {
       try {
-        const focusSearch = !prevState.searchOpen && this.state.searchOpen;
+        const focusSearch = !prev.searchOpen && this.state.searchOpen;
         setTimeout(() => {
           if (focusSearch) {
             const input = document.querySelector('[role="dialog"][aria-label="Search"] input');
@@ -2911,11 +2795,13 @@ class Component extends DCLogic {
         }, 0);
       } catch (er) {}
     }
-    if (prevState.cartItems !== this.state.cartItems) this._writeJSON('ak_cart', this.state.cartItems);
-    if (prevState.wishlist !== this.state.wishlist) this._writeJSON('ak_wishlist', this.state.wishlist);
-    if (prevState.lang !== this.state.lang) {
+    if (prev.cartItems !== this.state.cartItems) this._writeJSON('ak_cart', this.state.cartItems);
+    if (prev.wishlist !== this.state.wishlist) this._writeJSON('ak_wishlist', this.state.wishlist);
+    if (prev.lang !== this.state.lang) {
       try { document.documentElement.lang = this.state.lang || 'en'; } catch (er) {}
     }
+    if (prev.reminderTime !== this.state.reminderTime) this._syncReminderTimeInput();
+    this._prevLogicState = Object.assign({}, this.state);
   }
   componentWillUnmount() {
     if (this._onPageShow) { window.removeEventListener('pageshow', this._onPageShow); window.removeEventListener('focus', this._onPageShow); }
@@ -3067,13 +2953,24 @@ class Component extends DCLogic {
   }
 
   renderVals() {
-    const money = (n) => '₹' + Math.round(n);
+    const money = (n) => (n == null || n === '' || !Number.isFinite(Number(n))) ? 'Price soon' : ('₹' + Math.round(Number(n)));
+    const fromPrice = (p) => {
+      if (p.sizes && p.sizes.length) {
+        const first = p.sizes[0].p;
+        if (first == null || !Number.isFinite(Number(first))) return 'Price soon';
+        return 'from ' + money(first);
+      }
+      return money(p.priceN);
+    };
+    const priceReadyFor = (p, sizeIdx) => {
+      const base = p.sizes ? (p.sizes[Math.min(sizeIdx || 0, p.sizes.length - 1)] || {}).p : p.priceN;
+      return base != null && Number.isFinite(Number(base)) && Number(base) > 0;
+    };
     const LANGS = { en: 'English', ta: 'தமிழ்', te: 'తెలుగు', hi: 'हिन्दी' };
     const I18N = {
       en: { ann1: '100% Natural Ingredients', ann2: 'Member pricing · 10% off when signed in', nav1: 'Bath & Body', nav2: 'Kashayams', nav3: 'Spiritual', nav4: 'Our Story', eyebrow: 'Rooted in Tradition', heroTitle1: 'Rooted in Nature.', heroTitle2: 'Designed for Your Wellness.', heroSub: 'Chemical-free bath powders, targeted Ayurvedic kashayams and sacred fragrant blends — crafted from time-honoured herbal recipes for holistic body wellness.', shopCta: 'Shop the Collection', exploreCta: 'Explore Kashayams',
         chemFree: 'Chemical-free', herbalBlends: 'Blends & kits', happyHomes: 'Family-founded',
-        ritualEye: 'Personalised for this moment', ritualTitle: 'Your Ritual, Right Now', ritualSub: 'Ayurveda tunes wellness to the rhythm of the day and the turning of the seasons.',
-        byTime: 'By time of day', bySeason: 'By season & weather', weSuggest: 'We suggest', seasonalPick: 'Seasonal pick', addToCart: 'Add to Cart',
+        addToCart: 'Add to Cart',
         catEye: 'Find your ritual', catTitle: 'Shop by Category',
         apEye: 'Browse the collection', apTitle: 'The Apothecary Shelf', apSub: "Tap a jar to open it and reveal what's inside.",
         blendEye: 'Ashtagandham · Sacred Blend', blendTitle: 'Meet the Blend',
@@ -3090,8 +2987,7 @@ class Component extends DCLogic {
         s: { eye: 'Our Story', title: 'Wellness Inspired by Purpose', sub: 'Aakashik Wellness was born from a simple belief: nature has the power to support health when combined with traditional wisdom, genuine care, and a deep commitment to helping people live healthier lives.', famEye: 'A family journey', famTitle: 'From a time of uncertainty, a mission of care', p1a: 'Founded by ', gopi: 'Mr. Gopi', p1b: " — an experienced astrologer, Vasthu expert & Pranic healer with a profound interest in holistic wellness — Aakashik Wellness began its journey during one of the most challenging periods in recent history: the COVID-19 pandemic in 2021. Witnessing the fear and uncertainty of the outbreak, he was inspired to create a natural herbal formulation that could support people's immunity and respiratory wellness.", p2a: 'This vision was brought to life with the unwavering support of his wife and co-founder, ', devi: 'Mrs. Syamala Devi', p2b: '. Together they began carefully preparing their herbal formulations with dedication — combining traditional knowledge with a sincere desire to serve the community through natural wellness.', kaphaTag: 'FIRST FORMULATION', kaphaBody: 'Developed using carefully selected herbs traditionally known to support respiratory health — prepared as a traditional seasonal wellness blend for everyday comfort (not a medicine). When families were seeking natural solutions, Kaphahara earned the trust of many, strengthening the couple\'s commitment to herbal wellness.', navoTag: 'GUT & METABOLIC BALANCE', navoBody: "Rooted in the belief that a healthy gut forms the foundation of well-being, Navojas was formulated to promote digestive wellness and metabolic balance. It was developed as a traditional digestive wellness blend for everyday gut comfort (not a medicine).", quote: '"At Aakashik Wellness, every product begins with a purpose — not a trend. We believe true wellness focuses on prevention, balance, and supporting the body\'s natural ability to maintain health."', missionTitle: 'Our Mission', missionBody: 'To create trusted herbal wellness formulations inspired by traditional wisdom and real-life health needs — empowering individuals to embrace preventive care and holistic well-being through nature.', visionTitle: 'Our Vision', visionBody: 'To become a trusted name in herbal wellness by preserving traditional knowledge and offering natural formulations that support healthier communities for generations to come.', valuesTitle: 'Our Values', v1t: 'Purpose Before Profit', v1b: 'Every formulation is created to address genuine wellness needs and improve quality of life.', v2t: 'Rooted in Tradition', v2b: "We honour generations of herbal knowledge while creating products for today's needs.", v3t: 'Quality & Purity', v3b: 'Prepared with carefully selected ingredients, maintaining authenticity, consistency and uncompromising quality.', v4t: 'Care That Builds Trust', v4b: 'The confidence and well-being of the people who use our products remain at the heart of all we do.', journeyTitle: 'Our Journey Continues', jp1: "What started as one family's heartfelt effort to support people during a global health crisis has grown into a mission to make traditional herbal wellness more accessible. With every formulation, Mr. Gopi and Mrs. Syamala Devi continue to uphold the values on which Aakashik Wellness was founded — care, integrity, and the timeless wisdom of nature.", jp2: 'Aakashik Wellness is more than a wellness brand. It is a family-driven commitment to helping people nurture their health naturally, one formulation at a time.', tagline: 'Rooted in Tradition, Nurtured with Care, Dedicated to your Wellness.' } },
       ta: { ann1: '100% இயற்கை பொருட்கள்', ann2: 'உறுப்பினர் விலை · உள்நுழைந்தால் 10% தள்ளுபடி', nav1: 'குளியல் & உடல்', nav2: 'கஷாயங்கள்', nav3: 'ஆன்மீகம்', nav4: 'எங்கள் கதை', eyebrow: 'பாரம்பரியத்தில் வேரூன்றி', heroTitle1: 'இயற்கையில் வேரூன்றி.', heroTitle2: 'உங்கள் ஆரோக்கியத்திற்காக.', heroSub: 'ரசாயனமற்ற குளியல் பொடிகள், இலக்கு கஷாயங்கள் மற்றும் புனித நறுமணக் கலவைகள் — பாரம்பரிய மூலிகை செய்முறைகளில் இருந்து முழு உடல் நலனுக்காக.', shopCta: 'தொகுப்பை வாங்குங்கள்', exploreCta: 'கஷாயங்களைப் பாருங்கள்',
         chemFree: 'ரசாயனமற்றது', herbalBlends: 'கலவைகள் & கிட்கள்', happyHomes: 'குடும்ப நிறுவனம்',
-        ritualEye: 'இந்தத் தருணத்திற்காக', ritualTitle: 'உங்கள் சடங்கு, இப்போதே', ritualSub: 'ஆயுர்வேதம் நாளின் தாளத்திற்கும் பருவங்களின் மாற்றத்திற்கும் ஏற்ப நலனை சீரமைக்கிறது.',
-        byTime: 'நேரத்தின்படி', bySeason: 'பருவம் & வானிலைப்படி', weSuggest: 'நாங்கள் பரிந்துரைக்கிறோம்', seasonalPick: 'பருவத் தேர்வு', addToCart: 'கூடையில் சேர்',
+        addToCart: 'கூடையில் சேர்',
         catEye: 'உங்கள் சடங்கைக் கண்டறியுங்கள்', catTitle: 'வகைவாரியாக வாங்குங்கள்',
         apEye: 'தொகுப்பைப் பாருங்கள்', apTitle: 'மூலிகை அலமாரி', apSub: 'உள்ளே உள்ளதை வெளிப்படுத்த ஜாடியைத் தட்டவும்.',
         blendEye: 'அஷ்டகந்தம் · புனிதக் கலவை', blendTitle: 'கலவையைச் சந்தியுங்கள்',
@@ -3108,8 +3004,7 @@ class Component extends DCLogic {
         s: { eye: 'எங்கள் கதை', title: 'நோக்கத்தால் ஈர்க்கப்பட்ட நலம்', sub: 'ஆகாஷிக் வெல்னஸ் ஒரு எளிய நம்பிக்கையில் பிறந்தது: பாரம்பரிய ஞானம், உண்மையான அக்கறை மற்றும் மக்கள் ஆரோக்கியமாக வாழ உதவும் ஆழ்ந்த அர்ப்பணிப்புடன் இணைந்தால் இயற்கைக்கு ஆரோக்கியத்தை ஆதரிக்கும் சக்தி உண்டு.', famEye: 'ஒரு குடும்பப் பயணம்', famTitle: 'நிச்சயமற்ற காலத்திலிருந்து, ஒரு அக்கறையின் பணி', p1a: 'நிறுவியவர் ', gopi: 'திரு. கோபி', p1b: ' — முழுமையான நலனில் ஆழ்ந்த ஆர்வம் கொண்ட அனுபவமிக்க ஜோதிடர், வாஸ்து நிபுணர் & பிராணிக் ஹீலர் — ஆகாஷிக் வெல்னஸ் சமீபகால வரலாற்றின் மிகவும் சவாலான காலகட்டமான 2021 கோவிட்-19 பெருந்தொற்றின் போது தனது பயணத்தைத் தொடங்கியது. தொற்றின் அச்சத்தையும் நிச்சயமற்ற தன்மையையும் கண்டு, மக்களின் நோய் எதிர்ப்பு சக்தி மற்றும் சுவாச நலனை ஆதரிக்கும் இயற்கை மூலிகைக் கலவையை உருவாக்க அவர் ஈர்க்கப்பட்டார்.', p2a: 'இந்த தொலைநோக்கு அவரது மனைவி மற்றும் இணை நிறுவனர் ', devi: 'திருமதி. ஷ்யாமளா தேவி', p2b: ' அவர்களின் அசைக்க முடியாத ஆதரவுடன் நனவாக்கப்பட்டது. இருவரும் அர்ப்பணிப்புடன் தங்கள் மூலிகைக் கலவைகளை கவனமாக தயாரிக்கத் தொடங்கினர் — பாரம்பரிய அறிவை சமூகத்திற்கு சேவை செய்யும் உண்மையான விருப்பத்துடன் இணைத்தனர்.', kaphaTag: 'முதல் கலவை', kaphaBody: 'சுவாச நலனை ஆதரிப்பதாக பாரம்பரியமாக அறியப்படும் கவனமாக தேர்ந்தெடுக்கப்பட்ட மூலிகைகளால் உருவாக்கப்பட்டது — அன்றாட வசதிக்கான பருவகால நல்வாழ்வுக் கலவை (மருந்து அல்ல). குடும்பங்கள் இயற்கை வழிகளைத் தேடியபோது, கஃபஹரா பலரின் நம்பிக்கையைப் பெற்று மூலிகை நலனுக்கான அர்ப்பணிப்பை வலுப்படுத்தியது.', navoTag: 'குடல் & வளர்சிதை சமநிலை', navoBody: 'ஆரோக்கியமான குடல் நல்வாழ்வின் அடித்தளம் என்ற நம்பிக்கையில் வேரூன்றி, நவோஜஸ் செரிமான நலனையும் வளர்சிதை சமநிலையையும் ஊக்குவிக்க உருவாக்கப்பட்டது. அன்றாட குடல் வசதிக்கான பாரம்பரிய செரிமான நல்வாழ்வுக் கலவை (மருந்து அல்ல).', quote: '"ஆகாஷிக் வெல்னஸில், ஒவ்வொரு தயாரிப்பும் ஒரு நோக்கத்துடன் தொடங்குகிறது — ஒரு போக்குடன் அல்ல. உண்மையான நலம் தடுப்பு, சமநிலை மற்றும் உடலின் இயற்கை திறனை ஆதரிப்பதில் கவனம் செலுத்துகிறது என்று நாங்கள் நம்புகிறோம்."', missionTitle: 'எங்கள் நோக்கம்', missionBody: 'பாரம்பரிய ஞானம் மற்றும் நிஜ வாழ்க்கை ஆரோக்கியத் தேவைகளால் ஈர்க்கப்பட்ட நம்பகமான மூலிகை நல்வாழ்வுக் கலவைகளை உருவாக்குதல் — இயற்கையின் மூலம் தடுப்பு பராமரிப்பையும் முழுமையான நல்வாழ்வையும் தழுவ தனிநபர்களுக்கு உதவுதல்.', visionTitle: 'எங்கள் தொலைநோக்கு', visionBody: 'பாரம்பரிய அறிவைப் பாதுகாத்து, தலைமுறைகளுக்கு ஆரோக்கியமான சமூகங்களை ஆதரிக்கும் இயற்கைக் கலவைகளை வழங்குவதன் மூலம் மூலிகை நல்வாழ்வில் நம்பகமான பெயராக மாறுதல்.', valuesTitle: 'எங்கள் மதிப்புகள்', v1t: 'லாபத்தை விட நோக்கம்', v1b: 'ஒவ்வொரு கலவையும் உண்மையான நல்வாழ்வுத் தேவைகளை நிவர்த்தி செய்து வாழ்க்கைத் தரத்தை மேம்படுத்த உருவாக்கப்படுகிறது.', v2t: 'பாரம்பரியத்தில் வேரூன்றி', v2b: 'இன்றைய தேவைகளுக்கான தயாரிப்புகளை உருவாக்கும்போது தலைமுறை மூலிகை அறிவை மதிக்கிறோம்.', v3t: 'தரம் & தூய்மை', v3b: 'கவனமாக தேர்ந்தெடுக்கப்பட்ட பொருட்களுடன் தயாரிக்கப்பட்டு, நம்பகத்தன்மை, நிலைத்தன்மை மற்றும் சமரசமற்ற தரத்தை பராமரிக்கிறது.', v4t: 'நம்பிக்கையை உருவாக்கும் அக்கறை', v4b: 'எங்கள் தயாரிப்புகளைப் பயன்படுத்தும் மக்களின் நம்பிக்கையும் நல்வாழ்வும் நாங்கள் செய்யும் அனைத்திலும் மையமாக உள்ளன.', journeyTitle: 'எங்கள் பயணம் தொடர்கிறது', jp1: 'உலகளாவிய சுகாதார நெருக்கடியின் போது மக்களுக்கு உதவும் ஒரு குடும்பத்தின் இதயப்பூர்வமான முயற்சியாகத் தொடங்கியது, பாரம்பரிய மூலிகை நலனை மேலும் அணுகக்கூடியதாக்கும் பணியாக வளர்ந்துள்ளது. ஒவ்வொரு கலவையிலும், திரு. கோபி மற்றும் திருமதி. ஷ்யாமளா தேவி ஆகாஷிக் வெல்னஸ் நிறுவப்பட்ட மதிப்புகளைத் தொடர்ந்து நிலைநிறுத்துகின்றனர்.', jp2: 'ஆகாஷிக் வெல்னஸ் ஒரு நல்வாழ்வு பிராண்டை விட அதிகம். இது மக்கள் தங்கள் ஆரோக்கியத்தை இயற்கையாக வளர்க்க உதவும் குடும்பம் சார்ந்த அர்ப்பணிப்பு.', tagline: 'பாரம்பரியத்தில் வேரூன்றி, அன்புடன் வளர்க்கப்பட்டு, உங்கள் நலனுக்கு அர்ப்பணிக்கப்பட்டது.' } },
       te: { ann1: '100% సహజ పదార్థాలు', ann2: 'మెంబర్ ధర · సైన్ ఇన్‌తో 10% తగ్గింపు', nav1: 'స్నానం & శరీరం', nav2: 'కషాయాలు', nav3: 'ఆధ్యాత్మికం', nav4: 'మా కథ', eyebrow: 'సంప్రదాయంలో పాతుకుని', heroTitle1: 'ప్రకృతిలో పాతుకుని.', heroTitle2: 'మీ ఆరోగ్యం కోసం.', heroSub: 'రసాయనాలు లేని స్నాన పొడులు, లక్ష్య ఆయుర్వేద కషాయాలు మరియు పవిత్ర సుగంధ మిశ్రమాలు — సంప్రదాయ మూలికా వంటకాల నుండి సంపూర్ణ శరీర ఆరోగ్యం కోసం.', shopCta: 'సేకరణను కొనండి', exploreCta: 'కషాయాలను చూడండి',
         chemFree: 'రసాయనాలు లేనివి', herbalBlends: 'మిశ్రమాలు & కిట్లు', happyHomes: 'కుటుంబ సంస్థ',
-        ritualEye: 'ఈ క్షణం కోసం', ritualTitle: 'మీ ఆచారం, ఇప్పుడే', ritualSub: 'ఆయుర్వేదం రోజు లయకు, రుతువుల మార్పుకు అనుగుణంగా ఆరోగ్యాన్ని సమతుల్యం చేస్తుంది.',
-        byTime: 'సమయాన్ని బట్టి', bySeason: 'రుతువు & వాతావరణం బట్టి', weSuggest: 'మేము సూచిస్తున్నాము', seasonalPick: 'రుతు ఎంపిక', addToCart: 'కార్ట్‌కు జోడించు',
+        addToCart: 'కార్ట్‌కు జోడించు',
         catEye: 'మీ ఆచారాన్ని కనుగొనండి', catTitle: 'వర్గం వారీగా షాపింగ్',
         apEye: 'సేకరణను చూడండి', apTitle: 'మూలికా అలమరా', apSub: 'లోపల ఏముందో చూడటానికి జాడీని తాకండి.',
         blendEye: 'అష్టగంధం · పవిత్ర మిశ్రమం', blendTitle: 'మిశ్రమాన్ని కలవండి',
@@ -3126,8 +3021,7 @@ class Component extends DCLogic {
         s: { eye: 'మా కథ', title: 'లక్ష్యంతో ప్రేరేపించబడిన స్వస్థత', sub: 'ఆకాశిక్ వెల్‌నెస్ ఒక సాధారణ నమ్మకంతో పుట్టింది: సంప్రదాయ జ్ఞానం, నిజమైన శ్రద్ధ మరియు ప్రజలు ఆరోగ్యంగా జీవించడంలో సహాయపడే లోతైన నిబద్ధతతో కలిస్తే ప్రకృతికి ఆరోగ్యాన్ని ఆదుకునే శక్తి ఉంది.', famEye: 'ఒక కుటుంబ ప్రయాణం', famTitle: 'అనిశ్చిత సమయం నుండి, ఒక శ్రద్ధ మిషన్', p1a: 'స్థాపించినవారు ', gopi: 'శ్రీ. గోపి', p1b: ' — సంపూర్ణ ఆరోగ్యంపై లోతైన ఆసక్తి గల అనుభవజ్ఞుడైన జ్యోతిష్కుడు, వాస్తు నిపుణుడు & ప్రాణిక్ హీలర్ — ఆకాశిక్ వెల్‌నెస్ ఇటీవలి చరిత్రలో అత్యంత సవాలుతో కూడిన కాలమైన 2021 కోవిడ్-19 మహమ్మారి సమయంలో తన ప్రయాణాన్ని ప్రారంభించింది. వ్యాప్తి భయాన్ని, అనిశ్చితిని చూసి, ప్రజల రోగనిరోధక శక్తి, శ్వాసకోశ ఆరోగ్యాన్ని ఆదుకునే సహజ మూలికా మిశ్రమాన్ని రూపొందించడానికి ప్రేరణ పొందారు.', p2a: 'ఈ దృష్టి ఆయన భార్య మరియు సహ-వ్యవస్థాపకురాలు ', devi: 'శ్రీమతి. శ్యామళా దేవి', p2b: ' యొక్క అచంచల మద్దతుతో సాకారమైంది. వారిద్దరూ అంకితభావంతో తమ మూలికా మిశ్రమాలను జాగ్రత్తగా తయారు చేయడం ప్రారంభించారు — సంప్రదాయ జ్ఞానాన్ని సమాజానికి సేవ చేసే నిజాయితీ కోరికతో కలిపారు.', kaphaTag: 'మొదటి మిశ్రమం', kaphaBody: 'శ్వాసకోశ ఆరోగ్యాన్ని ఆదుకునేందుకు సంప్రదాయంగా తెలిసిన జాగ్రత్తగా ఎంచుకున్న మూలికలతో రూపొందించబడింది — రోజువారీ సౌకర్యం కోసం సాంప్రదాయ కాలానుగుణ ఆరోగ్య మిశ్రమం (మందు కాదు). కుటుంబాలు సహజ మార్గాలను వెతికినప్పుడు, కఫహర చాలామంది నమ్మకాన్ని పొంది మూలికా ఆరోగ్య నిబద్ధతను బలపరిచింది.', navoTag: 'పేగు & జీవక్రియ సమతుల్యం', navoBody: 'ఆరోగ్యకరమైన పేగు శ్రేయస్సుకు పునాది అనే నమ్మకంలో వేళ్లూనుకుని, నవోజస్ జీర్ణ ఆరోగ్యాన్ని, జీవక్రియ సమతుల్యతను ప్రోత్సహించేందుకు రూపొందించబడింది. రోజువారీ పేగు సౌకర్యం కోసం సాంప్రదాయ జీర్ణ ఆరోగ్య మిశ్రమం (మందు కాదు).', quote: '"ఆకాశిక్ వెల్‌నెస్‌లో, ప్రతి ఉత్పత్తి ఒక లక్ష్యంతో మొదలవుతుంది — ఒక ధోరణితో కాదు. నిజమైన స్వస్థత నివారణ, సమతుల్యత మరియు శరీర సహజ సామర్థ్యానికి మద్దతునివ్వడంపై దృష్టి పెడుతుందని మేము నమ్ముతాము."', missionTitle: 'మా లక్ష్యం', missionBody: 'సంప్రదాయ జ్ఞానం, నిజ జీవిత ఆరోగ్య అవసరాలతో ప్రేరేపించబడిన నమ్మకమైన మూలికా ఆరోగ్య మిశ్రమాలను సృష్టించడం — ప్రకృతి ద్వారా నివారణ సంరక్షణ, సంపూర్ణ శ్రేయస్సును స్వీకరించడానికి వ్యక్తులకు శక్తినివ్వడం.', visionTitle: 'మా దృష్టి', visionBody: 'సంప్రదాయ జ్ఞానాన్ని కాపాడుతూ, తరతరాలకు ఆరోగ్యకరమైన సమాజాలను ఆదుకునే సహజ మిశ్రమాలను అందించడం ద్వారా మూలికా ఆరోగ్యంలో నమ్మకమైన పేరుగా మారడం.', valuesTitle: 'మా విలువలు', v1t: 'లాభం కంటే లక్ష్యం', v1b: 'ప్రతి మిశ్రమం నిజమైన ఆరోగ్య అవసరాలను తీర్చడానికి, జీవన నాణ్యతను మెరుగుపరచడానికి సృష్టించబడుతుంది.', v2t: 'సంప్రదాయంలో వేళ్లూనుకుని', v2b: 'నేటి అవసరాలకు ఉత్పత్తులను సృష్టిస్తూ తరతరాల మూలికా జ్ఞానాన్ని గౌరవిస్తాము.', v3t: 'నాణ్యత & స్వచ్ఛత', v3b: 'జాగ్రత్తగా ఎంచుకున్న పదార్థాలతో తయారు చేయబడి, ప్రామాణికత, స్థిరత్వం, రాజీలేని నాణ్యతను కాపాడుతుంది.', v4t: 'నమ్మకాన్ని పెంచే శ్రద్ధ', v4b: 'మా ఉత్పత్తులను ఉపయోగించే ప్రజల విశ్వాసం, శ్రేయస్సు మేము చేసే అన్నింటిలో కేంద్రంగా ఉంటాయి.', journeyTitle: 'మా ప్రయాణం కొనసాగుతోంది', jp1: 'ప్రపంచ ఆరోగ్య సంక్షోభ సమయంలో ప్రజలకు సహాయం చేయాలనే ఒక కుటుంబ హృదయపూర్వక ప్రయత్నంగా మొదలైనది, సంప్రదాయ మూలికా ఆరోగ్యాన్ని మరింత అందుబాటులోకి తెచ్చే మిషన్‌గా ఎదిగింది. ప్రతి మిశ్రమంతో, శ్రీ. గోపి, శ్రీమతి. శ్యామళా దేవి ఆకాశిక్ వెల్‌నెస్ స్థాపించబడిన విలువలను కొనసాగిస్తున్నారు.', jp2: 'ఆకాశిక్ వెల్‌నెస్ ఒక ఆరోగ్య బ్రాండ్ కంటే ఎక్కువ. ఇది ప్రజలు తమ ఆరోగ్యాన్ని సహజంగా పెంపొందించుకోవడంలో సహాయపడే కుటుంబ ఆధారిత నిబద్ధత.', tagline: 'సంప్రదాయంలో వేళ్లూనుకుని, ప్రేమతో పెంచబడి, మీ ఆరోగ్యానికి అంకితం.' } },
       hi: { ann1: '100% प्राकृतिक सामग्री', ann2: 'सदस्य मूल्य · साइन इन पर 10% छूट', nav1: 'स्नान और शरीर', nav2: 'कषायम', nav3: 'आध्यात्मिक', nav4: 'हमारी कहानी', eyebrow: 'परंपरा में निहित', heroTitle1: 'प्रकृति में निहित.', heroTitle2: 'आपके स्वास्थ्य के लिए.', heroSub: 'रसायन-मुक्त स्नान चूर्ण, लक्षित आयुर्वेदिक कषायम और पवित्र सुगंधित मिश्रण — पारंपरिक हर्बल विधियों से समग्र शारीरिक स्वास्थ्य के लिए बनाए गए.', shopCta: 'संग्रह खरीदें', exploreCta: 'कषायम देखें',
         chemFree: 'रसायन-मुक्त', herbalBlends: 'मिश्रण व किट', happyHomes: 'परिवार-स्थापित',
-        ritualEye: 'इस पल के लिए', ritualTitle: 'आपका अनुष्ठान, अभी', ritualSub: 'आयुर्वेद दिन की लय और ऋतुओं के बदलाव के अनुरूप स्वास्थ्य को संतुलित करता है.',
-        byTime: 'समय के अनुसार', bySeason: 'ऋतु और मौसम के अनुसार', weSuggest: 'हमारा सुझाव', seasonalPick: 'मौसमी चयन', addToCart: 'कार्ट में डालें',
+        addToCart: 'कार्ट में डालें',
         catEye: 'अपना अनुष्ठान खोजें', catTitle: 'श्रेणी अनुसार खरीदें',
         apEye: 'संग्रह देखें', apTitle: 'औषधि अलमारी', apSub: 'अंदर क्या है यह देखने के लिए जार पर टैप करें.',
         blendEye: 'अष्टगंधम · पवित्र मिश्रण', blendTitle: 'मिश्रण से मिलें',
@@ -3146,21 +3040,28 @@ class Component extends DCLogic {
     const t = I18N[this.state.lang] || I18N.en;
     const hiddenIds = this._readHiddenIds();
     const BASE_PRODUCTS = [
-      { id: 'sunni', name: 'Herbal Sunni Pindi', sub: 'Bath Powder', element: 'Earth', concern: 'Skin & Body', priceN: 249, jar: '#D9BE9C', cap: '#A06437', benefit: 'Gentle herbal cleansing for soft, glowing skin.', herbs: ['Green Gram', 'Turmeric', 'Vetiver'], tag: '100% Natural' },
-      { id: 'diabetic', name: 'Sugar Balance Support', sub: 'Kashayam', element: 'Fire', concern: 'Sugar', priceN: 399, jar: '#CFB6A5', cap: '#9A5432', benefit: 'A traditional herbal brew for everyday metabolic wellness rituals (not a medicine).', herbs: ['Bitter Gourd', 'Fenugreek', 'Gymnema'], tag: 'Ayurvedic' },
-      { id: 'immunity', name: 'Daily Immunity', sub: 'Kashayam', element: 'Water', concern: 'Immunity', priceN: 349, jar: '#BCC8A2', cap: '#5E7A4C', benefit: 'Everyday defense powered by holy basil and pepper.', herbs: ['Tulsi', 'Pepper', 'Ginger'], tag: '100% Natural' },
-      { id: 'kaphahara', name: 'Kaphahara', sub: 'Herbal Wellness Powder', element: 'Air', concern: 'Respiratory', priceN: 199, jar: '#D6BA8D', cap: '#A8894E', front: 'assets/kaphahara-front.png', back: 'assets/kaphahara-back.png', sizes: [{ g: '100g', p: 199 }, { g: '250g', p: 399 }, { g: '500g', p: 599 }], benefit: 'A traditional herbal blend formulated to support respiratory comfort, seasonal balance and overall well-being.', herbs: ['Tulasi', 'Shunthi', 'Maricha', 'Pippali', 'Vasa', 'Yashtimadhu', 'Haridra'], tag: 'Ayurvedic' },
+      { id: 'herbal-bath', name: 'Herbal Bath Powder', sub: 'Bath Powder', element: 'Earth', concern: 'Skin & Body', priceN: 249, jar: '#D9BE9C', cap: '#A06437', front: 'assets/herbal-bath-front.jpeg', back: 'assets/herbal-bath-back.jpeg', sizes: [{ g: '100g', p: 249 }, { g: '500g', p: 999 }, { g: '1kg', p: 1999 }], benefit: 'A traditional blend of herbs and botanicals for a refreshing, mindful bath — helps you feel fresh, calm and positive with a sense of purity and balance. Pure, natural, with no artificial colours, flavours or preservatives.', herbs: ['Haldi', 'Turmeric', 'Sandalwood', 'Pacha Karpooram', 'Cinnamon', 'Rose Petals'], tag: '100% Natural' },
+      { id: 'kaphahara', name: 'Kaphahara', sub: 'Herbal Wellness Powder', element: 'Air', concern: 'Respiratory', priceN: 599, jar: '#D6BA8D', cap: '#A8894E', front: 'assets/kaphahara-front.png', back: 'assets/kaphahara-back.png', sizes: [{ g: '250g', p: 599 }, { g: '500g', p: 1199 }], benefit: 'A traditional herbal blend formulated to support respiratory comfort, seasonal balance and overall well-being.', herbs: ['Tulasi', 'Shunthi', 'Maricha', 'Pippali', 'Vasa', 'Yashtimadhu', 'Haridra'], tag: 'Ayurvedic' },
       { id: 'ashta', name: 'Ashtagandham', sub: 'Sacred Powder', element: 'Space', concern: 'Spiritual', priceN: 199, jar: '#2E3D2C', cap: '#C0A55E', benefit: 'Eight fragrant herbs for ritual and clearing the space within.', herbs: ['Sandalwood', 'Saffron', 'Cardamom'], tag: '100% Natural' },
-      { id: 'navojas', name: 'Navojas', sub: 'Herbal Wellness Powder', element: 'Fire', concern: 'Digestion', priceN: 199, jar: '#C99374', cap: '#93513B', front: 'assets/navojas-front.jpeg', back: 'assets/navojas-back.jpeg', sizes: [{ g: '100g', p: 199 }, { g: '250g', p: 399 }, { g: '500g', p: 599 }], benefit: 'A traditional blend of time-tested herbs for gut comfort and everyday digestive wellness (not a medicine).', herbs: ['Methika', 'Ajwain', 'Krishna Jeeraka', 'Kala Zeera', 'Kalmegh'], tag: 'Ayurvedic' },
+      { id: 'navojas', name: 'Navojas', sub: 'Herbal Wellness Powder', element: 'Fire', concern: 'Digestion', priceN: 599, jar: '#C99374', cap: '#93513B', front: 'assets/navojas-front.jpeg', back: 'assets/navojas-back.jpeg', sizes: [{ g: '250g', p: 599 }, { g: '500g', p: 1199 }], benefit: 'A traditional blend of time-tested herbs for gut comfort and everyday digestive wellness (not a medicine).', herbs: ['Methika', 'Ajwain', 'Krishna Jeeraka', 'Kala Zeera', 'Kalmegh'], tag: 'Ayurvedic' },
+      { id: 'amirit-ahaar', name: 'Amirit Ahaar', sub: 'Health Mix', element: 'Earth', concern: 'Nutrition', priceN: 599, jar: '#E8D9B8', cap: '#5E7A4C', front: 'assets/amirit-ahaar-front.jpeg', back: 'assets/amirit-ahaar-back.jpeg', sizes: [{ g: '250g', p: 599 }, { g: '500g', p: 1199 }, { g: '1kg', p: 2399 }], benefit: 'A wholesome nutrition blend of cereals, millets and nuts for the whole family — from 6‑month‑old babies to adults. 100% natural, rich in nutrients, and made to support everyday energy and healthy growth.', herbs: ['Jowar', 'Ragi', 'Pearl Millet', 'Punjabi Wheat', 'Barley', 'Almonds', 'Cashew', 'Pistachios'], tag: '100% Natural', ageNote: 'Suitable from 6 months to adults' },
+      { id: 'aparajitha', name: 'Dried Aparajitha Flower', sub: 'Butterfly Pea Flower', element: 'Water', concern: 'Spiritual', priceN: 349, jar: '#D6E4F0', cap: '#2E5A4C', front: 'assets/aparajitha-front.jpeg', back: 'assets/aparajitha-back.jpeg', sizes: [{ g: '50g', p: 349 }, { g: '100g', p: 599 }], benefit: 'Handpicked dried Aparajitha (butterfly pea) flowers — rich in antioxidants and traditionally used for a calming herbal drink that supports overall wellness, relaxation, and natural colour in foods and beverages. Pure, natural, with no artificial colours, flavours or preservatives.', herbs: ['Aparajitha', 'Butterfly Pea'], tag: '100% Natural' },
+      { id: 'avartaki', name: 'Avartaki', sub: "Tanner's Cassia Flower", element: 'Earth', concern: 'Spiritual', priceN: 119, jar: '#F2E4B8', cap: '#5E7A4C', front: 'assets/avartaki-front.jpeg', back: 'assets/avartaki-back.jpeg', sizes: [{ g: '50g', p: 119 }, { g: '100g', p: 199 }], benefit: "Handpicked dried Avartaki (Tanner's Cassia / Senna auriculata) flowers — nature's golden blossom, rich in antioxidants and traditionally used for a nourishing herbal drink that supports overall wellness, relaxation, and healthy skin. Pure, natural, with no artificial colours, flavours or preservatives.", herbs: ['Avartaki', "Tanner's Cassia"], tag: '100% Natural' },
+      { id: 'tulasi', name: 'Dried Tulasi Leaves', sub: 'Holy Basil · Ocimum sanctum', element: 'Air', concern: 'Immunity', priceN: 69, jar: '#C8D9B8', cap: '#4E6B3C', front: 'assets/tulasi-front.jpeg', back: 'assets/tulasi-back.jpeg', sizes: [{ g: '50g', p: 69 }, { g: '100g', p: 119 }], benefit: 'Handpicked dried Tulasi (Holy Basil) leaves — a sacred herb revered in traditional wellness, rich in natural antioxidants and used to support immunity, respiratory comfort, stress relief, and everyday well-being. Pure, natural, with no artificial colours, flavours or preservatives.', herbs: ['Tulasi', 'Holy Basil'], tag: '100% Natural' },
+      { id: 'hibiscus', name: 'Dried Hibiscus Flower', sub: 'Hibiscus rosa-sinensis', element: 'Water', concern: 'Spiritual', priceN: 75, jar: '#F0D0D4', cap: '#8B2E3A', front: 'assets/hibiscus-front.jpeg', back: 'assets/hibiscus-back.jpeg', sizes: [{ g: '50g', p: 75 }, { g: '100g', p: 149 }], benefit: "Handpicked dried Hibiscus flowers — nature's beauty in a cup, rich in antioxidants and traditionally used for a refreshing herbal drink that supports heart wellness, relaxation, healthy skin and hair, and natural colour in foods and beverages. Pure, natural, with no artificial colours, flavours or preservatives.", herbs: ['Hibiscus'], tag: '100% Natural' },
+      { id: 'jamun-seed', name: 'Jamun Seed Powder', sub: 'Indian Blackberry Seed', element: 'Fire', concern: 'Sugar', priceN: 75, jar: '#E8D4E0', cap: '#5C2E4A', front: 'assets/jamun-seed-front.jpeg', back: 'assets/jamun-seed-back.jpeg', sizes: [{ g: '50g', p: 75 }, { g: '100g', p: 149 }], benefit: 'Finely ground Jamun (Indian Blackberry) seed powder — traditionally valued to support healthy blood sugar levels, digestion, metabolic wellness and everyday balance. Carefully cleaned, dried and powdered. Pure, natural, with no artificial colours, flavours or preservatives.', herbs: ['Jamun Seed', 'Indian Blackberry'], tag: '100% Natural' },
+      { id: 'tamarind-seed', name: 'Tamarind Seed Powder', sub: 'Tamarindus indica Seed', element: 'Earth', concern: 'Digestion', priceN: 60, jar: '#E8D9C4', cap: '#6B4E2E', front: 'assets/tamarind-seed-front.jpeg', back: 'assets/tamarind-seed-back.jpeg', sizes: [{ g: '50g', p: 60 }, { g: '100g', p: 119 }], benefit: 'Finely ground tamarind seed powder — naturally rich in dietary fibre and plant compounds, traditionally valued to support digestion, gut health, antioxidant wellness and everyday vitality. Carefully cleaned, dried and powdered. Pure, natural, with no artificial colours, flavours or preservatives.', herbs: ['Tamarind Seed'], tag: '100% Natural' },
+      { id: 'moringa', name: 'Dried Moringa Leaves', sub: 'Drumstick Tree · Moringa oleifera', element: 'Earth', concern: 'Immunity', priceN: 149, jar: '#D4E8C8', cap: '#3D6B2E', front: 'assets/moringa-front.jpeg', back: 'assets/moringa-back.jpeg', sizes: [{ g: '50g', p: 149 }, { g: '100g', p: 299 }], benefit: 'Handpicked dried Moringa (Drumstick tree) leaves — nutrient-rich and traditionally valued to support immunity, digestion, antioxidant wellness and everyday vitality. Naturally dried to preserve their goodness. Pure, natural, with no artificial colours, flavours or preservatives.', herbs: ['Moringa'], tag: '100% Natural' },
+      { id: 'rose-water', name: 'Rose Water', sub: 'Floral Ritual Mist', element: 'Water', concern: 'Spiritual', priceN: null, jar: '#F5D6DE', cap: '#8B3A4A', sizes: [{ g: '100ml', p: null }], benefit: 'Pure rose water for a gentle ritual mist — traditionally used to refresh the face, calm the senses, and clear the space for prayer and everyday wellness. Pure, natural, with no artificial colours, flavours or preservatives.', herbs: ['Rose'], tag: '100% Natural' },
     ];
     const customProducts = this._readCustomProducts()
       .map((p) => this._normalizeCustomProduct(p))
       .filter((p) => p && p.active !== false);
     const PRODUCTS = BASE_PRODUCTS.filter((p) => hiddenIds.indexOf(p.id) < 0).concat(customProducts);
     const BUNDLES = [
-      { id: 'kit-immunity', name: 'Immunity Ritual Kit', sub: 'Bundle · Save ₹148 vs singles', element: 'Water', concern: 'Immunity', priceN: 599, jar: '#BCC8A2', cap: '#5E7A4C', benefit: 'Daily Immunity + Kaphahara + Ashtagandham — a complete daily defense ritual.', herbs: ['Daily Immunity', 'Kaphahara', 'Ashtagandham'], tag: 'Best Value', bundle: true },
-      { id: 'kit-glow', name: 'Glow & Cleanse Kit', sub: 'Bundle · Save ₹99 vs singles', element: 'Earth', concern: 'Skin & Body', priceN: 349, jar: '#D9BE9C', cap: '#A06437', benefit: 'Sunni Pindi bath powder + Ashtagandham for a grounding cleanse routine.', herbs: ['Sunni Pindi', 'Ashtagandham'], tag: 'Best Value', bundle: true },
-      { id: 'sample-trio', name: 'Sample Trio', sub: 'Try before you commit', element: 'All', concern: 'Immunity', priceN: 99, jar: '#E3D6BC', cap: '#A8894E', benefit: 'Three mini sachets of our bestsellers — a low-risk first taste.', herbs: ['Daily Immunity', 'Kaphahara', 'Navojas'], tag: 'Trial Pack', bundle: true },
+      { id: 'kit-immunity', name: 'Immunity Ritual Kit', sub: 'Bundle · Save vs singles', element: 'Water', concern: 'Immunity', priceN: 599, jar: '#BCC8A2', cap: '#5E7A4C', benefit: 'Dried Tulasi + Kaphahara + Dried Moringa Leaves — a complete daily defense ritual.', herbs: ['Dried Tulasi', 'Kaphahara', 'Dried Moringa Leaves'], tag: 'Best Value', bundle: true },
+      { id: 'kit-glow', name: 'Glow & Cleanse Kit', sub: 'Bundle · Save ₹99 vs singles', element: 'Earth', concern: 'Skin & Body', priceN: 349, jar: '#D9BE9C', cap: '#A06437', benefit: 'Herbal Bath Powder + Ashtagandham for a grounding cleanse routine.', herbs: ['Herbal Bath Powder', 'Ashtagandham'], tag: 'Best Value', bundle: true },
+      { id: 'sample-trio', name: 'Sample Trio', sub: '7 × 50g trial sachets', element: 'All', concern: 'Immunity', priceN: 99, jar: '#E3D6BC', cap: '#A8894E', benefit: 'Seven 50g sachets — Dried Aparajitha Flower, Avartaki, Dried Tulasi Leaves, Dried Hibiscus Flower, Jamun Seed Powder, Tamarind Seed Powder and Dried Moringa Leaves.', herbs: ['Dried Aparajitha Flower', 'Avartaki', 'Dried Tulasi Leaves', 'Dried Hibiscus Flower', 'Jamun Seed Powder', 'Tamarind Seed Powder', 'Dried Moringa Leaves'], tag: 'Trial Pack', bundle: true },
     ].filter((p) => hiddenIds.indexOf(p.id) < 0);
     const ALL = {}; PRODUCTS.concat(BUNDLES).forEach(p => ALL[p.id] = p);
     const cartLineKey = (id, size) => id + '::' + (size || 'std');
@@ -3237,7 +3138,7 @@ class Component extends DCLogic {
       const wished = !!this.state.wishlist[p.id];
       return {
         ...p,
-        priceStr: p.sizes ? 'from ' + money(p.sizes[0].p) : money(p.priceN),
+        priceStr: fromPrice(p),
         listPriceStr: hasDisc ? money(p.listPriceN) : '',
         hasDiscount: hasDisc,
         addLabel: oos ? 'Out of stock' : (p.sizes ? 'Choose Size' : 'Add to Cart'),
@@ -3253,6 +3154,11 @@ class Component extends DCLogic {
         hasPhoto,
         noPhoto: !hasPhoto,
         photoUrl,
+        photoEl: hasPhoto ? React.createElement('img', {
+          src: photoUrl,
+          alt: p.name,
+          style: { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', padding: '14px', filter: 'drop-shadow(0 16px 20px rgba(46,61,44,0.18))' },
+        }) : null,
         thumbBg: hasPhoto ? 'linear-gradient(180deg, #F6F1E4 0%, #E8E0CE 100%)' : 'linear-gradient(145deg, ' + p.jar + ' 0%, ' + p.cap + ' 88%)',
         herbChips,
         hasHerbs: herbChips.length > 0,
@@ -3260,61 +3166,14 @@ class Component extends DCLogic {
       };
     };
 
-    // ---- Circadian ----
-    const PERIODS = {
-      morning: { label: 'Morning', range: '5–11 AM', greet: 'Good morning', why: 'Tulsi, pepper & ginger to awaken your defenses for the day ahead.', addId: 'immunity', sky: 'linear-gradient(180deg,#F7C889 0%,#FBE7C6 100%)', bl: 24, bt: 62, bs: 40, bc: '#EE9B45', b2: '#FBD9A0', glow: 'rgba(244,162,76,.5)', night: false, h1: '#C98A4C', h2: '#E1A862' },
-      midday:  { label: 'Midday',  range: '11 AM–4 PM', greet: 'Good afternoon', why: 'Support digestion and steady energy after your midday meal.', addId: 'navojas', sky: 'linear-gradient(180deg,#B9D6E6 0%,#EAF1E7 100%)', bl: 50, bt: 26, bs: 44, bc: '#F2B818', b2: '#FBE9A6', glow: 'rgba(242,194,48,.55)', night: false, h1: '#6E8E78', h2: '#93B79C' },
-      evening: { label: 'Evening', range: '4–9 PM', greet: 'Good evening', why: 'Clear the chest and breathe easy as the day slows down.', addId: 'kaphahara', sky: 'linear-gradient(180deg,#E79A63 0%,#F3D6B0 100%)', bl: 76, bt: 62, bs: 42, bc: '#DE5C28', b2: '#F4B072', glow: 'rgba(226,102,46,.5)', night: false, h1: '#8A4E3A', h2: '#B56A46' },
-      night:   { label: 'Night',   range: '9 PM–5 AM', greet: 'Winding down', why: 'Sacred fragrant herbs to clear the space and settle into rest.', addId: 'ashta', sky: 'linear-gradient(180deg,#242844 0%,#454A6C 100%)', bl: 62, bt: 32, bs: 38, bc: '#D9D6C0', b2: '#F4F1E0', glow: 'rgba(230,228,205,.45)', night: true, h1: '#1A1E38', h2: '#2E335A' },
-    };
-    const hour = new Date().getHours();
-    const autoKey = (hour >= 5 && hour < 11) ? 'morning' : hour < 16 ? 'midday' : hour < 21 ? 'evening' : 'night';
-    const periodKey = this.state.manualPeriod || autoKey;
-    const P = PERIODS[periodKey];
-    const _pp = ALL[P.addId] || {};
-    const period = { ...P,
-      blend: _pp.name || P.addId,
-      price: _pp.sizes ? 'from ' + money(_pp.sizes[0].p) : money(_pp.priceN || 0),
-      addLabel: this._stockOf(P.addId) <= 0 ? 'Out of stock' : (_pp.sizes ? 'Choose Size' : t.addToCart),
-      add: () => (this._stockOf(P.addId) <= 0 ? this.showToast('Out of stock — ask the owner to restock') : (_pp.sizes ? openQuickView(P.addId) : addToCart(P.addId))),
-      onQuick: () => openQuickView(P.addId),
-      day: !P.night, bodyStyle: 'position:absolute;left:' + P.bl + '%;top:' + P.bt + '%;width:' + P.bs + 'px;height:' + P.bs + 'px;border-radius:50%;background:radial-gradient(circle at 40% 36%,' + P.b2 + ',' + P.bc + ');box-shadow:0 0 22px 6px ' + P.glow + ';animation:celBob 4s ease-in-out infinite;z-index:3;', haloStyle: 'position:absolute;left:' + P.bl + '%;top:' + P.bt + '%;width:' + (P.bs * 2.8) + 'px;height:' + (P.bs * 2.8) + 'px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,' + P.glow + ',transparent 66%);pointer-events:none;z-index:2;', hill1Style: 'position:absolute;left:-8%;right:-8%;bottom:-30px;height:54px;border-radius:50%;background:' + P.h1 + ';z-index:4;', hill2Style: 'position:absolute;left:-8%;right:-8%;bottom:-16px;height:46px;border-radius:50%;background:' + P.h2 + ';opacity:0.9;z-index:1;' };
     const chip = (active) => 'padding:8px 15px;border-radius:30px;font-size:13px;font-weight:500;letter-spacing:0.02em;cursor:pointer;transition:all .18s;border:1px solid ' + (active ? '#2E3D2C' : '#D7CDB4') + ';background:' + (active ? '#2E3D2C' : 'transparent') + ';color:' + (active ? '#F1EEDF' : '#5E6A54') + ';';
-    const periodChips = Object.keys(PERIODS).map(k => ({
-      label: PERIODS[k].label, active: k === periodKey, style: chip(k === periodKey),
-      onClick: () => this.setState({ manualPeriod: k }),
-    }));
-
-    // ---- Season ----
-    const SEASONS = {
-      summer:  { label: 'Summer',  note: 'Cooling herbal bathing to pacify Pitta and beat the heat.', addId: 'sunni', sky: 'linear-gradient(180deg,#F5D585 0%,#FBEFCF 100%)', fx: 'rays', h1: '#CBA451', h2: '#E7C877', cloud: false },
-      monsoon: { label: 'Monsoon', note: 'Immunity & respiratory support for damp, changeable days.', addId: 'kaphahara', sky: 'linear-gradient(180deg,#8B98A1 0%,#C4CCD1 100%)', fx: 'rain', h1: '#525C63', h2: '#6E7A82', cloud: true },
-      autumn:  { label: 'Autumn',  note: 'Grounding, Vata-balancing warmth as the air turns dry.', addId: 'navojas', sky: 'linear-gradient(180deg,#E1A55D 0%,#F1D9B2 100%)', fx: 'leaves', h1: '#9A6432', h2: '#C98A4C', cloud: false },
-      winter:  { label: 'Winter',  note: 'Warming, immune-boosting brews for cold mornings.', addId: 'immunity', sky: 'linear-gradient(180deg,#B0C7D7 0%,#E7EFF3 100%)', fx: 'snow', h1: '#A6BCCC', h2: '#CBD9E2', cloud: true },
-    };
-    const month = new Date().getMonth();
-    const autoSeason = (month >= 2 && month <= 5) ? 'summer' : (month >= 6 && month <= 8) ? 'monsoon' : (month >= 9 && month <= 10) ? 'autumn' : 'winter';
-    const seasonKey = this.state.manualSeason || autoSeason;
-    const _sp = ALL[SEASONS[seasonKey].addId] || {};
-    const season = { ...SEASONS[seasonKey],
-      blend: _sp.name || SEASONS[seasonKey].addId,
-      price: _sp.sizes ? 'from ' + money(_sp.sizes[0].p) : money(_sp.priceN || 0),
-      addLabel: this._stockOf(SEASONS[seasonKey].addId) <= 0 ? 'Out of stock' : (_sp.sizes ? 'Choose Size' : t.addToCart),
-      add: () => (this._stockOf(SEASONS[seasonKey].addId) <= 0 ? this.showToast('Out of stock — ask the owner to restock') : (_sp.sizes ? openQuickView(SEASONS[seasonKey].addId) : addToCart(SEASONS[seasonKey].addId))),
-      onQuick: () => openQuickView(SEASONS[seasonKey].addId),
-    };
-    const seasonFx = { isRain: season.fx === 'rain', isSnow: season.fx === 'snow', isLeaves: season.fx === 'leaves', isRays: season.fx === 'rays', cloud: season.cloud, hill1Style: 'position:absolute;left:-8%;right:-8%;bottom:-26px;height:50px;border-radius:50%;background:' + season.h1 + ';z-index:4;', hill2Style: 'position:absolute;left:-8%;right:-8%;bottom:-14px;height:44px;border-radius:50%;background:' + season.h2 + ';opacity:0.9;z-index:1;' };
-    const seasonChips = Object.keys(SEASONS).map(k => ({
-      label: SEASONS[k].label, active: k === seasonKey, style: chip(k === seasonKey),
-      onClick: () => this.setState({ manualSeason: k }),
-    }));
 
     // ---- Apothecary jars ----
-    const JAR_IDS = ['sunni', 'diabetic', 'immunity', 'kaphahara', 'ashta', 'navojas'];
+    const JAR_IDS = ['herbal-bath', 'kaphahara', 'ashta', 'navojas', 'amirit-ahaar', 'aparajitha', 'avartaki', 'tulasi', 'hibiscus', 'jamun-seed', 'tamarind-seed', 'moringa', 'rose-water'];
     const JARS = JAR_IDS.map((id) => {
       const p = ALL[id];
       if (!p) return null;
-      return { id, name: p.name, sub: p.sub, benefit: p.benefit, herbs: p.herbs || [], jar: p.jar, cap: p.cap, price: p.sizes ? 'from ' + money(p.sizes[0].p) : money(p.priceN) };
+      return { id, name: p.name, sub: p.sub, benefit: p.benefit, herbs: p.herbs || [], jar: p.jar, cap: p.cap, price: fromPrice(p) };
     }).filter(Boolean);
     const safeJarIdx = JARS.length ? Math.min(Math.max(0, this.state.openJar || 0), JARS.length - 1) : 0;
     const jars = JARS.map((j, i) => {
@@ -3345,7 +3204,7 @@ class Component extends DCLogic {
     const _jpMeta = JARS[safeJarIdx] || { id: '', name: '', priceN: 0, jar: '#E3D6BC', cap: '#A8894E', herbs: [] };
     const _jp = ALL[_jpMeta.id] || _jpMeta;
     const openJar = { ..._jpMeta,
-      price: _jp.sizes ? 'from ' + money(_jp.sizes[0].p) : money(_jp.priceN || 0),
+      price: fromPrice(_jp),
       addLabel: !_jpMeta.id ? 'Unavailable' : (this._stockOf(_jp.id) <= 0 ? 'Out of stock' : (_jp.sizes ? 'Choose Size' : 'Add to Cart')),
       add: () => (!_jpMeta.id ? this.showToast('This blend is currently unavailable') : (this._stockOf(_jp.id) <= 0 ? this.showToast('Out of stock — ask the owner to restock') : (_jp.sizes ? openQuickView(_jp.id) : addToCart(_jp.id)))),
       onQuick: () => (_jpMeta.id ? openQuickView(_jp.id) : this.showToast('This blend is currently unavailable')) };
@@ -3371,8 +3230,15 @@ class Component extends DCLogic {
 
     // ---- Herb-to-benefit web (built from live catalog herbs) ----
     const HERB_BLURBS = {
-      'Tulasi': 'Holy basil — supports respiratory comfort and seasonal immunity.',
+      'Tulasi': 'Holy basil — sacred leaves traditionally used for immunity, breath, and everyday wellness drinks.',
       'Tulsi': 'Holy basil — supports respiratory comfort and seasonal immunity.',
+      'Holy Basil': 'Holy Basil (Ocimum sanctum) — handpicked dried leaves for a simple, powerful herbal brew.',
+      'Hibiscus': 'Hibiscus (Hibiscus rosa-sinensis) — vibrant dried petals traditionally steeped for antioxidant-rich herbal drinks.',
+      'Jamun Seed': 'Jamun seed — traditionally used in Indian wellness for metabolic balance and healthy blood sugar rituals.',
+      'Indian Blackberry': 'Indian Blackberry (Jamun) seeds — finely ground for a simple daily decoction.',
+      'Tamarind Seed': 'Tamarind seed — fibre-rich powder traditionally mixed with warm water to support digestion and everyday wellness.',
+      'Moringa': 'Moringa (Drumstick tree) — nutrient-rich dried leaves traditionally steeped as a herbal tea for immunity and everyday vitality.',
+      'Rose': 'Rose water — a gentle floral mist traditionally used to refresh the face and clear the space for ritual.',
       'Shunthi': 'Dry ginger — warming; kindles digestion and clears congestion.',
       'Ginger': 'Fresh ginger — warming; kindles digestion and supports everyday comfort.',
       'Maricha': 'Black pepper — opens the channels and aids absorption of the blend.',
@@ -3382,6 +3248,10 @@ class Component extends DCLogic {
       'Yashtimadhu': 'Licorice root — traditionally used to soothe the throat in seasonal blends (not a medicine).',
       'Haridra': 'Turmeric — the golden root; supports the body\'s natural balance.',
       'Turmeric': 'Turmeric — the golden root; supports the body\'s natural balance.',
+      'Haldi': 'Turmeric (Haldi) — the golden root in traditional bath and wellness blends.',
+      'Pacha Karpooram': 'Edible camphor — a traditional aromatic used in herbal bath rituals.',
+      'Cinnamon': 'Cinnamon — warming spice traditionally used for fragrance and everyday wellness.',
+      'Rose Petals': 'Rose petals — gentle floral notes for a calming bath ritual.',
       'Methika': 'Fenugreek seed (Trigonella foenum-graecum) — a traditional seed used in digestive wellness rituals (not a medicine).',
       'Fenugreek': 'Fenugreek seed — a traditional seed used in digestive and metabolic wellness rituals (not a medicine).',
       'Ajwain': 'Carom seed (Trachyspermum ammi) — eases bloating and kindles the digestive fire.',
@@ -3395,6 +3265,18 @@ class Component extends DCLogic {
       'Sandalwood': 'Sandalwood — fragrant and grounding; used in sacred and ritual powders.',
       'Saffron': 'Saffron — warm floral aroma at the heart of sacred blends.',
       'Cardamom': 'Cardamom — bright, lifting spice in fragrant ritual powders.',
+      'Jowar': 'Sorghum (jowar) — a nourishing cereal base in our family health mix.',
+      'Ragi': 'Finger millet (ragi) — calcium-rich millet traditionally used for growing kids and adults.',
+      'Pearl Millet': 'Pearl millet — a wholesome millet that supports everyday energy.',
+      'Punjabi Wheat': 'Punjabi wheat — a familiar cereal grain for comforting home nutrition.',
+      'Barley': 'Barley — a gentle cereal traditionally used in everyday nourishing drinks.',
+      'Almonds': 'Almonds (badam) — nutrient-dense nuts for strength and growth.',
+      'Cashew': 'Cashew nuts — creamy richness and natural nourishment.',
+      'Pistachios': 'Pistachios — wholesome dry fruit for flavour and nutrition.',
+      'Aparajitha': 'Aparajitha (butterfly pea) — a vibrant blue flower traditionally steeped for calming herbal drinks.',
+      'Butterfly Pea': 'Butterfly pea flower — rich in natural plant compounds and used to colour teas and foods naturally.',
+      'Avartaki': "Avartaki (Tanner's Cassia) — a golden herbal flower traditionally used for nourishing wellness drinks.",
+      "Tanner's Cassia": "Tanner's Cassia (Senna auriculata) — a traditional blossom known for natural antioxidant goodness.",
     };
     const HERBS = {};
     PRODUCTS.forEach((p) => {
@@ -3425,6 +3307,16 @@ class Component extends DCLogic {
         nodeStyle: 'opacity:0;animation:nodePop .5s cubic-bezier(.34,1.5,.6,1) forwards ' + nd + 's;' };
     });
     const herbCenter = { xPct: (HW.cx / 460 * 100), yPct: (HW.cy / 320 * 100), cx: HW.cx, cy: HW.cy };
+    const webLinesEl = React.createElement(React.Fragment, null, webNodes.map((n, i) =>
+      React.createElement('line', {
+        key: 'wl-' + i,
+        x1: HW.cx,
+        y1: HW.cy,
+        x2: n.x2,
+        y2: n.y2,
+        style: { stroke: '#B79B57', strokeWidth: 1.5, strokeDasharray: 240, strokeDashoffset: 240, animation: 'drawLine .65s ease forwards ' + (0.12 + i * 0.18).toFixed(2) + 's' },
+      })
+    ));
 
     // ---- Cart summary ----
     const MEMBER_RATE = 0.10;
@@ -3476,27 +3368,32 @@ class Component extends DCLogic {
       const hasBack = !!p.back;
       const sizeIdx = Math.min(this.state.qvSize || 0, (p.sizes ? p.sizes.length : 1) - 1);
       const basePrice = p.sizes ? p.sizes[sizeIdx].p : p.priceN;
-      const unit = basePrice * (sub ? 0.9 : 1);
+      const priced = priceReadyFor(p, sizeIdx);
+      const unit = priced ? basePrice * (sub ? 0.9 : 1) : null;
       const sizeBtn = (on) => 'flex:1;min-width:82px;padding:11px 8px;border-radius:12px;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;border:1px solid ' + (on ? '#2E3D2C' : '#D7CDB4') + ';background:' + (on ? '#2E3D2C' : 'transparent') + ';color:' + (on ? '#F1EEDF' : '#45543E') + ';';
       const sizeOpts = (p.sizes || []).map((s, k) => ({ g: s.g, priceStr: money(s.p), style: sizeBtn(k === sizeIdx), onClick: () => this.setState({ qvSize: k }) }));
       const face = this.state.qvFace === 'back' && hasBack ? p.back : p.front;
       const faceBtn = (on) => 'padding:7px 14px;border-radius:30px;font-size:11.5px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;border:1px solid ' + (on ? '#2E3D2C' : 'rgba(46,61,44,0.3)') + ';background:' + (on ? '#2E3D2C' : 'rgba(255,253,245,0.85)') + ';color:' + (on ? '#F1EEDF' : '#45543E') + ';';
-      qv = { ...p, hasPhoto: !!p.front, noPhoto: !p.front, hasBack, photoPad: hasBack ? '18px 18px 62px' : '18px', photo: face,
+      qv = { ...p, hasPhoto: !!p.front, noPhoto: !p.front, hasBack, photoPad: hasBack ? '12px 12px 58px' : '12px', photo: face,
         frontBtnStyle: faceBtn(this.state.qvFace !== 'back'), backBtnStyle: faceBtn(this.state.qvFace === 'back'),
         showFront: () => this.setState({ qvFace: 'front' }), showBack: () => { if (hasBack) this.setState({ qvFace: 'back' }); },
-        photoEl: React.createElement('img', { src: face, alt: p.name + ' pack', style: { maxWidth: '100%', maxHeight: '340px', objectFit: 'contain', display: 'block' } }),
+        photoEl: React.createElement('img', { src: face, alt: p.name + ' pack', style: { maxWidth: '100%', maxHeight: 'min(68vh, 620px)', width: 'auto', height: 'auto', objectFit: 'contain', display: 'block' } }),
         hasSizes: !!p.sizes, sizeOpts, priceStr: money(unit), origStr: money(basePrice), subscribe: sub, wished: !!this.state.wishlist[p.id], notWished: !this.state.wishlist[p.id],
         wishAria: this.state.wishlist[p.id] ? 'Remove from Wishlist' : 'Add to Wishlist',
         subBtnStyle: 'flex:1;padding:11px 10px;border-radius:12px;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .2s;border:1px solid ' + (sub ? '#2E3D2C' : '#D7CDB4') + ';background:' + (sub ? '#2E3D2C' : 'transparent') + ';color:' + (sub ? '#F1EEDF' : '#5E6A54') + ';',
         onceBtnStyle: 'flex:1;padding:11px 10px;border-radius:12px;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .2s;border:1px solid ' + (!sub ? '#2E3D2C' : '#D7CDB4') + ';background:' + (!sub ? '#2E3D2C' : 'transparent') + ';color:' + (!sub ? '#F1EEDF' : '#5E6A54') + ';',
         chooseSub: () => this.setState({ qvSubscribe: true }), chooseOnce: () => this.setState({ qvSubscribe: false }),
         toggleWish: () => toggleWish(p.id),
-        addLabel: oos ? 'Out of stock' : 'Add to Cart',
-        addDisabled: oos,
-        addStyle: 'flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:' + (oos ? '#A99C7E' : '#2E3D2C') + ';color:#F1EEDF;border:none;padding:14px;border-radius:30px;font-size:14.5px;font-weight:500;cursor:' + (oos ? 'not-allowed' : 'pointer') + ';opacity:' + (oos ? '0.72' : '1') + ';',
+        addLabel: oos ? 'Out of stock' : (priced ? 'Add to Cart' : 'Price coming soon'),
+        addDisabled: oos || !priced,
+        addStyle: 'flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:' + ((oos || !priced) ? '#A99C7E' : '#2E3D2C') + ';color:#F1EEDF;border:none;padding:14px;border-radius:30px;font-size:14.5px;font-weight:500;cursor:' + ((oos || !priced) ? 'not-allowed' : 'pointer') + ';opacity:' + ((oos || !priced) ? '0.72' : '1') + ';',
         add: () => {
           if (oos) {
             this.showToast('Out of stock — ask the owner to restock');
+            return;
+          }
+          if (!priced) {
+            this.showToast('Prices coming soon — check back shortly');
             return;
           }
           addToCart(p.id, sub, p.sizes ? p.sizes[sizeIdx].g : null, basePrice);
@@ -3506,9 +3403,9 @@ class Component extends DCLogic {
 
     // ---- Bundles ----
     const KIT_PARTS = {
-      'kit-immunity': ['immunity', 'kaphahara', 'ashta'],
-      'kit-glow': ['sunni', 'ashta'],
-      'sample-trio': ['immunity', 'kaphahara', 'navojas'],
+      'kit-immunity': ['tulasi', 'kaphahara', 'moringa'],
+      'kit-glow': ['herbal-bath', 'ashta'],
+      'sample-trio': ['aparajitha', 'avartaki', 'tulasi', 'hibiscus', 'jamun-seed', 'tamarind-seed', 'moringa'],
     };
     const bundles = BUNDLES.map((b) => {
       const partIds = KIT_PARTS[b.id];
@@ -3528,7 +3425,7 @@ class Component extends DCLogic {
     });
 
     // ---- Search & filters ----
-    const CONCERNS = ['all', 'Immunity', 'Sugar', 'Respiratory', 'Digestion', 'Skin & Body', 'Spiritual'];
+    const CONCERNS = ['all', 'Immunity', 'Sugar', 'Respiratory', 'Digestion', 'Nutrition', 'Skin & Body', 'Spiritual'];
     const ELEMENTS = ['all', 'Earth', 'Water', 'Fire', 'Air', 'Space'];
     const PRICES = [{ k: 'all', label: 'All prices' }, { k: 'u300', label: 'Under ₹300' }, { k: 'm', label: '₹300–400' }, { k: 'p400', label: '₹400+' }];
     const q = this.state.searchQuery.trim().toLowerCase();
@@ -3536,24 +3433,37 @@ class Component extends DCLogic {
     const priceMatches = (p) => {
       if (this.state.fPrice === 'all') return true;
       const prices = (p.sizes && p.sizes.length) ? p.sizes.map((s) => s.p) : [p.priceN];
-      return prices.some((n) => inPrice(n));
+      return prices.some((n) => n != null && Number.isFinite(Number(n)) && inPrice(Number(n)));
     };
     const catalog = PRODUCTS.concat(BUNDLES);
     const KASHAYAM_CONCERNS = ['Immunity', 'Sugar', 'Respiratory', 'Digestion'];
+    const TARGETED_KASHAYAM_IDS = { navojas: true, kaphahara: true };
+    const DETOX_IDS = {
+      aparajitha: true, avartaki: true, tulasi: true, hibiscus: true,
+      'jamun-seed': true, 'tamarind-seed': true, moringa: true,
+    };
+    const SPIRITUAL_WELLNESS_IDS = { ashta: true, 'herbal-bath': true, 'rose-water': true };
     const concernMatches = (p) => {
       if (this.state.fConcern === 'all') return true;
       if (this.state.fConcern === 'Kashayams') return KASHAYAM_CONCERNS.includes(p.concern);
+      if (this.state.fConcern === 'TargetedKashayams') return !!TARGETED_KASHAYAM_IDS[p.id];
+      if (this.state.fConcern === 'Detox') return !!DETOX_IDS[p.id];
+      if (this.state.fConcern === 'SpiritualWellness') return !!SPIRITUAL_WELLNESS_IDS[p.id];
       return p.concern === this.state.fConcern;
     };
-    const results = catalog.filter(p => concernMatches(p) && (this.state.fElement === 'all' || p.element === this.state.fElement || p.element === 'All') && priceMatches(p) && (!q || (p.name + ' ' + p.sub + ' ' + p.concern + ' ' + p.element + ' ' + (p.herbs || []).join(' ')).toLowerCase().includes(q))).map((p, idx) => decorate(p, idx));
+    const results = catalog.filter(p => concernMatches(p) && (this.state.fElement === 'all' || p.element === this.state.fElement || p.element === 'All') && priceMatches(p) && (!q || (p.name + ' ' + p.sub + ' ' + p.concern + ' ' + p.element + ' ' + (p.herbs || []).join(' ') + ' ' + (p.benefit || '')).toLowerCase().includes(q))).map((p, idx) => decorate(p, idx));
     const CONCERN_COPY = {
       'Kashayams': { title: 'Ayurvedic kashayams', sub: 'Brews and wellness powders for immunity, metabolism, breath and digestion.' },
-      'Skin & Body': { title: 'Bath & body rituals', sub: 'Herbal Sunni Pindi and gentle chemical-free cleansing for soft, glowing skin.' },
-      'Sugar': { title: 'Targeted wellness brews', sub: 'Traditional kashayams for everyday metabolic balance — ritual, not medicine.' },
-      'Immunity': { title: 'Daily defense rituals', sub: 'Tulsi, pepper and time-tested herbs for everyday immunity support.' },
+      'TargetedKashayams': { title: 'Targeted kashayams', sub: 'Navojas for gut comfort and Kaphahara for seasonal breath — ritual, not medicine.' },
+      'Detox': { title: 'Daily de-toxification', sub: 'Dried flowers, leaves and seed powders for everyday cleansing and balance — ritual, not medicine.' },
+      'SpiritualWellness': { title: 'Spiritual wellness', sub: 'Ashtagandham, Herbal Bath Powder and rose water for ritual and clearing the space within.' },
+      'Skin & Body': { title: 'Bath & body rituals', sub: 'Herbal Bath Powder and gentle chemical-free cleansing for a refreshing, mindful bath.' },
+      'Sugar': { title: 'Targeted wellness brews', sub: 'Jamun seed powder and traditional kashayams for everyday metabolic balance — ritual, not medicine.' },
+      'Immunity': { title: 'Daily defense rituals', sub: 'Tulsi, dried Tulasi and Moringa leaves, pepper and time-tested herbs for everyday immunity support.' },
       'Respiratory': { title: 'Breath & seasonal comfort', sub: 'Kaphahara and blends formulated for respiratory wellness rituals.' },
-      'Digestion': { title: 'Gut comfort rituals', sub: 'Navojas and digestive wellness powders for everyday gut balance.' },
-      'Spiritual': { title: 'Sacred fragrant blends', sub: 'Ashtagandham and ritual powders to clear the space within.' },
+      'Digestion': { title: 'Gut comfort rituals', sub: 'Navojas, tamarind seed powder and digestive wellness blends for everyday gut balance.' },
+      'Nutrition': { title: 'Wholesome nutrition', sub: 'Amirit Ahaar and family health mixes for babies from 6 months through adults.' },
+      'Spiritual': { title: 'Sacred fragrant blends', sub: 'Ashtagandham, Aparajitha, Avartaki, Hibiscus and ritual powders to clear the space within.' },
     };
     const concernCopy = CONCERN_COPY[this.state.fConcern] || null;
     const searchTitle = concernCopy ? concernCopy.title : (q ? 'Search results' : 'Browse the collection');
@@ -3653,10 +3563,38 @@ class Component extends DCLogic {
         { h: 'Privacy queries' },
         { p: 'Aakashik Wellness · info@aakashikwellness.com · +91 87662 84078' },
       ] },
+      shipping: { title: 'Shipping Policy', blocks: [
+        { p: 'Effective Date: 20th September, 2026' },
+        { p: 'At Aakashik Wellness, we are committed to delivering your wellness products safely and conveniently to your doorstep. Please read the following shipping terms before placing your order.' },
+        { h: '1. Order Processing' },
+        { p: 'Orders are generally processed within 1–3 business days after successful confirmation of payment.' },
+        { p: 'Orders placed on Sundays, public holidays, or during promotional periods may require additional processing time.' },
+        { p: 'Once your order has been dispatched, you will receive shipping or tracking details through the contact information provided at the time of purchase.' },
+        { h: '2. Delivery Time' },
+        { p: 'Delivery generally takes approximately 3–7 business days from the date of dispatch, depending on the delivery location and courier service.' },
+        { p: 'Delivery timelines may vary for remote locations, during public holidays, adverse weather conditions, natural events, courier delays, or other circumstances beyond our control.' },
+        { h: '3. Shipping Charges' },
+        { p: 'Applicable shipping charges will be displayed at the time of checkout before the order is confirmed.' },
+        { p: 'We may offer free or discounted shipping during selected promotional periods. Any such offer will be subject to the terms applicable to that promotion.' },
+        { h: '4. Delivery Address' },
+        { p: 'Customers are responsible for providing a complete and accurate delivery address, including the correct name, mobile number, PIN code, and other required details.' },
+        { p: 'Aakashik Wellness shall not be responsible for delays or failed deliveries resulting from incorrect, incomplete, or inaccurate address information provided by the customer.' },
+        { h: '5. Delayed or Failed Delivery' },
+        { p: 'If your order is delayed beyond the estimated delivery period, please contact us with your order details. We will coordinate with the applicable courier partner to help resolve the issue.' },
+        { p: 'If a shipment is returned to us because the customer was unavailable, refused delivery, or provided an incorrect address, additional shipping charges may apply for re-dispatch.' },
+        { h: '6. Damaged Package' },
+        { p: 'Please check the package at the time of delivery. If the package appears significantly damaged, opened, or tampered with, please contact us as soon as possible and, where possible, provide photographs or other relevant evidence.' },
+        { p: 'We will review the matter and assist you in accordance with our Return & Refund Policy.' },
+        { h: '7. International Shipping' },
+        { p: 'Currently, Aakashik Wellness ships orders within India only, unless otherwise specifically stated on our website.' },
+        { h: '8. Contact Us' },
+        { p: 'For questions regarding shipping or your order, please contact us: Aakashik Wellness · info@aakashikwellness.com · +91 87662 84078 · 403, Sector-17A, Housing Board Colony, Gurgaon, India – 122001' },
+        { p: 'By placing an order through our website, you acknowledge and agree to the terms of this Shipping Policy.' },
+      ] },
     };
     const legalKey = this.state.legal;
     const legalDoc = legalKey && LEGAL[legalKey] ? LEGAL[legalKey] : null;
-    const legalTabs = [['refund', 'Refund'], ['disclaimer', 'Disclaimer'], ['terms', 'Terms'], ['privacy', 'Privacy']].map(([k, label]) => ({
+    const legalTabs = [['refund', 'Refund'], ['disclaimer', 'Disclaimer'], ['terms', 'Terms'], ['privacy', 'Privacy'], ['shipping', 'Shipping']].map(([k, label]) => ({
       label, active: k === legalKey,
       style: 'padding:8px 16px;border-radius:30px;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .2s;border:1px solid ' + (k === legalKey ? '#2E3D2C' : '#D7CDB4') + ';background:' + (k === legalKey ? '#2E3D2C' : 'transparent') + ';color:' + (k === legalKey ? '#F1EEDF' : '#5E6A54') + ';',
       onClick: () => this.setState({ legal: k }),
@@ -3668,7 +3606,7 @@ class Component extends DCLogic {
 
     // ---- Reviews ----
     const reviews = [
-      { name: 'Lakshmi R.', city: 'Coimbatore', stars: 5, product: 'Herbal Sunni Pindi', text: 'I stopped using soap three months ago and my skin has never felt this soft. My mother says it smells exactly like what my grandmother used to make.', initial: 'L', tint: '#D9BE9C' },
+      { name: 'Lakshmi R.', city: 'Coimbatore', stars: 5, product: 'Herbal Bath Powder', text: 'I stopped using soap three months ago and my skin has never felt this soft. My mother says it smells exactly like what my grandmother used to make.', initial: 'L', tint: '#D9BE9C' },
       { name: 'Venkat S.', city: 'Hyderabad', stars: 5, product: 'Navojas', text: 'I enjoy Navojas with my evening walk. It feels like a steady, grounding ritual — taste is strong but pleasant.', initial: 'V', tint: '#C99374' },
       { name: 'Anitha M.', city: 'Chennai', stars: 5, product: 'Kaphahara', text: 'We keep Kaphahara at home through monsoon. The blend smells fresh and has become part of our seasonal routine.', initial: 'A', tint: '#BCC8A2' },
       { name: 'Ramesh K.', city: 'Bengaluru', stars: 4, product: 'Ashtagandham', text: 'The fragrance during morning pooja is beautiful and lasts. Delivery took a little longer than expected, but the quality made up for it.', initial: 'R', tint: '#C0A55E' },
@@ -3677,16 +3615,10 @@ class Component extends DCLogic {
     // ---- Magic layer ----
     const bpMap = { in: { label: 'Breathe in…', scale: 1.4, dur: '4s' }, hold: { label: 'Hold', scale: 1.4, dur: '7s' }, out: { label: 'Breathe out…', scale: 0.72, dur: '8s' } };
     const bp = bpMap[this.state.breathePhase] || bpMap.in;
+    const hour = new Date().getHours();
     const tintOpacity = (hour >= 19 || hour < 5) ? 0.16 : hour >= 16 ? 0.09 : 0;
     const dayNightStyle = 'position:fixed;inset:0;z-index:40;pointer-events:none;background:radial-gradient(ellipse at 50% 118%, rgba(190,106,69,0.55), transparent 72%);opacity:' + tintOpacity + ';';
     const recentProducts = (this.state.recent || []).map(id => ALL[id]).filter(Boolean).map(decorate);
-    const featuredIds = customProducts.slice(0, 2).map((p) => p.id).concat(['immunity', 'kaphahara', 'sunni', 'ashta']);
-    const seenFeat = {};
-    const featuredProducts = featuredIds.filter((id) => {
-      if (!id || seenFeat[id] || !ALL[id]) return false;
-      seenFeat[id] = true;
-      return true;
-    }).slice(0, 4).map((id) => decorate(ALL[id]));
     const DOSHA_SHELF = { vata: 'Skin & Body', pitta: 'Sugar', kapha: 'Immunity' };
     const DOSHA_Q = [
       { q: t.dq1 || 'How does your body usually feel?', opts: [
@@ -3709,13 +3641,13 @@ class Component extends DCLogic {
     const DOSHA_INFO = {
       vata: { name: t.vataName || 'Vata', trait: t.vataTrait || 'Air & Ether · movement', color: '#5E7A4C', tint: '#EAF0E1',
         body: t.vataBody || 'Your constitution moves quickly and can run dry and cold. Warm, grounding and nourishing rituals steady you — regular routines, warm oils and gently spiced brews.',
-        picks: ['sunni', 'kaphahara'] },
+        picks: ['herbal-bath', 'kaphahara'] },
       pitta: { name: t.pittaName || 'Pitta', trait: t.pittaTrait || 'Fire & Water · transformation', color: '#B65E38', tint: '#F3E4DA',
         body: t.pittaBody || 'Your constitution runs warm and sharp, with strong digestion that can tip into heat. Cooling, soothing and metabolically balancing blends keep your fire steady.',
-        picks: ['navojas', 'diabetic'] },
+        picks: ['navojas', 'jamun-seed'] },
       kapha: { name: t.kaphaName || 'Kapha', trait: t.kaphaTrait || 'Earth & Water · structure', color: '#3F7C90', tint: '#DEE8E0',
         body: t.kaphaBody || 'Your constitution is steady and strong, but can hold heaviness and congestion. Light, warming and clearing rituals bring back energy and easy breath.',
-        picks: ['kaphahara', 'immunity'] },
+        picks: ['kaphahara', 'tulasi'] },
     };
     const dStep = this.state.doshaStep || 0;
     const dAns = this.state.doshaAns || [];
@@ -3733,7 +3665,7 @@ class Component extends DCLogic {
       const oos = this._stockOf(p.id) <= 0;
       return {
         tag: p.sub || p.concern, name: p.name,
-        price: p.sizes ? 'from ' + money(p.sizes[0].p) : money(p.priceN),
+        price: fromPrice(p),
         oos,
         addOpacity: oos ? '0.72' : '1',
         addLabel: oos ? 'Out of stock' : (p.sizes ? 'Choose Size' : (t.addToCart || 'Add to Cart')),
@@ -3848,7 +3780,6 @@ class Component extends DCLogic {
       breatheLabel: bp.label, breatheOrbStyle: 'transition: transform ' + bp.dur + ' ease-in-out; transform: scale(' + bp.scale + ');',
       dayNightStyle,
       recentProducts, hasRecent: recentProducts.length > 0,
-      featuredProducts,
       storyKapha: ALL.kaphahara ? decorate(ALL.kaphahara) : { onQuick: () => this.showToast('This blend is currently unavailable'), onAdd: () => this.showToast('This blend is currently unavailable'), addLabel: 'Unavailable' },
       storyNavo: ALL.navojas ? decorate(ALL.navojas) : { onQuick: () => this.showToast('This blend is currently unavailable'), onAdd: () => this.showToast('This blend is currently unavailable'), addLabel: 'Unavailable' },
       reviews,
@@ -3858,6 +3789,7 @@ class Component extends DCLogic {
       openDisclaimer: () => this._openLegalDoc('disclaimer'),
       openTerms: () => this._openLegalDoc('terms'),
       openPrivacy: () => this._openLegalDoc('privacy'),
+      openShipping: () => this._openLegalDoc('shipping'),
       closeLegal: () => this.setState({ legal: null }),
       scrollTop: (e) => {
         if (e && e.preventDefault) e.preventDefault();
@@ -4418,9 +4350,12 @@ class Component extends DCLogic {
       trackTryAgain: () => this.setState({ trackSubmitted: false, trackOrder: null, trackNotFound: false, trackOrderId: '' }),
       filterConcernSkin: () => openConcernShelf('Skin & Body'),
       filterConcernSugar: () => openConcernShelf('Sugar'),
+      filterConcernTargetedKashayams: () => openConcernShelf('TargetedKashayams'),
+      filterConcernDetox: () => openConcernShelf('Detox'),
       filterConcernImmunity: () => openConcernShelf('Immunity'),
       filterConcernKashayams: () => openConcernShelf('Kashayams'),
-      filterConcernSpiritual: () => openConcernShelf('Spiritual'),
+      filterConcernSpiritual: () => openConcernShelf('SpiritualWellness'),
+      filterConcernNutrition: () => openConcernShelf('Nutrition'),
       trackOrderId: this.state.trackOrderId,
       onTrackOrderId: (e) => this.setState({ trackOrderId: e.target.value }),
       onTrackSubmit: (e) => {
@@ -4482,10 +4417,6 @@ class Component extends DCLogic {
           });
       },
 
-      circadian: { greeting: PERIODS[autoKey].greet, autoLabel: PERIODS[autoKey].label },
-      period, periodChips,
-      season, seasonChips, seasonFx,
-
       jars, openJar,
 
       bottleTransform, onBottleDown: this.onBottleDown,
@@ -4494,7 +4425,7 @@ class Component extends DCLogic {
 
       aroma, activeAromaColor,
 
-      herbs, activeHerbData, webNodes, herbCenter,
+      herbs, activeHerbData, webNodes, herbCenter, webLinesEl,
 
       reminderContact: this.state.reminderContact,
       onReminderContact: (e) => this.setState({ reminderContact: e.target.value }),

@@ -215,7 +215,7 @@ test.describe('UX final — Landing honesty, layout, a11y', () => {
       localStorage.removeItem('ak_persist');
       sessionStorage.removeItem('ak_logged');
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await page.reload();
@@ -235,7 +235,7 @@ test.describe('UX final — Landing honesty, layout, a11y', () => {
     await page.goto(LANDING_URL);
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await page.reload();
@@ -249,7 +249,7 @@ test.describe('UX final — Landing honesty, layout, a11y', () => {
     await page.goto(LANDING_URL);
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await page.reload();
@@ -283,14 +283,15 @@ test.describe('UX final — Landing honesty, layout, a11y', () => {
 
   test('TC-F19 positive: privacy policy describes newsletter use and mock payments', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await page.getByRole('button', { name: 'Privacy Policy' }).click();
+    await page.getByRole('link', { name: 'Privacy Policy' }).first().click();
+    await expect(page).toHaveURL(/\/privacy\/?$/);
     await expect(page.getByText(/Send newsletter updates when you subscribe/i)).toBeVisible();
     await expect(page.getByText(/mock checkout only/i)).toBeVisible();
   });
 
   test('TC-F20 negative: privacy no longer claims live shipping partners as current', async ({ page }) => {
-    await page.goto(LANDING_URL);
-    await page.getByRole('button', { name: 'Privacy Policy' }).click();
+    await page.goto('/privacy');
+    await expect(page.getByRole('heading', { name: 'Privacy Policy' })).toBeVisible();
     await expect(page.getByText(/share necessary information with shipping partners and service providers to fulfil your orders/i)).toHaveCount(0);
   });
 });

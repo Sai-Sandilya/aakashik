@@ -107,8 +107,8 @@ test.describe('Category 1 UX fixes', () => {
       localStorage.setItem('ak_orders', JSON.stringify([{
         id: 'AAK-99999',
         placedAt: Date.now() - 3600000,
-        total: 349,
-        items: [{ name: 'Daily Immunity', qty: 1 }],
+        total: 199,
+        items: [{ name: 'Kaphahara', qty: 1 }],
         delivery: { name: 'Test' },
       }]));
     });
@@ -140,7 +140,7 @@ test.describe('Category 1 UX fixes', () => {
       const users = {};
       users[email] = { name, email, phone: '', password, verified: true };
       localStorage.setItem('ak_users', JSON.stringify(users));
-      localStorage.setItem('ak_cart', JSON.stringify({ immunity: { qty: 1, subscribe: false, size: null, sizePrice: null } }));
+      localStorage.setItem('ak_cart', JSON.stringify({ 'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null } }));
     }, { email, password: STRONG_PASSWORD, name: 'Lock User' });
     await mockEmailLoginApi(page, { email, password: STRONG_PASSWORD, name: 'Lock User' });
     await page.reload();

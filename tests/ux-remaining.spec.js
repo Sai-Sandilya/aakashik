@@ -136,15 +136,15 @@ test.describe('UX remaining — shopper honesty (3–7, 10)', () => {
     await page.locator('#kits').scrollIntoViewIfNeeded();
     await expect(page.getByText('Immunity Ritual Kit').first()).toBeVisible();
     await expect(page.getByText(/₹599/).first()).toBeVisible();
-    await expect(page.getByText(/Save ₹148 vs singles/i)).toBeVisible();
-    await expect(page.getByText(/₹349/).first()).toBeVisible();
+    await expect(page.getByText('Glow & Cleanse Kit').first()).toBeVisible();
     await expect(page.getByText(/Save ₹99 vs singles/i)).toBeVisible();
   });
 
-  test('TC-R10 positive: diabetic product renamed Softly', async ({ page }) => {
+  test('TC-R10 positive: Jamun Seed Powder visible; removed kashayams gone', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await expect(page.getByText('Sugar Balance Support').first()).toBeVisible();
-    await expect(page.getByText('Diabetic Care')).toHaveCount(0);
+    await expect(page.getByText('Jamun Seed Powder').first()).toBeVisible();
+    await expect(page.getByText('Sugar Balance Support')).toHaveCount(0);
+    await expect(page.getByText('Daily Immunity')).toHaveCount(0);
   });
 
   test('TC-R11 positive: order confirm reflects server or local save', async ({ page }) => {
@@ -152,7 +152,7 @@ test.describe('UX remaining — shopper honesty (3–7, 10)', () => {
     await seedEmailUser(page, { email, password: STRONG_PASSWORD });
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await page.reload();
@@ -201,7 +201,7 @@ test.describe('UX remaining — checkout remember, validation, discounts (8–9,
       localStorage.removeItem('ak_persist');
       sessionStorage.removeItem('ak_logged');
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await page.reload();
@@ -232,7 +232,7 @@ test.describe('UX remaining — checkout remember, validation, discounts (8–9,
     await seedEmailUser(page, { email, password: STRONG_PASSWORD });
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await page.reload();
@@ -255,7 +255,7 @@ test.describe('UX remaining — checkout remember, validation, discounts (8–9,
     await seedEmailUser(page, { email, password: STRONG_PASSWORD });
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await page.reload();
@@ -272,29 +272,29 @@ test.describe('UX remaining — checkout remember, validation, discounts (8–9,
   test('TC-R17 positive: member + subscribe do not stack beyond 10%', async ({ page }) => {
     const email = `stack-${Date.now()}@test.com`;
     await seedEmailUser(page, { email, password: STRONG_PASSWORD });
-    // immunity 349; with 10% once → 314.1
+    // kaphahara 599; with 10% once → 539
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: true, size: null, sizePrice: null },
+        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: true, size: null, sizePrice: null },
       }));
     });
     await page.reload();
     await page.locator('[data-cart-icon="true"]').click({ force: true });
     await expect(page.getByText(/Subscribe 10% off|10% off applies once/i).first()).toBeVisible({ timeout: 8000 });
-    // List ₹349, one 10% discount → rounded ₹314
-    await expect(page.getByText('₹314').first()).toBeVisible();
+    // List ₹599, one 10% discount → rounded ₹539
+    await expect(page.getByText('₹539').first()).toBeVisible();
   });
 
   test('TC-R18 negative: guest without subscribe pays full list (no member discount)', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await page.reload();
     await page.locator('[data-cart-icon="true"]').click({ force: true });
-    await expect(page.getByText('₹349').first()).toBeVisible();
+    await expect(page.getByText('₹599').first()).toBeVisible();
     await expect(page.getByText(/Member 10% off/i)).toHaveCount(0);
   });
 });
@@ -308,7 +308,7 @@ test.describe('UX remaining — a11y, i18n, geo, polish (13, 16–22)', () => {
     await page.goto(LANDING_URL);
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await page.reload();
@@ -335,7 +335,7 @@ test.describe('UX remaining — a11y, i18n, geo, polish (13, 16–22)', () => {
     await seedEmailUser(page, { email, password: STRONG_PASSWORD, name: 'Placeholder User' });
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await page.reload();

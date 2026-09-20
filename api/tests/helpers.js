@@ -80,11 +80,11 @@ export function sampleDelivery(overrides = {}) {
 
 export function sampleOrderPayload(overrides = {}) {
   return {
-    items: [{ productId: 'immunity', qty: 1 }],
+    items: [{ productId: 'ashta', qty: 1 }],
     delivery: sampleDelivery(),
     payMethod: 'cod',
-    total: 349,
-    subtotal: 349,
+    total: 199,
+    subtotal: 199,
     ...overrides,
   };
 }

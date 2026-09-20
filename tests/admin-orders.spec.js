@@ -43,11 +43,11 @@ async function createApiOrder(request, overrides = {}) {
     ...(overrides.delivery || {}),
   };
   const payload = {
-    items: overrides.items || [{ productId: 'immunity', qty: 1 }],
+    items: overrides.items || [{ productId: 'kaphahara', qty: 1 }],
     delivery,
     payMethod: overrides.payMethod || 'cod',
-    total: overrides.total != null ? overrides.total : 349,
-    subtotal: overrides.subtotal != null ? overrides.subtotal : 349,
+    total: overrides.total != null ? overrides.total : 199,
+    subtotal: overrides.subtotal != null ? overrides.subtotal : 199,
   };
   const res = await request.post('/api/orders', { data: payload });
   expect(res.ok()).toBeTruthy();
@@ -173,7 +173,7 @@ test.describe('Admin orders — detail & status transitions', () => {
     await page.getByRole('button', { name: new RegExp(order.id) }).click();
     await expect(page.getByRole('heading', { name: order.id })).toBeVisible();
     await expect(page.getByText('Ananya Rao', { exact: true })).toBeVisible();
-    await expect(page.getByText(/Daily Immunity/)).toBeVisible();
+    await expect(page.getByText(/Kaphahara/)).toBeVisible();
     await expect(page.getByText(/Hyderabad/)).toBeVisible();
   });
 
@@ -207,7 +207,7 @@ test.describe('Admin orders — detail & status transitions', () => {
 
   test('TC-AD11 negative: delivered order has no further status actions', async ({ page, request }) => {
     const order = await createApiOrder(request, {
-      items: [{ productId: 'sunni', qty: 1 }],
+      items: [{ productId: 'herbal-bath', qty: 1 }],
       total: 249,
       subtotal: 249,
     });
@@ -247,10 +247,10 @@ test.describe('Admin orders — store sync', () => {
       localStorage.setItem('ak_orders', JSON.stringify([{
         id: 'AAK-42424',
         placedAt: Date.now(),
-        total: 349,
+        total: 199,
         payMethod: 'cod',
         payment: { method: 'cod', mock: true, status: 'ok' },
-        items: [{ name: 'Daily Immunity', qty: 1, line: '₹349' }],
+        items: [{ name: 'Kaphahara', qty: 1, line: '₹599' }],
         delivery: {
           name: 'Store Buyer',
           phone: '9876500999',
@@ -332,7 +332,7 @@ test.describe('Admin orders — complex cross-flows', () => {
         id: 'AAK-66666',
         placedAt: Date.now(),
         total: 249,
-        items: [{ name: 'Herbal Sunni Pindi', qty: 1 }],
+        items: [{ name: 'Herbal Bath Powder', qty: 1 }],
         delivery: { name: 'Live', phone: '9876500666', email: '', address: 'A', city: 'B', state: 'C', pincode: '500001' },
         source: 'store',
       }]));

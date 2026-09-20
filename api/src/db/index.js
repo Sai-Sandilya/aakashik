@@ -268,6 +268,64 @@ function migrateSchema(db) {
   }
 }
 
+
+/** Remove retired builtin SKUs so live DBs drop discontinued products. */
+function pruneRetiredBuiltins(db) {
+  const retired = ['diabetic', 'immunity', 'sunni'];
+  withTransaction(db, () => {
+    for (const id of retired) {
+      db.prepare('DELETE FROM inventory WHERE product_id = ?').run(id);
+      db.prepare('DELETE FROM products WHERE id = ? AND is_builtin = 1').run(id);
+    }
+  });
+}
+
+
+/** Keep builtin catalog prices in sync with constants (sizes live in pricing.js). */
+function syncBuiltinProductPrices(db) {
+  const upd = db.prepare('UPDATE products SET price_n = ?, list_price_n = ?, name = ?, sub = ?, element = ?, concern = ?, updated_at = ? WHERE id = ? AND is_builtin = 1');
+  const now = Date.now();
+  withTransaction(db, () => {
+    for (const p of BUILTIN_PRODUCTS) {
+      upd.run(p.priceN, p.priceN, p.name, p.sub, p.element, p.concern, now, p.id);
+    }
+  });
+}
+
+/** Insert any new builtin catalog rows missing from an existing database. */
+function ensureBuiltinProducts(db) {
+  const now = Date.now();
+  const insertProduct = db.prepare(`
+    INSERT OR IGNORE INTO products (
+      id, name, description, sub, element, concern, price_n, list_price_n, discount_pct,
+      photo, kind, is_builtin, active, hidden, custom, created_at, updated_at
+    ) VALUES (
+      @id, @name, @description, @sub, @element, @concern, @priceN, @listPriceN, 0,
+      '', @kind, 1, 1, 0, 0, @now, @now
+    )
+  `);
+  const insertInventory = db.prepare(`
+    INSERT OR IGNORE INTO inventory (product_id, quantity) VALUES (?, ?)
+  `);
+  withTransaction(db, () => {
+    for (const p of BUILTIN_PRODUCTS) {
+      insertProduct.run({
+        id: p.id,
+        name: p.name,
+        description: p.name,
+        sub: p.sub,
+        element: p.element,
+        concern: p.concern,
+        priceN: p.priceN,
+        listPriceN: p.priceN,
+        kind: p.kind,
+        now,
+      });
+      insertInventory.run(p.id, DEFAULT_STOCK[p.id] ?? 0);
+    }
+  });
+}
+
 export async function createDb(options = {}) {
   const memory = options.memory ?? config.isTest;
   let dbPath = ':memory:';
@@ -286,6 +344,9 @@ export async function createDb(options = {}) {
   migrateSchema(db);
 
   if (options.seed !== false) await seedIfEmpty(db);
+  ensureBuiltinProducts(db);
+  pruneRetiredBuiltins(db);
+  syncBuiltinProductPrices(db);
   await migratePlaintextAdminPassword(db);
   await syncAdminCredentialsFromEnv(db);
 

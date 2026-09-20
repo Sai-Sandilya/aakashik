@@ -4,8 +4,17 @@ export const MEMBER_RATE = 0.10;
 
 /** Size price map for products with variants (matches storefront). */
 export const SIZE_PRICES = {
-  kaphahara: { '100g': 199, '250g': 399, '500g': 599 },
-  navojas: { '100g': 199, '250g': 399, '500g': 599 },
+  'herbal-bath': { '100g': 249, '500g': 999, '1kg': 1999 },
+  kaphahara: { '250g': 599, '500g': 1199 },
+  navojas: { '250g': 599, '500g': 1199 },
+  'amirit-ahaar': { '250g': 599, '500g': 1199, '1kg': 2399 },
+  aparajitha: { '50g': 349, '100g': 599 },
+  avartaki: { '50g': 119, '100g': 199 },
+  tulasi: { '50g': 69, '100g': 119 },
+  hibiscus: { '50g': 75, '100g': 149 },
+  'jamun-seed': { '50g': 75, '100g': 149 },
+  'tamarind-seed': { '50g': 60, '100g': 119 },
+  moringa: { '50g': 149, '100g': 299 },
 };
 
 export function resolveBasePrice(product, { size, sizePrice }) {
@@ -22,7 +31,11 @@ export function resolveBasePrice(product, { size, sizePrice }) {
     }
     return product.priceN;
   }
-  return product.priceN;
+  const base = product.priceN;
+  if (!(Number(base) > 0)) {
+    throw new ApiError(400, 'validation_error', `Pricing not available yet for ${product.id}`);
+  }
+  return base;
 }
 
 /**

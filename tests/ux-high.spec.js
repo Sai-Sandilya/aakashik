@@ -27,7 +27,7 @@ function wishlistButton(page) {
 async function openDeliveryCheckout(page, opts = {}) {
   const email = opts.email || `member-${Date.now()}@test.com`;
   const cart = opts.cart || {
-    'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+    'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
   };
   await seedEmailUser(page, { email, password: STRONG_PASSWORD, name: 'Member User' });
   await page.evaluate((c) => {
@@ -83,7 +83,7 @@ test.describe('UX high fixes', () => {
 
   test('TC-H02 negative: cart does not show free-shipping progress bar', async ({ page }) => {
     await seedCartAndOpen(page, {
-      'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+      'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
     });
     await expect(page.getByText(/more for free shipping|unlocked free shipping/i)).toHaveCount(0);
   });
@@ -115,8 +115,10 @@ test.describe('UX high fixes', () => {
 
   test('TC-H06 negative: refund policy says no returns after order placed', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await page.getByRole('button', { name: 'Refund Policy' }).first().click();
-    await expect(page.getByText(/do not accept returns or refunds once an order has been placed/i)).toBeVisible({ timeout: 8000 });
+    await page.getByRole('link', { name: 'Refund Policy' }).first().click();
+    await expect(page).toHaveURL(/\/refund\/?$/);
+    await expect(page.getByRole('heading', { name: 'Return & Refund Policy' })).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText(/do not accept returns or refunds once an order has been placed/i)).toBeVisible();
   });
 
   // --- 5 Track steps ---
@@ -125,8 +127,8 @@ test.describe('UX high fixes', () => {
       localStorage.setItem('ak_orders', JSON.stringify([{
         id: 'AAK-11111',
         placedAt: Date.now(),
-        total: 349,
-        items: [{ name: 'Daily Immunity', qty: 1 }],
+        total: 199,
+        items: [{ name: 'Kaphahara', qty: 1 }],
         delivery: { name: 'Test' },
       }]));
     });
@@ -147,8 +149,8 @@ test.describe('UX high fixes', () => {
       localStorage.setItem('ak_orders', JSON.stringify([{
         id: 'AAK-22222',
         placedAt: Date.now() - 30 * 3600000,
-        total: 349,
-        items: [{ name: 'Daily Immunity', qty: 1 }],
+        total: 199,
+        items: [{ name: 'Kaphahara', qty: 1 }],
       }]));
     });
     await page.goto(LANDING_URL);
@@ -174,7 +176,7 @@ test.describe('UX high fixes', () => {
   // --- 4 Member discount ---
   test('TC-H10 positive: guest sees sign-in for member pricing', async ({ page }) => {
     await seedCartAndOpen(page, {
-      'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+      'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
     });
     await expect(page.getByText(/Sign in for member pricing/i)).toBeVisible();
   });
@@ -185,7 +187,7 @@ test.describe('UX high fixes', () => {
     await page.goto('/');
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await seedApiEmailUser(page, { email, password: STRONG_PASSWORD, name: 'Member User' });
@@ -198,12 +200,12 @@ test.describe('UX high fixes', () => {
     await page.goto(LANDING_URL);
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await page.reload();
     await cartButton(page).click();
-    await expect(page.getByText('₹349').first()).toBeVisible();
+    await expect(page.getByText('₹599').first()).toBeVisible();
     await expect(page.getByText(/Member discount/i)).toHaveCount(0);
   });
 
@@ -302,8 +304,8 @@ test.describe('UX high fixes', () => {
     await page.goto(LANDING_URL);
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'kaphahara::100g': { productId: 'kaphahara', qty: 1, subscribe: false, size: '100g', sizePrice: 199 },
-        'kaphahara::250g': { productId: 'kaphahara', qty: 1, subscribe: false, size: '250g', sizePrice: 399 },
+        'kaphahara::250g': { productId: 'kaphahara', qty: 1, subscribe: false, size: '250g', sizePrice: 599 },
+        'kaphahara::500g': { productId: 'kaphahara', qty: 1, subscribe: false, size: '500g', sizePrice: 1199 },
       }));
     });
     await page.reload();
@@ -319,7 +321,7 @@ test.describe('UX high fixes', () => {
     await page.goto(LANDING_URL);
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'kaphahara::100g': { productId: 'kaphahara', qty: 2, subscribe: false, size: '100g', sizePrice: 199 },
+        'kaphahara::250g': { productId: 'kaphahara', qty: 2, subscribe: false, size: '250g', sizePrice: 599 },
       }));
     });
     await page.reload();
@@ -332,42 +334,30 @@ test.describe('UX high fixes', () => {
     await expect(page.getByText('100g ·').first()).toBeVisible();
   });
 
-  // --- 7 One source of truth / 6 real products ---
-  test('TC-H23 positive: night ritual maps to Ashtagandham (real SKU)', async ({ page }) => {
+  // --- Ritual section removed ---
+  test('TC-H23 positive: Your Ritual section is removed from the landing page', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await page.getByRole('button', { name: 'Night' }).click();
-    await expect(page.getByRole('heading', { name: 'Ashtagandham' }).first()).toBeVisible();
-    await expect(page.getByText(/Calm & Restore/i)).toHaveCount(0);
-    await expect(page.getByText('₹199').first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Your Ritual, Right Now' })).toHaveCount(0);
+    await expect(page.getByText(/Personalised for this moment/i)).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Night' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Summer' })).toHaveCount(0);
   });
 
-  test('TC-H24 positive: summer season maps to Herbal Sunni Pindi with Quick View', async ({ page }) => {
-    await page.goto(LANDING_URL);
-    await page.getByRole('button', { name: 'Summer' }).click();
-    await expect(page.getByRole('heading', { name: 'Herbal Sunni Pindi', exact: true }).first()).toBeVisible();
-    await expect(page.getByText(/Cooling Sattva/i)).toHaveCount(0);
-    await page.getByRole('button', { name: 'Quick View' }).first().click({ force: true });
-    await expect(page.getByText('Herbal Sunni Pindi').first()).toBeVisible();
-  });
-
-  test('TC-H25 positive: jar shelf price matches catalog for Daily Immunity', async ({ page }) => {
+  test('TC-H25 positive: jar shelf price matches catalog for Kaphahara', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: 349 },
+        'kaphahara::250g': { productId: 'kaphahara', qty: 1, subscribe: false, size: '250g', sizePrice: 599 },
       }));
     });
     await page.reload();
     await cartButton(page).click({ force: true });
-    await expect(page.getByText('₹349').first()).toBeVisible();
+    await expect(page.getByText('₹599').first()).toBeVisible();
   });
 
-  test('TC-H26 negative: phantom product names are gone from season cards', async ({ page }) => {
+  test('TC-H26 negative: phantom product names are gone from the landing page', async ({ page }) => {
     await page.goto(LANDING_URL);
-    for (const label of ['Monsoon', 'Autumn', 'Winter', 'Summer']) {
-      await page.getByRole('button', { name: label }).click();
-      await expect(page.getByText(/Cooling Sattva|Ojas Daily Wellness|Golden Immunity Kashayam|Kaphahara Respiratory/i)).toHaveCount(0);
-    }
+    await expect(page.getByText(/Cooling Sattva|Ojas Daily Wellness|Golden Immunity Kashayam|Kaphahara Respiratory/i)).toHaveCount(0);
   });
 
   // --- 9 Wishlist view ---
@@ -382,7 +372,7 @@ test.describe('UX high fixes', () => {
 
   test('TC-H28 positive: remove from wishlist empties the drawer', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await page.evaluate(() => localStorage.setItem('ak_wishlist', JSON.stringify({ immunity: true })));
+    await page.evaluate(() => localStorage.setItem('ak_wishlist', JSON.stringify({ kaphahara: true })));
     await page.reload();
     await wishlistButton(page).click();
     await page.getByRole('dialog', { name: 'Wishlist' }).getByRole('button', { name: 'Remove', exact: true }).click();
@@ -405,7 +395,7 @@ test.describe('UX high fixes', () => {
 
   test('TC-H30b positive: Quick View from wishlist closes the drawer', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await page.evaluate(() => localStorage.setItem('ak_wishlist', JSON.stringify({ immunity: true })));
+    await page.evaluate(() => localStorage.setItem('ak_wishlist', JSON.stringify({ kaphahara: true })));
     await page.reload();
     await wishlistButton(page).click();
     const wishDialog = page.getByRole('dialog', { name: 'Wishlist' });
@@ -418,14 +408,14 @@ test.describe('UX high fixes', () => {
   test('TC-H30c positive: stale wishlist IDs are pruned from storage', async ({ page }) => {
     await page.goto(LANDING_URL);
     await page.evaluate(() => localStorage.setItem('ak_wishlist', JSON.stringify({
-      immunity: true,
+      kaphahara: true,
       'gone-product': true,
     })));
     await page.reload();
     await expect.poll(async () => page.evaluate(() => {
       const w = JSON.parse(localStorage.getItem('ak_wishlist') || '{}');
-      return { hasGone: !!w['gone-product'], hasImm: !!w.immunity, keys: Object.keys(w).sort().join(',') };
-    }), { timeout: 8000 }).toEqual({ hasGone: false, hasImm: true, keys: 'immunity' });
+      return { hasGone: !!w['gone-product'], hasImm: !!w.kaphahara, keys: Object.keys(w).sort().join(',') };
+    }), { timeout: 8000 }).toEqual({ hasGone: false, hasImm: true, keys: 'kaphahara' });
     await expect(wishlistButton(page).getByText('1')).toBeVisible();
   });
 

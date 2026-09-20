@@ -58,7 +58,7 @@ npm run api:test
 | TC-API33 | Negative stock rejected | − | 400 |
 | TC-API34 | Out-of-stock filter | + | Only qty 0 |
 | TC-API35 | Low-stock filter (1–5) | + | Low badge |
-| TC-API36 | Reseed defaults | + | immunity = 30 |
+| TC-API36 | Reseed defaults | + | kaphahara = 40 |
 | TC-API37 | Custom SKU in inventory | + | Stock from create |
 
 ### Orders (`orders.test.js`)
@@ -154,7 +154,7 @@ curl -s http://127.0.0.1:3001/api/admin/me \
 
 ```bash
 curl -s http://127.0.0.1:3001/api/products | jq
-curl -s http://127.0.0.1:3001/api/products/immunity | jq
+curl -s http://127.0.0.1:3001/api/products/kaphahara | jq
 ```
 
 ### 5. Create custom product (admin)
@@ -180,7 +180,7 @@ curl -s -X POST http://127.0.0.1:3001/api/admin/products \
 curl -s http://127.0.0.1:3001/api/admin/inventory \
   -H "Authorization: Bearer $TOKEN" | jq
 
-curl -s -X PATCH http://127.0.0.1:3001/api/admin/inventory/immunity \
+curl -s -X PATCH http://127.0.0.1:3001/api/admin/inventory/kaphahara \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"quantity": 25}' | jq
@@ -192,7 +192,7 @@ curl -s -X PATCH http://127.0.0.1:3001/api/admin/inventory/immunity \
 curl -s -X POST http://127.0.0.1:3001/api/orders \
   -H "Content-Type: application/json" \
   -d '{
-    "items": [{"productId": "immunity", "name": "Daily Immunity", "qty": 1, "unitPrice": 349}],
+    "items": [{"productId": "immunity", "name": "Kaphahara", "qty": 1, "unitPrice": 349}],
     "delivery": {
       "name": "Manual Tester",
       "phone": "9876543210",
@@ -240,12 +240,12 @@ curl -s http://127.0.0.1:3001/api/orders/$ORDER_ID/track | jq
 ### 10. Hide built-in from store
 
 ```bash
-curl -s -X PATCH http://127.0.0.1:3001/api/admin/products/sunni/visibility \
+curl -s -X PATCH http://127.0.0.1:3001/api/admin/products/herbal-bath/visibility \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"hidden": true}' | jq
 
-curl -s http://127.0.0.1:3001/api/products | jq '.products[] | select(.id=="sunni")'
+curl -s http://127.0.0.1:3001/api/products | jq '.products[] | select(.id=="herbal-bath")'
 ```
 
 ---
