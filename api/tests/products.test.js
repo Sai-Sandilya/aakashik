@@ -18,20 +18,20 @@ describe('API products', () => {
     await teardownTestApp();
   });
 
-  it('TC-API10 positive: store catalog lists 9 built-in products', async () => {
+  it('TC-API10 positive: store catalog lists 16 built-in products', async () => {
     const res = await app.inject({ method: 'GET', url: '/api/products' });
     assert.equal(res.statusCode, 200);
     const { products } = res.json();
-    assert.equal(products.length, 9);
-    assert.ok(products.some((p) => p.id === 'immunity'));
+    assert.equal(products.length, 16);
+    assert.ok(products.some((p) => p.id === 'kaphahara'));
     assert.ok(products.every((p) => p.active && !p.hidden));
   });
 
   it('TC-API11 positive: GET single product by id', async () => {
-    const res = await app.inject({ method: 'GET', url: '/api/products/immunity' });
+    const res = await app.inject({ method: 'GET', url: '/api/products/kaphahara' });
     assert.equal(res.statusCode, 200);
-    assert.equal(res.json().product.name, 'Daily Immunity');
-    assert.equal(res.json().product.priceN, 349);
+    assert.equal(res.json().product.name, 'Kaphahara');
+    assert.equal(res.json().product.priceN, 599);
   });
 
   it('TC-API12 negative: unknown product returns 404', async () => {
@@ -121,16 +121,16 @@ describe('API products', () => {
     const { token } = await loginAdmin();
     const hide = await app.inject({
       method: 'PATCH',
-      url: '/api/admin/products/sunni/visibility',
+      url: '/api/admin/products/herbal-bath/visibility',
       headers: authHeaders(token),
       payload: { hidden: true },
     });
     assert.equal(hide.statusCode, 200);
     const store = await app.inject({ method: 'GET', url: '/api/products' });
-    assert.ok(!store.json().products.some((p) => p.id === 'sunni'));
+    assert.ok(!store.json().products.some((p) => p.id === 'herbal-bath'));
     const show = await app.inject({
       method: 'PATCH',
-      url: '/api/admin/products/sunni/visibility',
+      url: '/api/admin/products/herbal-bath/visibility',
       headers: authHeaders(token),
       payload: { hidden: false },
     });
@@ -195,7 +195,7 @@ describe('API products', () => {
     const { token } = await loginAdmin();
     const res = await app.inject({
       method: 'DELETE',
-      url: '/api/admin/products/immunity',
+      url: '/api/admin/products/kaphahara',
       headers: authHeaders(token),
     });
     assert.equal(res.statusCode, 400);

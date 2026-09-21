@@ -18,7 +18,7 @@ describe('API inventory', () => {
     await teardownTestApp();
   });
 
-  it('TC-API30 positive: admin inventory lists 9 SKUs with stock', async () => {
+  it('TC-API30 positive: admin inventory lists 16 SKUs with stock', async () => {
     const { token } = await loginAdmin();
     const res = await app.inject({
       method: 'GET',
@@ -27,17 +27,17 @@ describe('API inventory', () => {
     });
     assert.equal(res.statusCode, 200);
     const { inventory } = res.json();
-    assert.equal(inventory.length, 9);
-    const immunity = inventory.find((r) => r.productId === 'immunity');
-    assert.equal(immunity.quantity, 30);
-    assert.equal(immunity.badge, 'in_stock');
+    assert.equal(inventory.length, 16);
+    const kaphahara = inventory.find((r) => r.productId === 'kaphahara');
+    assert.equal(kaphahara.quantity, 40);
+    assert.equal(kaphahara.badge, 'in_stock');
   });
 
   it('TC-API31 positive: set exact stock quantity', async () => {
     const { token } = await loginAdmin();
     const res = await app.inject({
       method: 'PATCH',
-      url: '/api/admin/inventory/sunni',
+      url: '/api/admin/inventory/herbal-bath',
       headers: authHeaders(token),
       payload: { quantity: 4 },
     });
@@ -50,20 +50,20 @@ describe('API inventory', () => {
     const { token } = await loginAdmin();
     await app.inject({
       method: 'PATCH',
-      url: '/api/admin/inventory/sunni',
+      url: '/api/admin/inventory/herbal-bath',
       headers: authHeaders(token),
       payload: { quantity: 10 },
     });
     const up = await app.inject({
       method: 'POST',
-      url: '/api/admin/inventory/sunni/adjust',
+      url: '/api/admin/inventory/herbal-bath/adjust',
       headers: authHeaders(token),
       payload: { delta: 1 },
     });
     assert.equal(up.json().inventory.quantity, 11);
     const down = await app.inject({
       method: 'POST',
-      url: '/api/admin/inventory/sunni/adjust',
+      url: '/api/admin/inventory/herbal-bath/adjust',
       headers: authHeaders(token),
       payload: { delta: -1 },
     });
@@ -74,7 +74,7 @@ describe('API inventory', () => {
     const { token } = await loginAdmin();
     const res = await app.inject({
       method: 'PATCH',
-      url: '/api/admin/inventory/immunity',
+      url: '/api/admin/inventory/kaphahara',
       headers: authHeaders(token),
       payload: { quantity: -5 },
     });
@@ -85,7 +85,7 @@ describe('API inventory', () => {
     const { token } = await loginAdmin();
     await app.inject({
       method: 'PATCH',
-      url: '/api/admin/inventory/diabetic',
+      url: '/api/admin/inventory/jamun-seed',
       headers: authHeaders(token),
       payload: { quantity: 0 },
     });
@@ -94,7 +94,7 @@ describe('API inventory', () => {
       url: '/api/admin/inventory?filter=out',
       headers: authHeaders(token),
     });
-    assert.ok(res.json().inventory.some((r) => r.productId === 'diabetic'));
+    assert.ok(res.json().inventory.some((r) => r.productId === 'jamun-seed'));
     assert.ok(res.json().inventory.every((r) => r.quantity <= 0));
   });
 
@@ -120,7 +120,7 @@ describe('API inventory', () => {
     const { token } = await loginAdmin();
     await app.inject({
       method: 'PATCH',
-      url: '/api/admin/inventory/immunity',
+      url: '/api/admin/inventory/kaphahara',
       headers: authHeaders(token),
       payload: { quantity: 1 },
     });
@@ -130,8 +130,8 @@ describe('API inventory', () => {
       headers: authHeaders(token),
     });
     assert.equal(reseed.statusCode, 200);
-    const immunity = reseed.json().inventory.find((r) => r.productId === 'immunity');
-    assert.equal(immunity.quantity, 30);
+    const kaphahara = reseed.json().inventory.find((r) => r.productId === 'kaphahara');
+    assert.equal(kaphahara.quantity, 40);
   });
 
   it('TC-API37 positive: custom product appears in inventory after create', async () => {

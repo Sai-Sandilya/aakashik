@@ -158,25 +158,25 @@ test.describe('Admin products — store visibility', () => {
   test('TC-PR07 complex: hide built-in removes it from store; show restores', async ({ page }) => {
     await adminLogin(page);
     await openProducts(page);
-    const row = page.locator('[data-product-row="immunity"]');
+    const row = page.locator('[data-product-row="kaphahara"]');
     await row.getByRole('button', { name: 'Hide from store' }).click();
-    await expect(page.getByText(/Daily Immunity hidden from store/i)).toBeVisible();
+    await expect(page.getByText(/Kaphahara hidden from store/i)).toBeVisible();
 
     await page.goto(LANDING_URL);
     await page.reload();
     await waitForStoreCatalog(page);
     const onStore = await page.evaluate(() => {
       const hidden = JSON.parse(localStorage.getItem('ak_hidden_ids') || '[]');
-      return hidden.includes('immunity');
+      return hidden.includes('kaphahara');
     });
     expect(onStore).toBe(true);
 
     await page.goto(ADMIN_URL);
     await openProducts(page);
-    await page.locator('[data-product-row="immunity"]').getByRole('button', { name: 'Show on store' }).click();
-    await expect(page.getByText(/Daily Immunity shown on store/i)).toBeVisible();
+    await page.locator('[data-product-row="kaphahara"]').getByRole('button', { name: 'Show on store' }).click();
+    await expect(page.getByText(/Kaphahara shown on store/i)).toBeVisible();
     const hidden = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_hidden_ids') || '[]'));
-    expect(hidden.includes('immunity')).toBe(false);
+    expect(hidden.includes('kaphahara')).toBe(false);
   });
 
   test('TC-PR08 complex: delete custom product removes it from admin + store', async ({ page, request }) => {
@@ -255,7 +255,7 @@ test.describe('Admin products — edit & inventory link', () => {
     await page.getByRole('button', { name: 'Inventory', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Inventory' })).toBeVisible();
     await expect(page.getByText('Inventory Linked Oil', { exact: true })).toBeVisible();
-    await expect(page.getByText(/SKUs:\s*10/)).toBeVisible();
+    await expect(page.getByText(/SKUs:\s*17/)).toBeVisible();
   });
 
   test('TC-PR11 complex: toggle draft hides from store then republish', async ({ page }) => {

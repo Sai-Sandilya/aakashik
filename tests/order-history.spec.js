@@ -18,7 +18,7 @@ async function seedOrders(page, email = ORDERS_EMAIL) {
         placedAt: Date.now() - 3600000,
         total: 548,
         items: [
-          { id: 'immunity', name: 'Daily Immunity', qty: 1 },
+          { id: 'kaphahara', name: 'Kaphahara', qty: 1 },
           { id: 'ashta', name: 'Ashtagandham', qty: 1 },
         ],
         delivery: { name: 'Test', email: userEmail, phone: '' },
@@ -54,7 +54,7 @@ test.describe('Order History UX', () => {
     await expect(page.getByRole('heading', { name: 'Order History' })).toBeVisible();
     await expect(page.getByText('AAK-77777')).toBeVisible();
     await expect(page.getByText('AAK-66666')).toHaveCount(0);
-    await expect(page.getByText('Products: Daily Immunity, Ashtagandham')).toBeVisible();
+    await expect(page.getByText('Products: Kaphahara, Ashtagandham')).toBeVisible();
   });
 
   test('TC-OH02 positive: order card shows status and Track Order', async ({ page }) => {
@@ -113,7 +113,7 @@ test.describe('Order History UX', () => {
     await page.goto(LANDING_URL);
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'immunity::std': { productId: 'immunity', qty: 1, subscribe: false, size: null, sizePrice: null },
+        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
       }));
     });
     await page.reload();

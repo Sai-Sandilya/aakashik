@@ -81,7 +81,7 @@ async function waitForStoreCatalog(page) {
   await page.waitForFunction(() => {
     try {
       const stock = JSON.parse(localStorage.getItem('ak_stock') || '{}');
-      return Number(stock.immunity) > 0 || Number(stock.sunni) > 0;
+      return Number(stock.kaphahara) > 0 || Number(stock['herbal-bath']) > 0;
     } catch (e) {
       return false;
     }

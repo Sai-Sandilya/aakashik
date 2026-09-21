@@ -44,14 +44,18 @@ describe('API validation hardening (TC-VAL)', () => {
     assert.equal(res.json().error, 'price_mismatch');
   });
 
-  it('TC-VAL02 positive: checkout uses DB price for immunity ₹349', async () => {
+  it('TC-VAL02 positive: checkout uses DB price for kaphahara ₹599 (250g default list)', async () => {
     const res = await app.inject({
       method: 'POST',
       url: '/api/orders',
-      payload: sampleOrderPayload({ total: 349, subtotal: 349 }),
+      payload: sampleOrderPayload({
+        items: [{ productId: 'kaphahara', qty: 1, size: '250g', sizePrice: 599 }],
+        total: 599,
+        subtotal: 599,
+      }),
     });
     assert.equal(res.statusCode, 201);
-    assert.equal(res.json().order.total, 349);
+    assert.equal(res.json().order.total, 599);
   });
 
   it('TC-VAL03 positive: member pricing applies 10% with real customer session', async () => {
@@ -61,14 +65,14 @@ describe('API validation hardening (TC-VAL)', () => {
       url: '/api/orders',
       headers: { cookie },
       payload: sampleOrderPayload({
-        total: 314,
-        subtotal: 349,
-        items: [{ productId: 'immunity', qty: 1 }],
+        total: 539,
+        subtotal: 599,
+        items: [{ productId: 'kaphahara', qty: 1, size: '250g', sizePrice: 599 }],
       }),
     });
     assert.equal(res.statusCode, 201);
-    assert.equal(res.json().order.total, 314);
-    assert.equal(res.json().order.memberDiscount, 35);
+    assert.equal(res.json().order.total, 539);
+    assert.equal(res.json().order.memberDiscount, 60);
   });
 
   it('TC-VAL03b negative: client loggedIn flag alone does not grant member pricing', async () => {
@@ -78,13 +82,13 @@ describe('API validation hardening (TC-VAL)', () => {
       payload: sampleOrderPayload({
         loggedIn: true,
         memberPricing: true,
-        total: 349,
-        subtotal: 349,
-        items: [{ productId: 'immunity', qty: 1 }],
+        total: 599,
+        subtotal: 599,
+        items: [{ productId: 'kaphahara', qty: 1, size: '250g', sizePrice: 599 }],
       }),
     });
     assert.equal(res.statusCode, 201);
-    assert.equal(res.json().order.total, 349);
+    assert.equal(res.json().order.total, 599);
     assert.equal(res.json().order.memberDiscount, 0);
   });
 
@@ -122,12 +126,12 @@ describe('API validation hardening (TC-VAL)', () => {
       method: 'POST',
       url: '/api/orders',
       payload: sampleOrderPayload({
-        items: [{ productId: 'kaphahara', qty: 1, size: '250g', sizePrice: 399 }],
-        total: 399,
+        items: [{ productId: 'kaphahara', qty: 1, size: '250g', sizePrice: 599 }],
+        total: 599,
       }),
     });
     assert.equal(res.statusCode, 201);
-    assert.equal(res.json().order.total, 399);
+    assert.equal(res.json().order.total, 599);
   });
 
   // Phase 2 — Cart integrity
@@ -144,7 +148,7 @@ describe('API validation hardening (TC-VAL)', () => {
     const res = await app.inject({
       method: 'POST',
       url: '/api/orders',
-      payload: sampleOrderPayload({ items: [{ productId: 'immunity', qty: 0 }] }),
+      payload: sampleOrderPayload({ items: [{ productId: 'kaphahara', qty: 0 }] }),
     });
     assert.equal(res.statusCode, 400);
   });
@@ -153,7 +157,7 @@ describe('API validation hardening (TC-VAL)', () => {
     const res = await app.inject({
       method: 'POST',
       url: '/api/orders',
-      payload: sampleOrderPayload({ items: [{ productId: 'immunity', qty: 100 }] }),
+      payload: sampleOrderPayload({ items: [{ productId: 'kaphahara', qty: 100 }] }),
     });
     assert.equal(res.statusCode, 400);
   });
@@ -162,7 +166,7 @@ describe('API validation hardening (TC-VAL)', () => {
     const { token } = await loginAdmin();
     await app.inject({
       method: 'PATCH',
-      url: '/api/admin/inventory/immunity',
+      url: '/api/admin/inventory/kaphahara',
       headers: authHeaders(token),
       payload: { quantity: 1 },
     });
@@ -171,10 +175,10 @@ describe('API validation hardening (TC-VAL)', () => {
       url: '/api/orders',
       payload: sampleOrderPayload({
         items: [
-          { productId: 'immunity', qty: 1 },
-          { productId: 'immunity', qty: 1 },
+          { productId: 'kaphahara', qty: 1, size: '250g', sizePrice: 599 },
+          { productId: 'kaphahara', qty: 1, size: '250g', sizePrice: 599 },
         ],
-        total: 698,
+        total: 1198,
       }),
     });
     assert.equal(res.statusCode, 409);
@@ -220,7 +224,7 @@ describe('API validation hardening (TC-VAL)', () => {
       payload: sampleOrderPayload({
         payMethod: 'upi',
         payment: { upiId: 'name@upi' },
-        total: 349,
+        total: 199,
       }),
     });
     assert.equal(res.statusCode, 201);
@@ -246,7 +250,7 @@ describe('API validation hardening (TC-VAL)', () => {
       payload: sampleOrderPayload({
         payMethod: 'card',
         payment: { cardNumber: '4111111111111111', cardExpiry: '12/30', cardCvv: '123' },
-        total: 349,
+        total: 199,
       }),
     });
     assert.equal(res.statusCode, 201);
@@ -288,7 +292,7 @@ describe('API validation hardening (TC-VAL)', () => {
       url: '/api/orders',
       payload: sampleOrderPayload({
         delivery: sampleDelivery({ phone: '9876543210', email: '' }),
-        total: 349,
+        total: 199,
       }),
     });
     assert.equal(res.statusCode, 201);
@@ -440,7 +444,7 @@ describe('API validation hardening (TC-VAL)', () => {
       method: 'POST',
       url: '/api/orders',
       payload: sampleOrderPayload({
-        items: [{ productId: 'sunni', qty: 1 }],
+        items: [{ productId: 'herbal-bath', qty: 1 }],
         total: 249,
         subtotal: 249,
       }),
