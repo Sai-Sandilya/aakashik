@@ -255,7 +255,7 @@ test.describe('Admin products — edit & inventory link', () => {
     await page.getByRole('button', { name: 'Inventory', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Inventory' })).toBeVisible();
     await expect(page.getByText('Inventory Linked Oil', { exact: true })).toBeVisible();
-    await expect(page.getByText(/SKUs:\s*10/)).toBeVisible();
+    await expect(page.getByText(/SKUs:\s*17/)).toBeVisible();
   });
 
   test('TC-PR11 complex: toggle draft hides from store then republish', async ({ page }) => {

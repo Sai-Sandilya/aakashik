@@ -43,7 +43,7 @@ async function createApiOrder(request, overrides = {}) {
     ...(overrides.delivery || {}),
   };
   const payload = {
-    items: overrides.items || [{ productId: 'kaphahara', qty: 1 }],
+    items: overrides.items || [{ productId: 'ashta', qty: 1 }],
     delivery,
     payMethod: overrides.payMethod || 'cod',
     total: overrides.total != null ? overrides.total : 199,
@@ -166,6 +166,9 @@ test.describe('Admin orders — detail & status transitions', () => {
 
   test('TC-AD08 positive: selecting order shows customer + items', async ({ page, request }) => {
     const order = await createApiOrder(request, {
+      items: [{ productId: 'kaphahara', qty: 1, size: '250g', sizePrice: 599 }],
+      total: 599,
+      subtotal: 599,
       delivery: { name: 'Ananya Rao', phone: '9876501001', city: 'Hyderabad' },
     });
     await page.reload();

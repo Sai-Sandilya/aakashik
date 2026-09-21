@@ -29,10 +29,10 @@ test.describe('Category 1 UX fixes', () => {
     });
   });
 
-  // TC-C01
+  // TC-C01 — sized jars use "Choose Size"; kits use short "Add" label
   test('guest can add to cart without signing in', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await page.getByRole('button', { name: 'Add to Cart' }).first().click();
+    await page.locator('#kits').getByRole('button', { name: 'Add', exact: true }).first().click();
     await expect(page.getByText('Added to cart')).toBeVisible({ timeout: 8000 });
     await expect(page.getByRole('link', { name: 'Sign in' })).toBeVisible();
   });
@@ -40,7 +40,7 @@ test.describe('Category 1 UX fixes', () => {
   // TC-C02
   test('cart persists after page reload', async ({ page }) => {
     await page.goto(LANDING_URL);
-    await page.getByRole('button', { name: 'Add to Cart' }).first().click();
+    await page.locator('#kits').getByRole('button', { name: 'Add', exact: true }).first().click();
     await expect(page.getByText('Added to cart')).toBeVisible({ timeout: 8000 });
     await page.waitForFunction(() => Object.keys(JSON.parse(localStorage.getItem('ak_cart') || '{}')).length > 0);
     await page.reload();

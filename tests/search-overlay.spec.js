@@ -37,6 +37,20 @@ async function openCategory(page, heading) {
   return dialog;
 }
 
+
+/** Add from a search card — sized SKUs use Choose Size + Quick View. */
+async function addProductFromCard(page, card) {
+  const choose = card.getByRole('button', { name: 'Choose Size' });
+  if (await choose.count()) {
+    await choose.click();
+    const qv = page.getByRole('dialog', { name: /quick view/i });
+    await expect(qv).toBeVisible({ timeout: 8000 });
+    await qv.getByRole('button', { name: /Add to Cart/i }).click();
+    return;
+  }
+  await card.getByRole('button', { name: 'Add to Cart' }).click();
+}
+
 /** @param {import('@playwright/test').Page} page */
 async function openMobileSearch(page) {
   await page.setViewportSize({ width: 840, height: 900 });
@@ -128,7 +142,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await page.getByRole('navigation').getByRole('link', { name: 'Spiritual' }).click();
     const dialog = searchDialog(page);
     await expect(dialog).toBeVisible({ timeout: 8000 });
-    await expect(dialog.getByRole('heading', { name: 'Sacred fragrant blends' })).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: 'Spiritual wellness' })).toBeVisible();
   });
 
   // ─── Category cards ──────────────────────────────────────────────────────
@@ -225,12 +239,13 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(productCard(dialog, 'Kaphahara')).toHaveCount(0);
   });
 
-  test('TC-SO19 positive: Concern Spiritual shows Ashtagandham only as product', async ({ page }) => {
+  test('TC-SO19 positive: Concern Spiritual shows Ashtagandham and sacred botanicals', async ({ page }) => {
     const dialog = await openSearch(page);
     await chipRow(dialog, 0).getByRole('button', { name: 'Spiritual', exact: true }).click();
     await expect(dialog.getByRole('heading', { name: 'Sacred fragrant blends' })).toBeVisible();
     await expect(dialog.getByRole('heading', { name: 'Ashtagandham' })).toBeVisible();
-    await expect(productCard(dialog, 'Herbal Bath Powder')).toHaveCount(0);
+    await expect(dialog.getByRole('heading', { name: 'Dried Aparajitha Flower' })).toBeVisible();
+    await expect(productCard(dialog, 'Kaphahara')).toHaveCount(0);
   });
 
   // ─── Element chips (every button) ────────────────────────────────────────
@@ -292,11 +307,11 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(productCard(dialog, 'Immunity Ritual Kit')).toHaveCount(0);
   });
 
-  test('TC-SO28 positive: ₹300–400 includes Glow kit and Kaphahara size band', async ({ page }) => {
+  test('TC-SO28 positive: ₹300–400 includes Glow kit and Aparajitha size band', async ({ page }) => {
     const dialog = await openSearch(page);
     await chipRow(dialog, 2).getByRole('button', { name: '₹300–400' }).click();
     await expect(dialog.getByRole('heading', { name: 'Glow & Cleanse Kit' })).toBeVisible();
-    await expect(dialog.getByRole('heading', { name: 'Kaphahara' })).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: 'Dried Aparajitha Flower' })).toBeVisible();
     await expect(productCard(dialog, 'Sample Trio')).toHaveCount(0);
   });
 
@@ -330,10 +345,11 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(dialog.getByRole('heading', { name: 'Ashtagandham' })).toBeVisible();
   });
 
-  test('TC-SO33 positive: search by herb name (Tulsi)', async ({ page }) => {
+  test('TC-SO33 positive: search by herb name (Tulasi)', async ({ page }) => {
     const dialog = await openSearch(page);
-    await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Tulsi');
+    await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Tulasi');
     await expect(dialog.getByRole('heading', { name: 'Kaphahara' })).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: 'Dried Tulasi Leaves' })).toBeVisible();
   });
 
   test('TC-SO34 positive: search by concern keyword Spiritual', async ({ page }) => {
@@ -407,13 +423,14 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(dialog.getByRole('heading', { name: 'No blends match yet' })).toBeVisible({ timeout: 5000 });
   });
 
-  test('TC-SO44 negative: Spiritual + Under ₹300 ok; Spiritual + ₹400+ empty', async ({ page }) => {
+  test('TC-SO44 negative: Spiritual + Under ₹300 ok; Spiritual + ₹400+ shows Aparajitha band', async ({ page }) => {
     const dialog = await openSearch(page);
     await chipRow(dialog, 0).getByRole('button', { name: 'Spiritual' }).click();
     await chipRow(dialog, 2).getByRole('button', { name: 'Under ₹300' }).click();
     await expect(dialog.getByRole('heading', { name: 'Ashtagandham' })).toBeVisible();
     await chipRow(dialog, 2).getByRole('button', { name: '₹400+' }).click();
-    await expect(dialog.getByRole('heading', { name: 'No blends match yet' })).toBeVisible({ timeout: 5000 });
+    await expect(dialog.getByRole('heading', { name: 'Dried Aparajitha Flower' })).toBeVisible();
+    await expect(productCard(dialog, 'Ashtagandham')).toHaveCount(0);
   });
 
   test('TC-SO45 negative: query + conflicting concern empties results', async ({ page }) => {
@@ -423,11 +440,11 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(dialog.getByRole('heading', { name: 'No blends match yet' })).toBeVisible({ timeout: 5000 });
   });
 
-  test('TC-SO46 positive: Digestion + Fire + Under ₹300 shows Navojas', async ({ page }) => {
+  test('TC-SO46 positive: Digestion + Fire + ₹400+ shows Navojas', async ({ page }) => {
     const dialog = await openSearch(page);
     await chipRow(dialog, 0).getByRole('button', { name: 'Digestion' }).click();
     await chipRow(dialog, 1).getByRole('button', { name: 'Fire' }).click();
-    await chipRow(dialog, 2).getByRole('button', { name: 'Under ₹300' }).click();
+    await chipRow(dialog, 2).getByRole('button', { name: '₹400+' }).click();
     await expect(dialog.getByRole('heading', { name: 'Navojas' })).toBeVisible();
   });
 
@@ -451,17 +468,17 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     const card = productCard(dialog, 'Herbal Bath Powder');
     await expect(card.getByText('Skin & Body')).toBeVisible();
     await expect(card.getByText(/Earth/)).toBeVisible();
-    await expect(card.getByText(/Gentle herbal cleansing/i)).toBeVisible();
+    await expect(card.getByText(/refreshing, mindful bath/i)).toBeVisible();
     await expect(card.getByRole('button', { name: 'View' })).toBeVisible();
-    await expect(card.getByRole('button', { name: 'Add to Cart' })).toBeVisible();
+    await expect(card.getByRole('button', { name: 'Choose Size' })).toBeVisible();
   });
 
   test('TC-SO49 positive: herb chips render on card', async ({ page }) => {
     const dialog = await openSearch(page);
     await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Kaphahara');
     const card = productCard(dialog, 'Kaphahara');
-    await expect(card.getByText('Tulsi', { exact: true }).first()).toBeVisible();
-    await expect(card.getByText('Pepper', { exact: true }).first()).toBeVisible();
+    await expect(card.getByText('Tulasi', { exact: true }).first()).toBeVisible();
+    await expect(card.getByText('Shunthi', { exact: true }).first()).toBeVisible();
   });
 
   test('TC-SO50 positive: photo product shows real image thumb', async ({ page }) => {
@@ -496,7 +513,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
 
   test('TC-SO54 positive: Add to Cart from search updates localStorage + toast', async ({ page }) => {
     const dialog = await openCategory(page, 'Natural Bath Powders');
-    await productCard(dialog, 'Herbal Bath Powder').getByRole('button', { name: 'Add to Cart' }).click();
+    await addProductFromCard(page, productCard(dialog, 'Herbal Bath Powder'));
     await expect(page.getByText(/Added to cart/i)).toBeVisible({ timeout: 8000 });
     const cartCount = await page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('ak_cart') || '{}')).length);
     expect(cartCount).toBeGreaterThan(0);
@@ -526,7 +543,8 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     const dialog = await openSearch(page);
     await expect(dialog.getByText(/rituals? found/i)).toBeVisible();
     await chipRow(dialog, 0).getByRole('button', { name: 'Spiritual' }).click();
-    await expect(dialog.getByText(/1 ritual found/i)).toBeVisible();
+    await expect(dialog.getByText(/rituals found/i)).toBeVisible();
+    expect(await dialog.locator('.searchCard').count()).toBeGreaterThan(1);
   });
 
   // ─── Catalog integrity / admin sync edges ────────────────────────────────
@@ -537,9 +555,8 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(page.getByRole('button', { name: 'Search' })).toBeVisible({ timeout: 8000 });
     const dialog = await openSearch(page);
     await chipRow(dialog, 0).getByRole('button', { name: 'Spiritual', exact: true }).click();
-    // Spiritual concern alone used to show Ashtagandham; hidden SKU must not render as a card
     await expect(productCard(dialog, 'Ashtagandham')).toHaveCount(0);
-    await expect(dialog.getByRole('heading', { name: 'No blends match yet' })).toBeVisible({ timeout: 5000 });
+    await expect(dialog.getByRole('heading', { name: 'Dried Aparajitha Flower' })).toBeVisible({ timeout: 5000 });
   });
 
   test('TC-SO59 positive: published custom product appears in search', async ({ page, request }) => {
@@ -582,7 +599,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await chipRow(dialog, 2).getByRole('button', { name: 'Under ₹300' }).click();
     await dialog.getByRole('button', { name: 'Clear filters' }).click();
     await expect(dialog.getByRole('heading', { name: 'Browse the collection' })).toBeVisible();
-    await productCard(dialog, 'Kaphahara').getByRole('button', { name: 'Add to Cart' }).click();
+    await addProductFromCard(page, productCard(dialog, 'Kaphahara'));
     await expect(page.getByText(/Added to cart/i)).toBeVisible({ timeout: 8000 });
     await dialog.getByRole('button', { name: /Close/i }).click();
     await expect(searchDialog(page)).toHaveCount(0);
@@ -596,7 +613,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await chipRow(dialog, 1).getByRole('button', { name: 'Water' }).click();
     await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Immun');
     await expect(dialog.getByText('Try:')).toBeVisible({ timeout: 5000 });
-    await dialog.getByRole('button', { name: 'Kaphahara' }).click();
+    await dialog.getByRole('button', { name: 'Immunity Ritual Kit' }).click();
     const qv = page.getByRole('dialog', { name: /quick view/i });
     await expect(qv).toBeVisible({ timeout: 8000 });
     await page.keyboard.press('Escape');
@@ -656,8 +673,8 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await seedStock(page, request, { 'herbal-bath': 25 });
     dialog = await openCategory(page, 'Natural Bath Powders');
     const card = productCard(dialog, 'Herbal Bath Powder');
-    await expect(card.getByRole('button', { name: 'Add to Cart' })).toBeVisible();
-    await card.getByRole('button', { name: 'Add to Cart' }).click();
+    await expect(card.getByRole('button', { name: 'Choose Size' })).toBeVisible();
+    await addProductFromCard(page, card);
     await expect(page.getByText(/Added to cart/i)).toBeVisible({ timeout: 8000 });
   });
 
@@ -671,7 +688,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await page.keyboard.press('Escape');
     await expect(qv).toHaveCount(0);
     await expect(searchDialog(page)).toBeVisible();
-    await card.getByRole('button', { name: 'Add to Cart' }).click();
+    await addProductFromCard(page, card);
     await expect(page.getByText(/Added to cart/i)).toBeVisible({ timeout: 8000 });
   });
 
@@ -702,12 +719,12 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(dialog.getByRole('heading', { name: 'Bath & body rituals' })).toBeVisible();
   });
 
-  test('TC-SO71 positive: third Shop now link opens Immunity shelf', async ({ page }) => {
+  test('TC-SO71 positive: third Shop now link opens Daily De-tox shelf', async ({ page }) => {
     await page.getByRole('heading', { name: 'Shop by Category' }).scrollIntoViewIfNeeded();
     await page.getByText('Shop now →').nth(2).click();
     const dialog = searchDialog(page);
     await expect(dialog).toBeVisible({ timeout: 8000 });
-    await expect(dialog.getByRole('heading', { name: 'Daily defense rituals' })).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: 'Daily de-toxification' })).toBeVisible();
   });
 
   test('TC-SO72 positive: fourth Shop now link opens Spiritual shelf', async ({ page }) => {
@@ -715,7 +732,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await page.getByText('Shop now →').nth(3).click();
     const dialog = searchDialog(page);
     await expect(dialog).toBeVisible({ timeout: 8000 });
-    await expect(dialog.getByRole('heading', { name: 'Sacred fragrant blends' })).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: 'Spiritual wellness' })).toBeVisible();
   });
 
   test('TC-SO73 positive: browse mode shows collection subtitle', async ({ page }) => {
@@ -726,7 +743,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
   test('TC-SO74 positive: Immunity concern shows defense subtitle', async ({ page }) => {
     const dialog = await openSearch(page);
     await chipRow(dialog, 0).getByRole('button', { name: 'Immunity', exact: true }).click();
-    await expect(dialog.getByText(/Tulsi, pepper and time-tested herbs/i)).toBeVisible();
+    await expect(dialog.getByText(/Tulsi, dried Tulasi and Moringa/i)).toBeVisible();
   });
 
   test('TC-SO75 positive: Sugar concern shows metabolic subtitle', async ({ page }) => {
@@ -756,7 +773,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
   test('TC-SO79 positive: Spiritual concern shows sacred subtitle', async ({ page }) => {
     const dialog = await openSearch(page);
     await chipRow(dialog, 0).getByRole('button', { name: 'Spiritual', exact: true }).click();
-    await expect(dialog.getByText(/Ashtagandham and ritual powders/i)).toBeVisible();
+    await expect(dialog.getByText(/Ashtagandham, Aparajitha, Avartaki, Hibiscus/i)).toBeVisible();
   });
 
   test('TC-SO80 positive: active query shows Search results title + quoted subtitle', async ({ page }) => {
@@ -915,11 +932,12 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(dialog.getByRole('heading', { name: 'No blends match yet' })).toBeVisible({ timeout: 5000 });
   });
 
-  test('TC-SO102 negative: Spiritual + Water yields empty', async ({ page }) => {
+  test('TC-SO102 positive: Spiritual + Water shows floral spiritual botanicals', async ({ page }) => {
     const dialog = await openSearch(page);
     await chipRow(dialog, 0).getByRole('button', { name: 'Spiritual' }).click();
     await chipRow(dialog, 1).getByRole('button', { name: 'Water' }).click();
-    await expect(dialog.getByRole('heading', { name: 'No blends match yet' })).toBeVisible({ timeout: 5000 });
+    await expect(dialog.getByRole('heading', { name: 'Dried Aparajitha Flower' })).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: 'Dried Hibiscus Flower' })).toBeVisible();
   });
 
   test('TC-SO103 positive: Immunity + Under ₹300 includes Sample Trio', async ({ page }) => {
@@ -929,11 +947,11 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(dialog.getByRole('heading', { name: 'Sample Trio' })).toBeVisible();
   });
 
-  test('TC-SO104 positive: Respiratory + Air + Under ₹300 shows Kaphahara', async ({ page }) => {
+  test('TC-SO104 positive: Respiratory + Air + ₹400+ shows Kaphahara', async ({ page }) => {
     const dialog = await openSearch(page);
     await chipRow(dialog, 0).getByRole('button', { name: 'Respiratory' }).click();
     await chipRow(dialog, 1).getByRole('button', { name: 'Air' }).click();
-    await chipRow(dialog, 2).getByRole('button', { name: 'Under ₹300' }).click();
+    await chipRow(dialog, 2).getByRole('button', { name: '₹400+' }).click();
     await expect(dialog.getByRole('heading', { name: 'Kaphahara' })).toBeVisible();
   });
 
@@ -958,7 +976,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     const dialog = await openSearch(page);
     await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Kaphahara');
     const card = productCard(dialog, 'Kaphahara');
-    await expect(card.getByText('100% Natural').first()).toBeVisible();
+    await expect(card.getByText('Ayurvedic').first()).toBeVisible();
   });
 
   test('TC-SO108 positive: sized product shows from price on card', async ({ page }) => {
@@ -986,12 +1004,14 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
 
   test('TC-SO111 positive: double Add to Cart increments quantity in cart', async ({ page }) => {
     const dialog = await openCategory(page, 'Natural Bath Powders');
-    const addBtn = productCard(dialog, 'Herbal Bath Powder').getByRole('button', { name: 'Add to Cart' });
-    await addBtn.click();
-    await addBtn.click();
+    const card = productCard(dialog, 'Herbal Bath Powder');
+    await addProductFromCard(page, card);
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog', { name: /quick view/i })).toHaveCount(0);
+    await addProductFromCard(page, card);
     const qty = await page.evaluate(() => {
       const cart = JSON.parse(localStorage.getItem('ak_cart') || '{}');
-      const line = cart['herbal-bath::std'];
+      const line = cart['herbal-bath::100g'] || cart['herbal-bath::std'];
       return line ? line.qty : 0;
     });
     expect(qty).toBe(2);
@@ -1000,10 +1020,12 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
   test('TC-SO112 negative: stock limit 1 blocks second add with toast', async ({ page, request }) => {
     await seedStock(page, request, { 'herbal-bath': 1 });
     const dialog = await openCategory(page, 'Natural Bath Powders');
-    const addBtn = productCard(dialog, 'Herbal Bath Powder').getByRole('button', { name: 'Add to Cart' });
-    await addBtn.click();
+    const card = productCard(dialog, 'Herbal Bath Powder');
+    await addProductFromCard(page, card);
     await expect(page.getByText(/Added to cart/i)).toBeVisible({ timeout: 8000 });
-    await addBtn.click();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog', { name: /quick view/i })).toHaveCount(0);
+    await addProductFromCard(page, card);
     await expect(page.getByText(/Only 1 left in stock/i)).toBeVisible({ timeout: 8000 });
   });
 
@@ -1016,7 +1038,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
 
   test('TC-SO114 positive: Add to Cart opens cart drawer', async ({ page }) => {
     const dialog = await openCategory(page, 'Natural Bath Powders');
-    await productCard(dialog, 'Herbal Bath Powder').getByRole('button', { name: 'Add to Cart' }).click();
+    await addProductFromCard(page, productCard(dialog, 'Herbal Bath Powder'));
     await expect(page.getByRole('dialog', { name: 'Your Cart' })).toBeVisible({ timeout: 8000 });
     await expect(searchDialog(page)).toBeVisible();
   });
@@ -1060,7 +1082,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await setProductHidden(request, 'jamun-seed', true, token);
     await reloadCatalog(page);
     const dialog = await openSearch(page);
-    expect(await dialog.locator('.searchCard').count()).toBeLessThan(9);
+    expect(await dialog.locator('.searchCard').count()).toBeLessThan(15);
   });
 
   test('TC-SO121 negative: hidden SKU still findable via kit herb text in search', async ({ page, request }) => {
@@ -1126,7 +1148,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await reloadCatalog(page);
     const dialog = await openCategory(page, 'Spiritual Wellness');
     await expect(productCard(dialog, 'Ashtagandham')).toHaveCount(0);
-    await expect(dialog.getByRole('heading', { name: 'No blends match yet' })).toBeVisible({ timeout: 5000 });
+    await expect(dialog.getByRole('heading', { name: 'Herbal Bath Powder' })).toBeVisible({ timeout: 5000 });
   });
 
   test('TC-SO126 positive: custom + built-in both visible in browse', async ({ page, request }) => {
@@ -1191,13 +1213,15 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
 
   test('TC-SO131 complex: add three different products from search in one session', async ({ page }) => {
     const dialog = await openSearch(page);
-    await productCard(dialog, 'Herbal Bath Powder').getByRole('button', { name: 'Add to Cart' }).click();
+    await addProductFromCard(page, productCard(dialog, 'Herbal Bath Powder'));
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog', { name: 'Your Cart' })).toHaveCount(0);
-    await productCard(dialog, 'Kaphahara').getByRole('button', { name: 'Add to Cart' }).click();
+    await expect(page.getByRole('dialog', { name: /quick view/i })).toHaveCount(0);
+    await addProductFromCard(page, productCard(dialog, 'Kaphahara'));
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog', { name: 'Your Cart' })).toHaveCount(0);
-    await productCard(dialog, 'Ashtagandham').getByRole('button', { name: 'Add to Cart' }).click();
+    await expect(page.getByRole('dialog', { name: /quick view/i })).toHaveCount(0);
+    await addProductFromCard(page, productCard(dialog, 'Ashtagandham'));
     const keys = await page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('ak_cart') || '{}')));
     expect(keys.length).toBeGreaterThanOrEqual(3);
   });
@@ -1208,7 +1232,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await expect(dialog).toBeVisible({ timeout: 8000 });
     await chipRow(dialog, 1).getByRole('button', { name: 'Earth' }).click();
     await chipRow(dialog, 2).getByRole('button', { name: 'Under ₹300' }).click();
-    await productCard(dialog, 'Herbal Bath Powder').getByRole('button', { name: 'Add to Cart' }).click();
+    await addProductFromCard(page, productCard(dialog, 'Herbal Bath Powder'));
     await expect(page.getByText(/Added to cart/i)).toBeVisible({ timeout: 8000 });
     await dialog.getByRole('button', { name: /Close/i }).click();
     await expect(searchDialog(page)).toHaveCount(0);
@@ -1259,7 +1283,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     const dialog = await openSearch(page);
     await chipRow(dialog, 0).getByRole('button', { name: 'Digestion' }).click();
     await chipRow(dialog, 1).getByRole('button', { name: 'Fire' }).click();
-    await chipRow(dialog, 2).getByRole('button', { name: 'Under ₹300' }).click();
+    await chipRow(dialog, 2).getByRole('button', { name: '₹400+' }).click();
     await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Nav');
     await expect(dialog.getByRole('heading', { name: 'Navojas' })).toBeVisible();
     await dialog.getByRole('button', { name: 'Clear filters' }).click();
@@ -1312,7 +1336,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await chipRow(dialog, 2).getByRole('button', { name: 'Under ₹300' }).click();
     await expect(productCard(dialog, 'Sample Trio')).toBeVisible();
     await chipRow(dialog, 2).getByRole('button', { name: '₹300–400' }).click();
-    await expect(productCard(dialog, 'Kaphahara')).toBeVisible();
+    await expect(productCard(dialog, 'Glow & Cleanse Kit')).toBeVisible();
     await chipRow(dialog, 2).getByRole('button', { name: '₹400+' }).click();
     await expect(productCard(dialog, 'Immunity Ritual Kit')).toBeVisible();
   });
@@ -1337,13 +1361,17 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
   test('TC-SO144 complex: add from search with cart already containing item merges qty', async ({ page }) => {
     await page.evaluate(() => {
       localStorage.setItem('ak_cart', JSON.stringify({
-        'kaphahara::std': { productId: 'kaphahara', qty: 1, subscribe: false, size: null, sizePrice: null },
+        'kaphahara::250g': { productId: 'kaphahara', qty: 1, subscribe: false, size: '250g', sizePrice: 599 },
       }));
     });
     await page.reload();
     const dialog = await openSearch(page);
-    await productCard(dialog, 'Kaphahara').getByRole('button', { name: 'Add to Cart' }).click();
-    const qty = await page.evaluate(() => JSON.parse(localStorage.getItem('ak_cart') || '{}')['kaphahara::std'].qty);
+    await addProductFromCard(page, productCard(dialog, 'Kaphahara'));
+    const qty = await page.evaluate(() => {
+      const cart = JSON.parse(localStorage.getItem('ak_cart') || '{}');
+      const line = cart['kaphahara::250g'] || cart['kaphahara::std'];
+      return line ? line.qty : 0;
+    });
     expect(qty).toBe(2);
   });
 
@@ -1361,12 +1389,13 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     expect(state.wish.ashta || state.wish['ashta']).toBeTruthy();
   });
 
-  test('TC-SO146 complex: hide ashta → show all rituals after spiritual empty still works', async ({ page, request }) => {
+  test('TC-SO146 complex: hide ashta → show all rituals after spiritual shelf still works', async ({ page, request }) => {
     await setProductHidden(request, 'ashta', true);
     await reloadCatalog(page);
     const dialog = await openCategory(page, 'Spiritual Wellness');
-    await expect(dialog.getByRole('heading', { name: 'No blends match yet' })).toBeVisible({ timeout: 5000 });
-    await dialog.getByRole('button', { name: 'Show all rituals' }).click();
+    await expect(productCard(dialog, 'Ashtagandham')).toHaveCount(0);
+    await expect(dialog.getByRole('heading', { name: 'Herbal Bath Powder' })).toBeVisible({ timeout: 5000 });
+    await dialog.getByRole('button', { name: 'Clear filters' }).click();
     await expect(dialog.getByRole('heading', { name: 'Browse the collection' })).toBeVisible();
     await expect(dialog.locator('.searchCard').first()).toBeVisible();
   });
@@ -1406,8 +1435,8 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     const dialog = await openSearch(page);
     await chipRow(dialog, 0).getByRole('button', { name: 'Immunity' }).click();
     await chipRow(dialog, 1).getByRole('button', { name: 'Water' }).click();
-    await chipRow(dialog, 2).getByRole('button', { name: '₹300–400' }).click();
-    await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Daily');
+    await chipRow(dialog, 2).getByRole('button', { name: '₹400+' }).click();
+    await dialog.getByPlaceholder('Search blends, herbs, concerns…').fill('Immun');
     await expect(dialog.getByText('Try:')).toBeVisible({ timeout: 5000 });
     await dialog.getByRole('button', { name: 'Clear filters' }).click();
     await chipRow(dialog, 0).getByRole('button', { name: 'Skin & Body' }).click();
@@ -1416,7 +1445,7 @@ test.describe('Search overlay — full automation (TC-SO)', () => {
     await card.getByRole('button', { name: 'View' }).click();
     await expect(page.getByRole('dialog', { name: /quick view/i })).toBeVisible({ timeout: 8000 });
     await page.keyboard.press('Escape');
-    await card.getByRole('button', { name: 'Add to Cart' }).click();
+    await addProductFromCard(page, card);
     await expect(page.getByText(/Added to cart/i)).toBeVisible({ timeout: 8000 });
     await dialog.getByRole('button', { name: /Close/i }).click();
     await expect(searchDialog(page)).toHaveCount(0);
