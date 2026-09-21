@@ -374,7 +374,8 @@ test.describe('UX low — polish & a11y', () => {
     await page.goto(LANDING_URL);
     await page.getByRole('button', { name: 'Language' }).click();
     await expect(page.getByRole('menu')).toBeVisible();
-    await page.locator('footer').getByRole('link', { name: 'Privacy Policy' }).click();
+    // Footer lists Privacy Policy in both the legal column and the bottom bar.
+    await page.locator('footer').getByRole('link', { name: 'Privacy Policy' }).first().click();
     await expect(page).toHaveURL(/\/privacy\/?$/);
     await expect(page.getByRole('heading', { name: 'Privacy Policy' })).toBeVisible();
   });

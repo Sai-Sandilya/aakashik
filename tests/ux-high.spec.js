@@ -193,7 +193,8 @@ test.describe('UX high fixes', () => {
     await seedApiEmailUser(page, { email, password: STRONG_PASSWORD, name: 'Member User' });
     await cartButton(page).click({ force: true });
     await expect(page.getByText(/10% off applies once|Member 10% off|Member pricing applied/i).first()).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText('−₹35')).toBeVisible();
+    // 10% of Kaphahara list ₹599
+    await expect(page.getByText('−₹60')).toBeVisible();
   });
 
   test('TC-H12 negative: guest total equals full catalog price (no silent member cut)', async ({ page }) => {
@@ -310,11 +311,11 @@ test.describe('UX high fixes', () => {
     });
     await page.reload();
     await cartButton(page).click();
-    await expect(page.getByText('100g ·').first()).toBeVisible();
     await expect(page.getByText('250g ·').first()).toBeVisible();
+    await expect(page.getByText('500g ·').first()).toBeVisible();
     const keys = await page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('ak_cart') || '{}')));
-    expect(keys).toContain('kaphahara::100g');
     expect(keys).toContain('kaphahara::250g');
+    expect(keys).toContain('kaphahara::500g');
   });
 
   test('TC-H22 negative: same size merges qty instead of duplicating', async ({ page }) => {
@@ -328,10 +329,10 @@ test.describe('UX high fixes', () => {
     const cart = /** @type {Record<string, { qty: number }>} */ (
       await page.evaluate(() => JSON.parse(localStorage.getItem('ak_cart') || '{}'))
     );
-    expect(cart['kaphahara::100g'].qty).toBe(2);
+    expect(cart['kaphahara::250g'].qty).toBe(2);
     expect(Object.keys(cart).filter((k) => k.startsWith('kaphahara::')).length).toBe(1);
     await cartButton(page).click({ force: true });
-    await expect(page.getByText('100g ·').first()).toBeVisible();
+    await expect(page.getByText('250g ·').first()).toBeVisible();
   });
 
   // --- Ritual section removed ---
